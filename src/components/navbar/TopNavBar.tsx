@@ -349,6 +349,7 @@ const NavigationLinks = memo(
             width={160}
             selectorMode={false}
             text={"Account"}
+            className="accountdropdown"
             dropdownMatrix={[
               [
                 <div className="flex items-center">
@@ -477,7 +478,7 @@ export const TopNavBar = memo(function TopNavBar({
 
   return (
     <>
-      <nav className="navbar fixed top-0 min-w-full shadow-md start-0 max-w-screen-xl z-[50] flex flex-wrap justify-between h-16 bg-neutral-900/70 backdrop-blur-sm items-center fade-in font-[family-name:var(--font-geist-sans)] font-bold">
+      <nav id="navbar" className="navbar fixed top-0 min-w-full shadow-md start-0 max-w-screen-xl z-[50] flex flex-wrap justify-between h-16 bg-neutral-900/70 backdrop-blur-sm items-center fade-in font-[family-name:var(--font-geist-sans)] font-bold">
         <div className="flex items-center space-x-4 w-full transition-all duration-300 ease-in-out pr-2">
           <a href="/" className="w-12 h-12">
             <Image

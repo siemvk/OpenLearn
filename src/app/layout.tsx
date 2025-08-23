@@ -100,7 +100,7 @@ const steps = [
         title: "Forum",
         content:
           "Klik hier om naar het forum te gaan en discussies te bekijken.",
-        selector: "#forumbutton",
+        selector: ".forumbutton",
         side: "bottom" as const,
         showControls: false,
         showSkip: true,
