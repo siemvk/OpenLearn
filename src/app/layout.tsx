@@ -133,7 +133,7 @@ const steps = [
             <p>Hier komen je recent bekeken/geoefende lijsten te staan.</p>
             <p>Zo komt het eruit te zien:</p>
             <img
-              src="https://cdn.polarlearn.tech/listpreview.png"
+              src="https://cdn.polarlearn.nl/polarlearn/listpreview.png"
               alt="Overzicht lijsten"
               className="mt-4 w-60 h-auto rounded-lg"
             />
