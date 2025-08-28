@@ -198,10 +198,10 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       locale: "nl_NL",
-      url: "https://polarlearn.tech",
+      url: "https://polarlearn.nl",
       title: "PolarLearn",
       description:
-        "PolarLearn is de gratis en Open-Source leerprogramma, gemaakt voor, en door studenten.",
+        "PolarLearn is het gratis en Open-Source leerprogramma, gemaakt voor, en door studenten.",
       siteName: "PolarLearn",
       images: [
         {

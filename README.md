@@ -54,7 +54,7 @@ Je kan voor PolarLearn kiezen, omdat:
 
 # Hoe kan je PolarLearn gebruiken?
 
-Je kan PolarLearn gebruiken door naar [PolarLearn](https://polarlearn.tech) te gaan. Hier kan je je aanmelden en beginnen met leren. Je kan ook PolarLearn zelf hosten door de code te downloaden en te volgen wat er in de wiki staat.
+Je kan PolarLearn gebruiken door naar [PolarLearn](https://polarlearn.nl) te gaan. Hier kan je je aanmelden en beginnen met leren. Je kan ook PolarLearn zelf hosten door de code te downloaden en te volgen wat er in de wiki staat.
 > [!IMPORTANT]  
 > 🌴 PolarLearn is momenteel op vakantie tot 1 sep. 2025. Tot die tijd als je het wilt proberen kan je PolarLearn zelf proberen te draaien. Voor hulp join de discord.
 
@@ -69,6 +69,6 @@ Je kan PolarLearn gebruiken door naar [PolarLearn](https://polarlearn.tech) te g
 join onze [Discordserver](https://discord.gg/TdYzXDzqSB)
 Je kan bijdragen aan PolarLearn door de code te downloaden (`git pull https://github.com/polarnl/polarlearn`) en te kijken wat je kan verbeteren. Ook kan je een issue aanmaken als je een bug hebt gevonden of een nieuwe functie wilt. Als je een feature request hebt, kan je ook een pull request aanmaken. Zie [CONTRIBUTING.md](https://github.com/polarnl/PolarLearn/blob/stable/CONTRIBUTING.md) voor meer informatie.
 
-Als je een suggestie hebt voor een nieuwe functie of er is een fout in het systeem, ga dan naar de [issue pagina vab GitHub](https://github.com/polarnl/PolarLearn/issues), en maak daar een nieuwe issue aan. Label hem correct en wees duidelijk en je funcite komt er misschien wel in! Je kan ook in de [discord chat](https://discord.gg/TdYzXDzqSB) praten en contact opnemen.
+Als je een suggestie hebt voor een nieuwe functie of er is een fout in het systeem, ga dan naar de [issue pagina van GitHub](https://github.com/polarnl/PolarLearn/issues), en maak daar een nieuwe issue aan. Label hem correct en wees duidelijk en je functie komt er misschien wel in! Je kan ook in de [discord chat](https://discord.gg/TdYzXDzqSB) praten en contact opnemen.
 
-Als je wilt bijdragen aan PolarLearn en kan programmeren in TypeScripy met Nextjs, kan je het best in de [Discord](https://discord.gg/TdYzXDzqSB) vragen hoe je kan helpen. lees ook de [CONTRIBUTING.md](https://github.com/polarnl/PolarLearn/blob/stable/CONTRIBUTING.md) voor de duidelijkheid.
+Als je wilt bijdragen aan PolarLearn en kan programmeren in TypeScript met Next.js, kan je het best in de [Discord](https://discord.gg/TdYzXDzqSB) vragen hoe je kan helpen. lees ook de [CONTRIBUTING.md](https://github.com/polarnl/PolarLearn/blob/stable/CONTRIBUTING.md) voor de duidelijkheid.

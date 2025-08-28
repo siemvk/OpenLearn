@@ -24,7 +24,7 @@ export async function sendSignUpEmail(email: string, username: string, token: st
         return resolve("no-email-sent");
       }
       await transporter.verify();
-      const activationUrl = `${process.env.NEXT_PUBLIC_URL || 'https://polarlearn.tech'}/auth/activate?token=${token}`;
+      const activationUrl = `${process.env.NEXT_PUBLIC_URL || 'https://polarlearn.nl'}/auth/activate?token=${token}`;
       const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -58,7 +58,7 @@ export async function sendSignUpEmail(email: string, username: string, token: st
                   <tr>
                     <td align="center">
                       <img
-                        src="https://polarlearn.tech/icon.png"
+                        src="https://polarlearn.nl/icon.png"
                         height="40"
                         alt="Logo Icon"
                         style="vertical-align: middle; margin-right: 10px"
@@ -66,7 +66,7 @@ export async function sendSignUpEmail(email: string, username: string, token: st
                     </td>
                     <td align="center">
                       <img
-                        src="https://polarlearn.tech/text.png"
+                        src="https://polarlearn.nl/text.png"
                         width="200"
                         alt="PolarLearn"
                         style="vertical-align: middle"
@@ -181,7 +181,7 @@ export async function sendSignUpEmail(email: string, username: string, token: st
 </html>`;
 
       const mail = await transporter.sendMail({
-        from: `"PolarLearn" <noreply@polarlearn.tech>`,
+        from: `"PolarLearn" <noreply@polarlearn.nl>`,
         to: email,
         subject: `PolarLearn | Account activeren voor ${username}`,
         html: htmlTemplate
