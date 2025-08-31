@@ -4,6 +4,9 @@ import { decodeCookie } from "@/utils/auth/session";
 import { prisma } from "@/utils/prisma";
 import { getTourState } from "./serverActions/getTourState";
 import { getUserFromSession } from "./utils/auth/auth";
+import { Embed, Webhook } from '@vermaysha/discord-webhook'
+
+const webhook = new Webhook(process.env.DISCORD_WEBHOOK || '');
 
 export async function middleware(request: NextRequest, response: NextResponse) {
   let cspHeader = "";
@@ -49,6 +52,57 @@ export async function middleware(request: NextRequest, response: NextResponse) {
 
   // Make sure headers get applied
   resp.headers.set("X-Content-Type-Options", "nosniff");
+
+  if (
+    request.nextUrl.pathname.endsWith("php") ||
+    request.nextUrl.pathname.endsWith("phtml") ||
+    request.nextUrl.pathname.endsWith("phps") ||
+    request.nextUrl.pathname.endsWith("cgi") ||
+    request.nextUrl.pathname.endsWith(".env") ||
+    request.nextUrl.pathname.includes("/wp-") ||
+    request.headers.get("user-agent")?.includes("curl") ||
+    request.headers.get("user-agent")?.includes("wget") ||
+    request.headers.get("user-agent")?.includes("httpie") ||
+    request.headers.get("user-agent")?.includes("powershell")
+  ) {
+    webhook.setUsername("Iemand zit gaar te doen")
+    const embed = new Embed()
+      .setTitle('Automatische scanrapport')
+      .addField(
+        {
+          name: "IP",
+          value: request.headers.get("x-forwarded-for") || "Onbekend",
+          inline: true
+        }
+      )
+      .addField(
+        {
+          name: "useragent",
+          value: request.headers.get("user-agent") || "Onbekend",
+          inline: true
+        }
+      )
+      .addField({
+        name: "Geprobeerde pad",
+        value: request.nextUrl.pathname,
+        inline: true
+      })
+      .setColor('#0099ff')
+      .setTimestamp()
+    webhook.addEmbed(embed)
+    const message = `@here
+\`\`\`
+[ Automatische scanrapport ]
+Tijd: ${new Date().toLocaleString()}
+IP: ${request.headers.get("x-forwarded-for") || "Onbekend"}
+useragent: ${request.headers.get("user-agent") || "Onbekend"}
+Geprobeerde pad: ${request.nextUrl.pathname}
+
+[ Automatisch gegenereerd door PolarLearn ]
+\`\`\``
+    webhook.setContent(message).send()
+    return new NextResponse("Foei kutbot!! Tyf nu maar op voordat wij lekker snel een abusereport sturen naar je ISP!")
+  }
 
   const { finishedTour } = await getTourState();
   if (
