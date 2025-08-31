@@ -226,8 +226,6 @@ export async function createUserCredentials(
 
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("Creating user with data:", { username, email, hasPassword: !!password });
-
       const userData: Prisma.XOR<Prisma.UserCreateInput, Prisma.UserUncheckedCreateInput> = {
         id: id,
         name: username,

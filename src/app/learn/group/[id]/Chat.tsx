@@ -61,6 +61,9 @@ export default function Chat({
   }, [messages]);
 
   useEffect(() => {
+    const container = messagesContainerRef.current;
+    container!.scrollTo({ top: container!.scrollHeight });
+
     if (!websocket) return;
 
     const subscribeToPage = () => {
@@ -116,6 +119,15 @@ export default function Chat({
       if (openListenerAdded) {
         websocket.removeEventListener("open", subscribeToPage);
       }
+
+      if (websocket.readyState === WebSocket.OPEN) {
+        websocket.send(
+          JSON.stringify({
+            event: "unsubscribe",
+            page: path,
+          })
+        );
+      }
     };
   }, [websocket, path]);
 
@@ -144,11 +156,11 @@ export default function Chat({
                       className="w-10 h-10 rounded-full object-cover border border-neutral-700"
                     />
                   ) : (
-                      <Jdenticon
-                        value={chatItem.creator}
-                        size={40}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
+                    <Jdenticon
+                      value={chatItem.creator}
+                      size={40}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
                   )}
                   <div>
                     <div className="text-sm text-neutral-400 mb-1 flex items-center gap-2">

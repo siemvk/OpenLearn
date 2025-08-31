@@ -171,6 +171,10 @@ app.get('/ws', upgradeWebSocket((c) => {
             wsGroups.set(ws.raw as WebSocket, groupId)
           }
         }
+        if (data.event === "unsubscribe") {
+          // Remove the WebSocket from group subscription
+          wsGroups.delete(ws.raw as WebSocket)
+        }
         if (data.event === "chat") {
           const groupId = data.group;
           const user = wsUsers.get(ws.raw as WebSocket);
@@ -181,7 +185,6 @@ app.get('/ws', upgradeWebSocket((c) => {
               where: { id: user.id },
               select: { image: true, id: true, name: true },
             });
-            console.log('dbUser for chat message:', dbUser);
             if (dbUser && dbUser.image) {
               creatorImage = dbUser.image;
             }
