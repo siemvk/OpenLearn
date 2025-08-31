@@ -1048,21 +1048,27 @@ const LearnTool = ({
         onComplete();
       }
 
+      // Immediately show streak celebration (assume streak will be started)
+      setStreakInfo({
+        currentStreak: 1,
+        isNewStreak: true,
+      });
+
       const updateStreak = async () => {
         try {
-          // Use the streak store hook
+          // Use the streak store hook (update in background)
           const result = await handleListCompletion();
 
-          if (result.success) {
+          // Update with actual result if different from assumption
+          if (result.success && result.currentStreak !== undefined) {
             setStreakInfo({
-              currentStreak: result.currentStreak || 0,
+              currentStreak: result.currentStreak,
               isNewStreak: result.isNewStreak === true,
             });
-          } else {
-            console.error("Failed to update streak:", result.message);
           }
         } catch (error) {
           console.error("Error updating streak:", error);
+          // Keep the optimistic UI showing celebration even if update fails
         }
       };
 
@@ -1096,11 +1102,27 @@ const LearnTool = ({
     // Also trigger streak update here as a fallback if it hasn't been triggered yet
     if (isCompleted && !streakUpdateTriggered) {
       setStreakUpdateTriggered(true);
+
+      // Immediately show streak celebration (assume streak will be started)
+      setStreakInfo({
+        currentStreak: 1,
+        isNewStreak: true,
+      });
+
       (async () => {
         try {
-          await handleListCompletion();
+          const result = await handleListCompletion();
+
+          // Update with actual result if different from assumption
+          if (result.success && result.currentStreak !== undefined) {
+            setStreakInfo({
+              currentStreak: result.currentStreak,
+              isNewStreak: result.isNewStreak === true,
+            });
+          }
         } catch (e) {
           console.error('Error in second effect streak update:', e);
+          // Keep the optimistic UI showing celebration even if update fails
         }
       })();
     }
@@ -1440,8 +1462,8 @@ const LearnTool = ({
           <div className="font-bold text-xl mb-2">Gefeliciteerd!</div>
           <div>Je hebt de lijst helemaal af!</div>
 
-          {/* Show streak celebration if a streak was achieved */}
-          {streakInfo.currentStreak > 0 && (
+          {/* Show streak celebration when list is completed (optimistic) */}
+          {listCompleted && (
             <StreakCelebration
               streak={streakInfo.currentStreak}
               isNewStreak={streakInfo.isNewStreak}

@@ -19,7 +19,6 @@ import { getTourState } from "@/serverActions/getTourState";
 import TourInitializer from "@/components/TourInitializer";
 import TourNavigator from "@/components/TourNavigator";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { ReactScan } from "@/components/ReactScan";
 import { decodeCookie } from "@/utils/auth/session";
 import { prisma } from "@/utils/prisma";
 import { getImpersonationData } from "@/utils/auth/getImpersonationData";

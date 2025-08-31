@@ -12,9 +12,7 @@ export const useStreakUpdate = () => {
 
   // Main function to call when a practice list is completed
   const handleListCompletion = useCallback(async () => {
-    console.log('🔄 useStreakUpdate: handleListCompletion called');
     try {
-      console.log('📊 Calling updateStreak from store...');
       const result = await updateStreak();
 
       if (result.success) {
