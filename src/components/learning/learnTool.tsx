@@ -32,6 +32,29 @@ function verwijderSpecialeTekens(tekst: string): string {
     .toLowerCase();
 }
 
+// Add a small, fast Levenshtein distance helper for typo detection
+const levenshtein = (a: string, b: string): number => {
+  const al = a.length, bl = b.length;
+  if (al === 0) return bl;
+  if (bl === 0) return al;
+  const dp: number[][] = Array.from({ length: al + 1 }, () =>
+    new Array(bl + 1).fill(0)
+  );
+  for (let i = 0; i <= al; i++) dp[i][0] = i;
+  for (let j = 0; j <= bl; j++) dp[0][j] = j;
+  for (let i = 1; i <= al; i++) {
+    for (let j = 1; j <= bl; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return dp[al][bl];
+};
+
 // Constants for repeated styles and values
 const STYLES = {
   questionCard: "p-4 bg-neutral-700 rounded-lg text-center mb-4 max-h-[120px] overflow-y-auto",
@@ -57,8 +80,7 @@ const QuestionDisplay = memo(({ question }: { question: string }) => (
 const AnswerOverlay = memo(
   ({ correct, answer }: { correct: boolean; answer?: string }) => (
     <motion.div
-      className={`absolute z-50 bottom-0 left-0 right-0 flex items-center justify-center ${correct ? "bg-green-700" : "bg-red-700"
-        } text-white rounded-lg text-2xl font-extrabold max-h-[60vh]`}
+      className={`absolute z-50 bottom-0 left-0 right-0 flex items-center justify-center ${correct ? "bg-green-700" : "bg-red-700"} text-white rounded-lg text-2xl font-extrabold max-h-[60vh]`}
       initial={{ y: "100%" }}
       animate={{ y: "0%" }}
       exit={{ y: "100%" }}
@@ -132,6 +154,30 @@ const GedachtenOverlay = memo(
     </motion.div>
   )
 );
+
+// Typo overlay: ask user whether to count a near-correct answer as correct
+const TypoOverlay = memo(
+  ({ onGood, onBad }: { onGood: () => void; onBad: () => void }) => (
+    <motion.div
+      className="absolute z-50 bottom-0 left-0 right-0 flex flex-col items-center justify-center bg-yellow-600 text-white rounded-lg max-h-[60vh]"
+      initial={{ y: "100%" }}
+      animate={{ y: "0%" }}
+      exit={{ y: "100%" }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
+      <div className="w-full p-4 max-h-[inherit] overflow-y-auto text-center">
+        <div className="font-extrabold text-xl mb-2">Je hebt een typfout gemaakt: { }</div>
+        <div className="text-sm mb-4">Wil je dit als goed of fout rekenen?</div>
+        <div className="flex gap-3 justify-center">
+          <Button1 onClick={onGood} text="Goed rekenen" />
+          <Button1 onClick={onBad} text="Fout rekenen" />
+        </div>
+      </div>
+    </motion.div>
+  )
+);
+
+
 
 // Replace the modal StreakScreen with an inline version
 const StreakCelebration = memo(
@@ -401,6 +447,7 @@ const LearnTool = ({
     showCorrect: false,
     showGedachtenOverlay: false,
     isAnswering: false,
+    toonTypo: false, // show a near-correct / typo overlay
   });
 
   // Consolidate learning progress state
@@ -470,7 +517,7 @@ const LearnTool = ({
   };
 
   // Destructure for easier access
-  const { toonAntwoord, showCorrect, showGedachtenOverlay, isAnswering } = overlays;
+  const { toonAntwoord, showCorrect, showGedachtenOverlay, isAnswering, toonTypo } = overlays;
   const { listCompleted, streakUpdateTriggered, currentLerenMethod } = learningState;
   const { streakInfo, lerenWordStats, lerenCompleted } = stats;
   const { userInput, randomNumber } = uiState;
@@ -480,6 +527,7 @@ const LearnTool = ({
   const setShowCorrect = (value: boolean) => updateOverlay('showCorrect', value);
   const setShowGedachtenOverlay = (value: boolean) => updateOverlay('showGedachtenOverlay', value);
   const setIsAnswering = (value: boolean) => updateOverlay('isAnswering', value);
+  const setToonTypo = (value: boolean) => updateOverlay('toonTypo', value);
   const setListCompleted = (value: boolean) => updateLearningState('listCompleted', value);
   const setStreakUpdateTriggered = (value: boolean) => updateLearningState('streakUpdateTriggered', value);
   const setCurrentLerenMethod = (value: "gedachten" | "multikeuze" | "hints" | "toets") => updateLearningState('currentLerenMethod', value);
@@ -503,7 +551,7 @@ const LearnTool = ({
 
 
   // Computed values for UI state
-  const locked = overlays.toonAntwoord || overlays.showCorrect || overlays.showGedachtenOverlay;
+  const locked = overlays.toonAntwoord || overlays.showCorrect || overlays.showGedachtenOverlay || overlays.toonTypo;
 
   // Generate deterministic random number for multiple choice
   const generateRandomNumber = useCallback(() => {
@@ -524,6 +572,9 @@ const LearnTool = ({
   // Refs for input elements to enable autofocus
   const toetsInputRef = useRef<HTMLInputElement>(null);
   const hintsInputRef = useRef<HTMLInputElement>(null);
+
+  // Preserve the submitted input when a typo is detected so overlays show the original text
+  const [typoSubmitted, setTypoSubmitted] = useState<string | null>(null);
 
   // Track current question and reset input when it changes
   const currentQuestion = lijstData.length > 0 ? lijstData[0]?.vraag || "" : "";
@@ -779,6 +830,8 @@ const LearnTool = ({
           } else if (showCorrect) {
             // Handle correct answer overlay - immediately move to next question or next step
             setShowCorrect(false);
+            // Ensure typo overlay also hidden
+            setToonTypo(false);
 
             // Small delay after overlay dismissal to avoid visual jarring
             setTimeout(() => {
@@ -863,6 +916,9 @@ const LearnTool = ({
     if (showCorrect) {
       const timer = setTimeout(() => {
         setShowCorrect(false);
+        // ensure typo overlay also hidden
+        setToonTypo(false);
+        setTypoSubmitted(null);
 
         // Small delay after overlay dismissal to avoid visual jarring
         setTimeout(() => {
@@ -1184,6 +1240,18 @@ const LearnTool = ({
       }
     }
 
+    // TYPO DETECTION: if not exact but very similar, treat as near-correct
+    let detectedTypo = false;
+    if (!userInputCorrect) {
+      const dist = levenshtein(huidigAntwoordZonderSpecialeTekens, userInputZonderSpecialeTekens);
+      const maxLen = Math.max(huidigAntwoordZonderSpecialeTekens.length, userInputZonderSpecialeTekens.length) || 1;
+      const normalized = dist / maxLen;
+      // threshold: 25% of length (adjustable). ignore very short words.
+      if (normalized <= 0.25 && maxLen > 2) {
+        detectedTypo = true;
+      }
+    }
+
     if (userInputCorrect) {
       setShowCorrect(true);
       if (onCorrectAnswer) onCorrectAnswer();
@@ -1198,6 +1266,10 @@ const LearnTool = ({
       }
 
       // No timeout - let Enter key handle progression
+    } else if (detectedTypo) {
+      // Preserve the user's submitted text and show the typo overlay
+      setTypoSubmitted(userInput);
+      setToonTypo(true);
     } else {
       setToonAntwoord(true);
       if (onWrongAnswer) onWrongAnswer();
@@ -1224,6 +1296,84 @@ const LearnTool = ({
     updateWordStats,
     currentLerenMethod,
   ]);
+
+  // Handlers for TypoOverlay buttons
+
+  // TypoOverlay component
+  const TypoOverlayComponent = memo(
+    ({
+      answer,
+      submitted,
+      onGood,
+      onBad,
+    }: {
+      answer: string;
+      submitted: string;
+      onGood: () => void;
+      onBad: () => void;
+    }) => (
+      <motion.div
+        className="absolute z-50 bottom-0 left-0 right-0 flex items-center justify-center bg-yellow-600 text-white rounded-lg max-h-[60vh]"
+        initial={{ y: "100%" }}
+        animate={{ y: "0%" }}
+        exit={{ y: "100%" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
+        <div className="w-full p-4 max-h-[inherit] overflow-y-auto">
+          <div className="flex flex-col items-center px-4 max-w-full mb-3">
+            <div className="overflow-hidden text-center">
+              <div className="font-extrabold mb-2">Je hebt een typfout gemaakt</div>
+              <div className="block break-words text-sm opacity-90 mb-2">Verwacht: <span className="font-semibold">{answer}</span></div>
+              <div className="block break-words text-sm">Ingevuld: <span className="italic">{submitted || "niets ingevuld"}</span></div>
+            </div>
+          </div>
+          <div className="flex gap-3 mt-2 justify-center">
+            <Button1 onClick={onGood} text="Goed rekenen" />
+            <Button1 onClick={onBad} text="Fout rekenen" />
+          </div>
+        </div>
+      </motion.div>
+    )
+  );
+
+  const handleTypoConfirm = useCallback(() => {
+    // User chooses to count typo as correct
+    if (!lijstData.length) return;
+    const [huidigeVraag, ...rest] = lijstData;
+    // Give credit
+    if (onCorrectAnswer) onCorrectAnswer();
+    if (mode === "leren") {
+      const questionKey = getQuestionKey(
+        huidigeVraag.vraag,
+        huidigeVraag.antwoord
+      );
+      updateWordStats(questionKey, true, currentLerenMethod);
+    }
+
+    // Hide typo overlay and show correct overlay for consistency
+    setToonTypo(false);
+    setTypoSubmitted(null);
+    setShowCorrect(true);
+  }, [lijstData, onCorrectAnswer, mode, getQuestionKey, updateWordStats, currentLerenMethod]);
+
+  const handleTypoReject = useCallback(() => {
+    // User chooses to count typo as incorrect
+    if (!lijstData.length) return;
+    const [huidigeVraag, ...rest] = lijstData;
+    if (onWrongAnswer) onWrongAnswer();
+    if (mode === "leren") {
+      const questionKey = getQuestionKey(
+        huidigeVraag.vraag,
+        huidigeVraag.antwoord
+      );
+      updateWordStats(questionKey, false, currentLerenMethod);
+    }
+
+    // Hide typo overlay and show wrong overlay
+    setToonTypo(false);
+    setTypoSubmitted(null);
+    setToonAntwoord(true);
+  }, [lijstData, onWrongAnswer, mode, getQuestionKey, updateWordStats, currentLerenMethod]);
 
   // Renamed from handleAntwoordControlerenGedachten
   const handleSelfAssessment = useCallback(
@@ -1676,6 +1826,14 @@ const LearnTool = ({
           <AnswerOverlay correct={false} answer={lijstData[0]?.antwoord} />
         )}
         {showCorrect && <AnswerOverlay correct={true} />}
+        {toonTypo && (
+          <TypoOverlayComponent
+            answer={lijstData[0]?.antwoord || ""}
+            submitted={typoSubmitted ?? userInput}
+            onGood={handleTypoConfirm}
+            onBad={handleTypoReject}
+          />
+        )}
         {showGedachtenOverlay && lijstData.length > 0 && (
           <GedachtenOverlay
             answer={lijstData[0]?.antwoord || ""}
