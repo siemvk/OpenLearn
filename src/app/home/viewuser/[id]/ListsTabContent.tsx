@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PencilIcon } from "lucide-react";
 import DeleteListButton from "@/components/learning/DeleteListButton";
 import { getSubjectIcon, getSubjectName } from "@/components/icons";
-import CreatorLink from "@/components/links/CreatorLink";
+import CreatorLink from "@/components/CreatorLink";
 
 interface PracticeList {
     list_id: string;
@@ -16,6 +16,7 @@ interface PracticeList {
     // Prefetched server-side
     prefetchedName?: string;
     prefetchedJdenticonValue?: string;
+    prefetchedUserId?: string | null;
 }
 
 interface ListsTabContentProps {
@@ -70,8 +71,8 @@ export default function ListsTabContent({
                                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center pointer-events-auto">
                                     <CreatorLink
                                         creator={list.creator}
-                                        prefetchedName={list.prefetchedName}
-                                        prefetchedJdenticonValue={list.prefetchedJdenticonValue}
+                                        userId={list.prefetchedUserId}
+                                        displayName={list.prefetchedName}
                                     />
                                 </div>
 

@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { PencilIcon } from "lucide-react";
 import DeleteListButton from "@/components/learning/DeleteListButton";
-import ClientCreatorLink from "@/components/ClientCreatorLink";
+import CreatorLink from "@/components/CreatorLink";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { getSubjectIcon, getSubjectName } from "@/components/icons";
 
@@ -115,9 +115,10 @@ export default function SearchListsTab({
                                 </div>
                             </div>
                             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center">
-                                <ClientCreatorLink
-                                    creator={user?.name || list.creator}
-                                    user={user}
+                                <CreatorLink
+                                    creator={list.creator}
+                                    userId={user?.id}
+                                    displayName={user?.name || list.creator}
                                 />
                             </div>
                             {(list.creator === currentUserName || currentUserRole === "admin") && (

@@ -9,17 +9,13 @@ import DeletePostButton from "@/components/DeletePostButton";
 import PinPostButton from "@/components/PinPostButton";
 import MarkdownRenderer from "@/components/md";
 import { cookies } from "next/headers";
-import CreatorLink from "@/components/links/CreatorLink";
+import CreatorLink from "@/components/CreatorLink";
 import ForumHome from "../page";
 import { getUserNameById } from "@/serverActions/getUserName";
 import EditPostBtn from "./editPostBtn";
 import { icons, getSubjectName } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import {
-  Book,
-  MessageCircle,
-  MessageCircleQuestion,
-  Megaphone,
   ShieldUser,
 } from "lucide-react";
 import ForumRepliesList from "../ForumRepliesList";
@@ -282,7 +278,8 @@ export default async function Page({
               <div className="flex items-center">
                 <CreatorLink
                   creator={postcreator?.name || post.creator}
-                  color="white"
+                  userId={postcreator?.id}
+                  displayName={postcreator?.name}
                 />
                 {postcreator.role === "admin" && (
                   <Badge className="bg-red-500 text-white ml-1 rounded-md">
@@ -309,8 +306,8 @@ export default async function Page({
               {post.updatedAt &&
                 post.createdAt &&
                 new Date(post.updatedAt).getTime() -
-                  new Date(post.createdAt).getTime() >
-                  1000 && <span>• Bewerkt</span>}
+                new Date(post.createdAt).getTime() >
+                1000 && <span>• Bewerkt</span>}
             </div>
           </div>
           <div className="flex items-center gap-2">

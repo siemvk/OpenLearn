@@ -2,7 +2,7 @@ import { prisma } from "@/utils/prisma"
 import { getSubjectIcon, getSubjectName } from "@/components/icons"
 import Image from "next/image"
 import MarkdownRenderer from "@/components/md"
-import CreatorLink from "@/components/links/CreatorLink"
+import CreatorLink from "@/components/CreatorLink"
 import { Metadata } from "next"
 import { addToRecentLists } from "@/utils/actions/updateRecentLists"
 import { addToRecentSubjects } from "@/utils/actions/updateRecentSubjects"
@@ -99,15 +99,20 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     // Prefetch creator info to avoid CSR waterfall
     let creatorName = summary?.creator || "";
     let creatorJdenticonValue = summary?.creator || "";
+    let creatorUserId: string | null = null;
     if (summary?.creator) {
         try {
             if (isUUID(summary.creator)) {
                 const info = await getUserNameById(summary.creator);
                 creatorName = info.name || summary.creator;
                 creatorJdenticonValue = info.jdenticonValue || summary.creator;
+                creatorUserId = summary.creator; // The creator field is already the UUID
             } else {
                 creatorName = summary.creator;
                 creatorJdenticonValue = summary.creator;
+                // For name-based creators, we should fetch the ID
+                const userInfo = await getUserIdByName(summary.creator);
+                creatorUserId = userInfo.id;
             }
         } catch (error) {
             console.error("Error fetching creator info:", error);
@@ -151,8 +156,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                         <span className="text-md text-gray-500 mr-2 justify-center">Gemaakt door:</span>
                         <CreatorLink
                             creator={summary.creator}
-                            prefetchedName={creatorName}
-                            prefetchedJdenticonValue={creatorJdenticonValue}
+                            userId={creatorUserId}
+                            displayName={creatorName}
                         />
                     </div>
                 )}

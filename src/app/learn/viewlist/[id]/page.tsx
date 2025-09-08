@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { getUserFromSession } from "@/utils/auth/auth";
 import { Badge } from "@/components/ui/badge";
 import UserListButtons from "@/components/learning/UserListButtons";
-import CreatorLink from "@/components/links/CreatorLink";
+import CreatorLink from "@/components/CreatorLink";
 import { addToRecentLists } from "@/utils/actions/updateRecentLists";
 import { addToRecentSubjects } from "@/utils/actions/updateRecentSubjects";
 import { Metadata } from "next";
@@ -180,15 +180,21 @@ const ViewListPage: NextPage<any, PageParams> = async ({ params }: PageParams) =
     // Prefetch creator info to avoid CSR waterfall
     let creatorName = listData?.creator || "";
     let creatorJdenticonValue = listData?.creator || "";
+    let creatorUserId: string | null = null;
     if (listData?.creator) {
         try {
             if (isUUID(listData.creator)) {
                 const info = await getUserNameById(listData.creator);
                 creatorName = info.name || listData.creator;
                 creatorJdenticonValue = info.jdenticonValue || listData.creator;
+                creatorUserId = listData.creator; // The creator field is already the UUID
             } else {
                 creatorName = listData.creator;
                 creatorJdenticonValue = listData.creator;
+                // For name-based creators, we should fetch the ID
+                const { getUserIdByName } = await import("@/serverActions/getUserName");
+                const userInfo = await getUserIdByName(listData.creator);
+                creatorUserId = userInfo.id;
             }
         } catch (error) {
             console.error("Error fetching creator info:", error);
@@ -350,8 +356,8 @@ const ViewListPage: NextPage<any, PageParams> = async ({ params }: PageParams) =
                         <div className="w-2" />
                         <CreatorLink
                             creator={listData?.creator || ""}
-                            prefetchedName={creatorName}
-                            prefetchedJdenticonValue={creatorJdenticonValue}
+                            userId={creatorUserId}
+                            displayName={creatorName}
                         />
                     </div>
 

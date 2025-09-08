@@ -98,19 +98,29 @@ export default async function Page({ params, searchParams }: PageProps) {
 
       // Prefetch creators
       const creators = Array.from(new Set(createdLists.map(l => l.creator)));
-      const creatorMap: Record<string, { name: string; jdenticonValue: string }> = {};
+      const creatorMap: Record<string, { name: string; jdenticonValue: string; userId: string | null }> = {};
       await Promise.all(creators.map(async creator => {
         if (isUUID(creator)) {
           const info = await getUserNameById(creator);
-          creatorMap[creator] = { name: info.name || creator, jdenticonValue: info.jdenticonValue || creator };
+          creatorMap[creator] = {
+            name: info.name || creator,
+            jdenticonValue: info.jdenticonValue || creator,
+            userId: creator // The creator is already the UUID
+          };
         } else {
-          creatorMap[creator] = { name: creator, jdenticonValue: creator };
+          const info = await getUserIdByName(creator);
+          creatorMap[creator] = {
+            name: creator,
+            jdenticonValue: creator,
+            userId: info.id
+          };
         }
       }));
       const enrichedLists = createdLists.map(item => ({
         ...item,
         prefetchedName: creatorMap[item.creator].name,
         prefetchedJdenticonValue: creatorMap[item.creator].jdenticonValue,
+        prefetchedUserId: creatorMap[item.creator].userId,
       }));
       return (
         <ListsTabContent
@@ -146,20 +156,29 @@ export default async function Page({ params, searchParams }: PageProps) {
 
       // Prefetch creators for summaries
       const creatorsS = Array.from(new Set(summaryList.map(s => s.creator)));
-      const creatorMapS: Record<string, { name: string; jdenticonValue: string }> = {};
+      const creatorMapS: Record<string, { name: string; jdenticonValue: string; userId: string | null }> = {};
       await Promise.all(creatorsS.map(async creator => {
         if (isUUID(creator)) {
           const info = await getUserNameById(creator);
-          creatorMapS[creator] = { name: info.name || creator, jdenticonValue: info.jdenticonValue || creator };
+          creatorMapS[creator] = {
+            name: info.name || creator,
+            jdenticonValue: info.jdenticonValue || creator,
+            userId: creator // The creator is already the UUID
+          };
         } else {
           const info = await getUserIdByName(creator);
-          creatorMapS[creator] = { name: creator, jdenticonValue: creator };
+          creatorMapS[creator] = {
+            name: creator,
+            jdenticonValue: creator,
+            userId: info.id
+          };
         }
       }));
       const enrichedSummaries = summaryList.map(item => ({
         ...item,
         prefetchedName: creatorMapS[item.creator].name,
         prefetchedJdenticonValue: creatorMapS[item.creator].jdenticonValue,
+        prefetchedUserId: creatorMapS[item.creator].userId,
       }));
       return (
         <SummariesTabContent
@@ -244,20 +263,29 @@ export default async function Page({ params, searchParams }: PageProps) {
 
       // Prefetch creators
       const creators = Array.from(new Set(createdLists.map(l => l.creator)));
-      const creatorMap: Record<string, { name: string; jdenticonValue: string }> = {};
+      const creatorMap: Record<string, { name: string; jdenticonValue: string; userId: string | null }> = {};
       await Promise.all(creators.map(async creator => {
         if (isUUID(creator)) {
           const info = await getUserNameById(creator);
-          creatorMap[creator] = { name: info.name || creator, jdenticonValue: info.jdenticonValue || creator };
+          creatorMap[creator] = {
+            name: info.name || creator,
+            jdenticonValue: info.jdenticonValue || creator,
+            userId: creator // The creator is already the UUID
+          };
         } else {
           const info = await getUserIdByName(creator);
-          creatorMap[creator] = { name: creator, jdenticonValue: creator };
+          creatorMap[creator] = {
+            name: creator,
+            jdenticonValue: creator,
+            userId: info.id
+          };
         }
       }));
       const enrichedLists = createdLists.map(item => ({
         ...item,
         prefetchedName: creatorMap[item.creator].name,
         prefetchedJdenticonValue: creatorMap[item.creator].jdenticonValue,
+        prefetchedUserId: creatorMap[item.creator].userId,
       }));
       return (
         <ListsTabContent

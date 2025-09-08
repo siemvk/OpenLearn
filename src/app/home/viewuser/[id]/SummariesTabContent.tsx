@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PencilIcon } from "lucide-react";
 import DeleteListButton from "@/components/learning/DeleteListButton";
 import { getSubjectIcon, getSubjectName } from "@/components/icons";
-import CreatorLink from "@/components/links/CreatorLink";
+import CreatorLink from "@/components/CreatorLink";
 
 interface Summary {
     list_id: string;
@@ -15,6 +15,7 @@ interface Summary {
     // Prefetched server-side
     prefetchedName?: string;
     prefetchedJdenticonValue?: string;
+    prefetchedUserId?: string | null;
 }
 
 interface SummariesTabContentProps {
@@ -63,8 +64,8 @@ export default function SummariesTabContent({
                                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center pointer-events-auto">
                                     <CreatorLink
                                         creator={summary.creator}
-                                        prefetchedName={summary.prefetchedName}
-                                        prefetchedJdenticonValue={summary.prefetchedJdenticonValue}
+                                        userId={summary.prefetchedUserId}
+                                        displayName={summary.prefetchedName}
                                     />
                                 </div>
 

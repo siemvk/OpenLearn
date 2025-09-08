@@ -6,7 +6,7 @@ import Jdenticon from "@/components/Jdenticon";
 import DeletePostButton from "@/components/DeletePostButton";
 import { formatRelativeTime } from "@/utils/formatRelativeTime";
 import VoteButtons from "@/components/VoteButtons";
-import ClientCreatorLink from "@/components/ClientCreatorLink";
+import CreatorLink from "@/components/CreatorLink";
 import MarkdownRenderer from "@/components/md";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { getReplies } from "./getReplies";
@@ -158,8 +158,10 @@ export default function ForumRepliesList({
                                         )}
                                     </div>
                                     <div className="flex-grow">
-                                        <ClientCreatorLink
-                                            creator={replyCreator?.name || reply.creator}
+                                        <CreatorLink
+                                            creator={reply.creator}
+                                            userId={replyCreator?.id}
+                                            displayName={replyCreator?.name}
                                         />
                                         {replyCreator.role === "admin" && (
                                             <Badge className="bg-red-500 text-white ml-1 rounded-md">

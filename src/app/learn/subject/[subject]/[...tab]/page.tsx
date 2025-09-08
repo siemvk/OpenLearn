@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PencilIcon } from "lucide-react";
 import DeleteListButton from "@/components/learning/DeleteListButton";
-import CreatorLink from "@/components/links/CreatorLink";
+import CreatorLink from "@/components/CreatorLink";
 import { formatRelativeTime } from "@/utils/formatRelativeTime";
 import { getSubjectIcon, getSubjectName } from "@/components/icons";
 import { prefetchCreatorInfo } from '@/utils/creator';
@@ -104,18 +104,21 @@ export default async function SubjectTabPage({
     ...list,
     prefetchedName: creatorMap[list.creator]?.name,
     prefetchedJdenticonValue: creatorMap[list.creator]?.jdenticonValue,
+    prefetchedUserId: creatorMap[list.creator]?.userId,
   }));
 
   const enrichedPracticedLists = sortedPracticedLists.map(list => ({
     ...list,
     prefetchedName: creatorMap[list.creator]?.name,
     prefetchedJdenticonValue: creatorMap[list.creator]?.jdenticonValue,
+    prefetchedUserId: creatorMap[list.creator]?.userId,
   }));
 
   const enrichedMyLists = myLists.map(list => ({
     ...list,
     prefetchedName: creatorMap[list.creator]?.name,
     prefetchedJdenticonValue: creatorMap[list.creator]?.jdenticonValue,
+    prefetchedUserId: creatorMap[list.creator]?.userId,
   }));
 
   // Fetch forum posts for this subject
@@ -210,8 +213,8 @@ export default async function SubjectTabPage({
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center pointer-events-auto">
                     <CreatorLink
                       creator={list.creator}
-                      prefetchedName={list.prefetchedName}
-                      prefetchedJdenticonValue={list.prefetchedJdenticonValue}
+                      userId={list.prefetchedUserId}
+                      displayName={list.prefetchedName}
                     />
                   </div>
 
@@ -282,8 +285,8 @@ export default async function SubjectTabPage({
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center pointer-events-auto">
                     <CreatorLink
                       creator={list.creator}
-                      prefetchedName={list.prefetchedName}
-                      prefetchedJdenticonValue={list.prefetchedJdenticonValue}
+                      userId={list.prefetchedUserId}
+                      displayName={list.prefetchedName}
                     />
                   </div>
 
@@ -352,8 +355,8 @@ export default async function SubjectTabPage({
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center pointer-events-auto">
                     <CreatorLink
                       creator={list.creator}
-                      prefetchedName={list.prefetchedName}
-                      prefetchedJdenticonValue={list.prefetchedJdenticonValue}
+                      userId={list.prefetchedUserId}
+                      displayName={list.prefetchedName}
                     />
                   </div>
 
