@@ -49,8 +49,12 @@ export async function middleware(request: NextRequest, response: NextResponse) {
     contentSecurityPolicyHeaderValue
   );
 
-  // Make sure headers get applied
   resp.headers.set("X-Content-Type-Options", "nosniff");
+  resp.headers.set("Access-Control-Allow-Origin", "*");
+  resp.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  resp.headers.set("X-Frame-Options", "DENY");
+  resp.headers.set("X-XSS-Protection", "1; mode=block");
+  resp.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 
   if (
     request.nextUrl.pathname.endsWith("php") ||
@@ -213,11 +217,8 @@ async function middlewareAuth(request: NextRequest, response: NextResponse) {
 export const config = {
   runtime: "nodejs",
   matcher: [
-    // Exclude API routes, static files, and other system paths
-    "/((?!api|_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     {
-      // Only run on pages, not API routes
-      source: "/((?!api|_next/static|_next/image|favicon.ico).*)",
+      source: "/((?!api|_next/static|_next/image|_next/static/media|_next/static/chunks|favicon.ico|.*\\.(?:html?|css|js|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },
@@ -225,3 +226,4 @@ export const config = {
     },
   ],
 };
+
