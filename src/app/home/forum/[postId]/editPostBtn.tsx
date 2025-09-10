@@ -54,6 +54,7 @@ import { Combobox } from "../selectSubjCombobox";
 import { SelectCategoryCombobox } from "../selectCategoryCombobox";
 import { toast } from "react-toastify";
 import MarkdownRenderer from "@/components/md";
+import { MarkdownPreview } from "../ForumDialog";
 
 
 interface EditPostButtonProps {
@@ -328,7 +329,7 @@ function EditPostButton({
                           {
                             id: "preview",
                             label: "Voorbeeld",
-                            content: <MarkdownRenderer content={content} />,
+                            content: <MarkdownPreview content={content} />,
                           },
                         ]}
                         defaultActiveTab="write"

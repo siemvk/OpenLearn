@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useMemo, memo, useEffect } from "react";
+import { useState, useCallback, memo, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Combobox } from "./selectSubjCombobox";
 import Button1 from "@/components/button/Button1";
@@ -9,17 +9,15 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { formSchema as baseFormSchema } from "./formSchema";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import ReactMarkdown from 'react-markdown';
-import Tabs, { TabItem } from "@/components/Tabs";
+import Tabs from "@/components/Tabs";
 import { SelectCategoryCombobox } from "./selectCategoryCombobox";
 import { useUserDataStore } from "@/store/user/UserDataProvider";
 import MarkdownRenderer from "@/components/md";
 
 // Memoized markdown preview component
-const MarkdownPreview = memo(({ content }: { content: string }) => (
+export const MarkdownPreview = memo(({ content }: { content: string }) => (
   <div className="bg-neutral-800 border border-neutral-700 h-40 overflow-y-auto p-3 rounded-md prose prose-invert max-w-none whitespace-pre-line">
     {content ? (
       <MarkdownRenderer content={content} />
