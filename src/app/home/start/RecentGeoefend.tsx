@@ -27,6 +27,9 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
   const [select, setSelect] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const router = useRouter();
+  const isMobile = () => screen.width <= 760;
+  //console.log('kijk: ', screen.width)
+  //console.log('niet telefoon: ' + !isMobile())
 
   const handleCheckboxChange = (itemId: string, isChecked: boolean) => {
     if (isChecked) {
@@ -271,14 +274,16 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                       </span>
                     </div>
                     <div className="flex-grow" />
-                    <div className="flex items-center pr-2">
-                      {Array.isArray(item.data) && item.data.length === 1
-                        ? '1 woord'
-                        : `${Array.isArray(item.data) ? item.data.length : 0} woorden`}
-                    </div>
+                    {(!isMobile()) && (
+                      <div className="flex items-center pr-2">
+                        {Array.isArray(item.data) && item.data.length === 1
+                          ? '1 woord'
+                          : `${Array.isArray(item.data) ? item.data.length : 0} woorden`}
+                      </div>
+                    )}
                   </div>
 
-                  {item.creator && (
+                  {item.creator && !isMobile() && (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center z-10">
                       <div className="pointer-events-auto">
                         <CreatorLink
@@ -291,7 +296,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                   )}
 
                   <div className="flex items-center gap-2 relative z-10">
-                    {(item.creator === currentUserName || isAdmin) && (
+                    {(item.creator === currentUserName || isAdmin && !isMobile()) && (
                       <Link
                         href={`/learn/editlist/${item.list_id}`}
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors"
@@ -300,7 +305,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                         <PencilIcon className="h-5 w-5 text-white" />
                       </Link>
                     )}
-                    {(item.creator === currentUserName || isAdmin) && (
+                    {(item.creator === currentUserName || isAdmin && !isMobile()) && (
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors">
                         <DeleteListButton listId={item.list_id} isCreator={true} />
                       </div>
