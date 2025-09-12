@@ -31,7 +31,6 @@ interface PageParams {
     searchParams?: Record<string, string | string[] | undefined>;
 }
 
-// Interface for word pair structure
 interface WordPair {
     "1": string;  // term
     "2": string;  // definition

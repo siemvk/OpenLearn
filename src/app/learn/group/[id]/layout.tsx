@@ -1,4 +1,3 @@
-// filepath: src/app/learn/group/[id]/layout.tsx
 import GroupHeaderTabs from "@/components/GroupHeaderTabs";
 import type { TabItem } from "@/components/Tabs";
 import { ReactNode } from "react";
@@ -36,7 +35,6 @@ export default async function GroupLayout({ children, params }: GroupLayoutProps
 
     return (
         <>
-            {/* header and tabs managed by client component */}
             <GroupHeaderTabs
                 tabs={tabs}
                 baseRoute={`/learn/group/${id}`}

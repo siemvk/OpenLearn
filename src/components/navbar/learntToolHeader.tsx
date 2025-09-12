@@ -1,12 +1,15 @@
 "use client";
 
-import { memo, useMemo } from "react";
+import { memo, useMemo, useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { X, ArrowLeft, Check, X as XIcon, Settings } from "lucide-react";
 import Link from "next/link";
 import Dropdown from "@/components/button/DropdownBtn";
 import Image from "next/image";
 import Timer from "./Timer";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { getSubjectName, getSubjectIcon } from "@/components/icons";
 
 // Import the images for the learning methods
 import learn from "@/app/img/learn.svg";
@@ -15,6 +18,7 @@ import hints from "@/app/img/hint.svg";
 import mind from "@/app/img/mind.svg";
 import livequiz from "@/app/img/livequiz.svg";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
+import Button1 from "@/components/button/Button1";
 
 // Memoized sub-components to prevent unnecessary re-renders
 const BackButton = memo(({ url }: { url: string }) => (
@@ -52,23 +56,147 @@ const StatsDisplay = memo(({ correctAnswers, wrongAnswers }: { correctAnswers: n
 ));
 StatsDisplay.displayName = "StatsDisplay";
 
-const SettingsButton = memo(() => (
-    <Dialog>
-        <DialogTrigger asChild>
-            <button
-                className="flex items-center justify-center h-8 w-8 bg-neutral-700 hover:bg-neutral-600 transition-colors rounded-full"
-            >
-                <Settings className="h-4 w-4" />
-            </button>
-        </DialogTrigger>
-        <DialogContent>
-            <DialogTitle>Leerinstellingen</DialogTitle>
-            <div className="p-4">
-                <p>moet nog afgemaakt worden</p>
-            </div>
-        </DialogContent>
-    </Dialog>
-));
+const SettingsButton = memo(({ listId, listData, onFlipQuestionLangChange, initialFlipQuestionLang }: {
+    listId: string;
+    listData: any;
+    onFlipQuestionLangChange?: (flipped: boolean) => void;
+    initialFlipQuestionLang?: boolean;
+}) => {
+    const [flipQuestionLang, setFlipQuestionLang] = useState(initialFlipQuestionLang || false);
+    const [loading, setLoading] = useState(false);
+    const [tempFlipQuestionLang, setTempFlipQuestionLang] = useState(initialFlipQuestionLang || false);
+    const [dialogOpen, setDialogOpen] = useState(false);
+
+    // Extract the actual list ID (remove custom- prefix if present)
+    const actualListId = listId.startsWith('custom-') ? listId.replace('custom-', '') : listId;
+
+    // Get language info from listData with proper names and icons
+    const langFromCode = listData?.lang_from;
+    const langToCode = listData?.lang_to;
+    const langFrom = langFromCode ? getSubjectName(langFromCode) : 'Onbekende taal';
+    const langTo = langToCode ? getSubjectName(langToCode) : 'Onbekende taal';
+    const langFromIcon = langFromCode ? getSubjectIcon(langFromCode) : null;
+    const langToIcon = langToCode ? getSubjectIcon(langToCode) : null;
+
+    // Preferences are now loaded server-side, no need for client-side request
+
+    const handleTempFlipToggle = (checked: boolean) => {
+        // Don't allow changes for combined lists
+        if (actualListId.startsWith('combined-')) {
+            return;
+        }
+        setTempFlipQuestionLang(checked);
+    };
+
+    const handleSaveAndRestart = async () => {
+        // Don't allow changes for combined lists
+        if (actualListId.startsWith('combined-')) {
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/v1/lists/${actualListId}/prefs`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    flipQuestionLang: tempFlipQuestionLang
+                })
+            });
+
+            if (response.ok) {
+                setFlipQuestionLang(tempFlipQuestionLang);
+                // Notify parent component of the change
+                if (onFlipQuestionLangChange) {
+                    onFlipQuestionLangChange(tempFlipQuestionLang);
+                }
+                setDialogOpen(false);
+
+                // Restart the current page by reloading
+                window.location.reload();
+            } else {
+                console.error('Failed to save preference');
+            }
+        } catch (error) {
+            console.error('Error saving preference:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDialogOpenChange = (open: boolean) => {
+        setDialogOpen(open);
+        if (open) {
+            // Reset temp state to current state when opening
+            setTempFlipQuestionLang(flipQuestionLang);
+        }
+    };
+
+    const isCombinedList = actualListId.startsWith('combined-');
+
+    return (
+        <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
+            <DialogTrigger asChild>
+                <button
+                    className="flex items-center justify-center h-8 w-8 bg-neutral-700 hover:bg-neutral-600 transition-colors rounded-full"
+                >
+                    <Settings className="h-4 w-4" />
+                </button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+                <DialogTitle>Leerinstellingen</DialogTitle>
+                <div className="space-y-6 p-4">
+                    <div className="space-y-3">
+                        <Label htmlFor="flip-lang" className="text-sm font-medium">
+                            Vraag taal
+                        </Label>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <Switch
+                                    id="flip-lang"
+                                    checked={tempFlipQuestionLang}
+                                    onCheckedChange={handleTempFlipToggle}
+                                    disabled={loading || isCombinedList}
+                                />
+                                <span className="text-sm text-neutral-400 flex items-center gap-2">
+                                    {tempFlipQuestionLang ? (
+                                        <>
+                                            {langToIcon && (
+                                                <Image src={langToIcon} alt={langTo} width={16} height={16} className="rounded-sm" />
+                                            )}
+                                            {langTo}
+                                        </>
+                                    ) : (
+                                        <>
+                                            {langFromIcon && (
+                                                <Image src={langFromIcon} alt={langFrom} width={16} height={16} className="rounded-sm" />
+                                            )}
+                                            {langFrom}
+                                        </>
+                                    )}
+                                </span>
+                            </div>
+                        </div>
+                        {isCombinedList && (
+                            <p className="text-xs text-neutral-500">
+                                Taal omwisselen is niet beschikbaar voor gecombineerde lijsten.
+                            </p>
+                        )}
+                    </div>
+                    <div className="flex justify-end p-4 border-t border-neutral-700">
+                        <Button1
+                            text={loading ? 'Opslaan...' : 'Opslaan en opnieuw beginnen'}
+                            onClick={handleSaveAndRestart}
+                            disabled={loading || isCombinedList || tempFlipQuestionLang === flipQuestionLang}
+                        />
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+});
 SettingsButton.displayName = "SettingsButton";
 
 const ExitButton = memo(() => (
@@ -122,6 +250,9 @@ interface LearnToolHeaderProps {
     wrongAnswers?: number;
     onMethodChange?: (method: string) => void;
     currentMethod?: string;
+    listData?: any; // Add listData prop
+    onFlipQuestionLangChange?: (flipped: boolean) => void; // Add callback for flip changes
+    initialFlipQuestionLang?: boolean; // Add initial flip state for SSR
 }
 
 const HeaderLearnTool = memo(({
@@ -131,6 +262,9 @@ const HeaderLearnTool = memo(({
     wrongAnswers = 0,
     onMethodChange,
     currentMethod = "leren",
+    listData,
+    onFlipQuestionLangChange,
+    initialFlipQuestionLang,
 }: LearnToolHeaderProps) => {
     // Check if this is a custom learning session
     const isCustomMode = listId.startsWith('custom-');
@@ -228,7 +362,12 @@ const HeaderLearnTool = memo(({
 
                 {/* Right side: Settings, stats, and exit */}
                 <div className="flex items-center gap-4">
-                    <SettingsButton />
+                    <SettingsButton
+                        listId={listId}
+                        listData={listData}
+                        onFlipQuestionLangChange={onFlipQuestionLangChange}
+                        initialFlipQuestionLang={initialFlipQuestionLang}
+                    />
                     <StatsDisplay correctAnswers={correctAnswers} wrongAnswers={wrongAnswers} />
                     <ExitButton />
                 </div>

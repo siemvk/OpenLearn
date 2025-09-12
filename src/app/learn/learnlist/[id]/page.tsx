@@ -1,6 +1,6 @@
-import { prisma } from "@/utils/prisma";
 import { addToRecentLists } from "@/utils/actions/updateRecentLists";
 import { addToRecentSubjects } from "@/utils/actions/updateRecentSubjects";
+import { getListWithPreferences } from "@/serverActions/getListWithPreferences";
 import LearnToolWithProgress from "@/components/learning/LearnToolWithProgress";
 
 export default async function LerenListPage({
@@ -9,29 +9,23 @@ export default async function LerenListPage({
     params: Promise<{ id: string }>;
 }) {
     const { id } = await params;
-    const listdata = await prisma.practice.findFirst({
-        where: { list_id: id },
-    });
 
-    // Add this list to user's recent lists
-    if (listdata) {
-        await addToRecentLists(id);
+    // Get list data with user preferences applied
+    const result = await getListWithPreferences(id);
 
-        // Also add the subject to recent subjects
-        if (listdata.subject) {
-            await addToRecentSubjects(listdata.subject);
-        }
+    if (!result) {
+        return <div>Lijst niet gevonden</div>;
     }
 
-    // Transform the data correctly - the database has format { "1": string, "2": string }
-    // but LearnTool expects { vraag: string, antwoord: string }
-    const rawListData =
-        listdata && listdata.data && Array.isArray(listdata.data)
-            ? listdata.data.map((item: any) => ({
-                vraag: item["1"] || "",
-                antwoord: item["2"] || ""
-            }))
-            : [];
+    const { listdata, rawListData, listDataProps, flipQuestionLang } = result;
+
+    // Add this list to user's recent lists
+    await addToRecentLists(id);
+
+    // Also add the subject to recent subjects
+    if (listdata.subject) {
+        await addToRecentSubjects(listdata.subject);
+    }
 
     return (
         <LearnToolWithProgress
@@ -39,6 +33,8 @@ export default async function LerenListPage({
             rawlistdata={rawListData}
             listId={id}
             currentMethod="leren"
+            listData={listDataProps}
+            initialFlipQuestionLang={flipQuestionLang}
         />
     );
 }

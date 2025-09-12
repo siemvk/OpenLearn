@@ -1,4 +1,5 @@
 import { createStore } from 'zustand/vanilla'
+import { getStreakData } from '@/serverActions/getStreakData'
 
 export interface WeekActivity {
   date: string;
@@ -115,21 +116,17 @@ export const createStreakStore = (initData?: Partial<StreakData>) =>
       }
     },
 
-    // Refresh data from server
+    // Refresh data from server using server action
     refreshData: async () => {
       try {
-        const response = await fetch('/api/v1/streak/data');
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to fetch streak data');
-        }
+        // Call the server action directly
+        const result = await getStreakData();
 
         // Update state with fresh data
         set({
-          streak: result.data.streak,
-          freezes: result.data.freezes,
-          weekActivity: result.data.weekActivity,
+          streak: result.streak,
+          freezes: result.freezes,
+          weekActivity: result.weekActivity,
         });
 
       } catch (error) {

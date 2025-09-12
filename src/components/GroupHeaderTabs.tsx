@@ -44,11 +44,6 @@ export default function GroupHeaderTabs({
     const canBypassApproval = isCreator || isAdmin || sessionRole === 'admin';
     const isRestricted = !!requiresApproval && !isMember && !canBypassApproval;
 
-    if (isRestricted) {
-        // don't show header tabs if group restricted view
-        return null;
-    }
-
     return (
         <>
             <div className="flex flex-col p-4">
@@ -70,15 +65,17 @@ export default function GroupHeaderTabs({
                 </div>
                 <p className="mt-2">{groupDescription}</p>
             </div>
-            <div className="px-6">
-                <Tabs
-                    tabs={tabs}
-                    defaultActiveTab={urlTab}
-                    withRoutes={true}
-                    baseRoute={baseRoute}
-                    renderContent={false}
-                />
-            </div>
+            {!isRestricted && (
+                <div className="px-6">
+                    <Tabs
+                        tabs={tabs}
+                        defaultActiveTab={urlTab}
+                        withRoutes={true}
+                        baseRoute={baseRoute}
+                        renderContent={false}
+                    />
+                </div>
+            )}
         </>
     );
 }

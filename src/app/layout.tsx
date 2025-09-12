@@ -12,6 +12,7 @@ import { prisma } from "@/utils/prisma";
 import { getImpersonationData } from "@/utils/auth/getImpersonationData";
 import { getStreakData } from "@/serverActions/getStreakData";
 import Providers from "@/components/providers";
+import DelWindowNext from "@/components/DelWindowNext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -213,6 +214,7 @@ export default async function RootLayout({
             footerContent={footerContent}
           >
             {children}
+            <DelWindowNext />
           </Providers>
         </SessionWrapper>
       </body>

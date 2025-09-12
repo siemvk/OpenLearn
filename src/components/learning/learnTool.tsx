@@ -330,6 +330,7 @@ const LearnTool = ({
   onWrongAnswer,
   onProgressUpdate,
   onComplete,
+  flipQuestionLang = false,
 }: {
   mode: "toets" | "gedachten" | "hints" | "learn" | "multikeuze" | "leren";
   rawlistdata: any[];
@@ -337,9 +338,13 @@ const LearnTool = ({
   onWrongAnswer?: () => void;
   onProgressUpdate?: (completed: number, total: number) => void;
   onComplete?: () => void;
+  flipQuestionLang?: boolean;
 }) => {
   const router = useRouter();
-  const { handleListCompletion } = useStreakUpdate();  // Seeded random number generator for deterministic results
+  const { handleListCompletion } = useStreakUpdate();
+  const prevFlipQuestionLang = useRef(flipQuestionLang);
+
+  // Seeded random number generator for deterministic results
   // Simple utility functions (no need for useCallback with empty deps)
   const seededRandom = (seed: number) => {
     let x = Math.sin(seed) * 10000;
@@ -397,10 +402,16 @@ const LearnTool = ({
     }
 
     return rawlistdata
-      .map((item) => ({
-        vraag: item.vraag || item["1"] || "",
-        antwoord: item.antwoord || item["2"] || "",
-      }))
+      .map((item) => {
+        const vraag = item.vraag || item["1"] || "";
+        const antwoord = item.antwoord || item["2"] || "";
+
+        // Data is already transformed server-side, no need to flip here
+        return {
+          vraag: vraag,
+          antwoord: antwoord,
+        };
+      })
       .filter((item) => item.vraag && item.antwoord);
   }, [rawlistdata]);
 
@@ -415,10 +426,16 @@ const LearnTool = ({
     }
     // Use deterministic shuffling based on content
     const mappedData = rawlistdata
-      .map((item) => ({
-        vraag: item.vraag || item["1"] || "",
-        antwoord: item.antwoord || item["2"] || "",
-      }))
+      .map((item) => {
+        const vraag = item.vraag || item["1"] || "";
+        const antwoord = item.antwoord || item["2"] || "";
+
+        // Data is already transformed server-side, no need to flip here
+        return {
+          vraag: vraag,
+          antwoord: antwoord,
+        };
+      })
       .filter((item) => item.vraag && item.antwoord);
 
     // Generate deterministic seed from content
@@ -1569,6 +1586,15 @@ const LearnTool = ({
     }
   }, [initialMappedData, lijstData.length, shuffleArray, listCompleted]);
 
+  // Update lijstData when flipQuestionLang changes
+  // NOTE: This is now handled server-side, so this effect is disabled
+  // Data comes pre-transformed from the server
+
+  // Keep ref in sync on mount (no longer needed but kept for compatibility)
+  useEffect(() => {
+    prevFlipQuestionLang.current = flipQuestionLang;
+  }, []);
+
   return (
     <div className="bg-neutral-800 relative min-w-[240px] w-full max-w-[600px] h-[60vh] rounded-lg flex flex-col justify-center overflow-hidden p-4">
       {locked && (
@@ -1854,6 +1880,7 @@ export default memo(LearnTool, (prevProps, nextProps) => {
     prevProps.onCorrectAnswer === nextProps.onCorrectAnswer &&
     prevProps.onWrongAnswer === nextProps.onWrongAnswer &&
     prevProps.onProgressUpdate === nextProps.onProgressUpdate &&
-    prevProps.onComplete === nextProps.onComplete
+    prevProps.onComplete === nextProps.onComplete &&
+    prevProps.flipQuestionLang === nextProps.flipQuestionLang
   );
 });

@@ -93,18 +93,6 @@ Geprobeerde pad: ${pathname}
     );
   }
 
-  // Redirect logic for first-time users / tours
-  const { finishedTour } = await getTourState();
-  if (
-    !finishedTour &&
-    pathname !== "/home/start" &&
-    !pathname.startsWith("/auth") &&
-    pathname !== "/" &&
-    await getUserFromSession(request.cookies.get("polarlearn.session-id")?.value)
-  ) {
-    return NextResponse.redirect(new URL("/home/start", request.url));
-  }
-
   return resp;
 }
 

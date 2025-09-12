@@ -55,8 +55,8 @@ Je kan voor PolarLearn kiezen, omdat:
 # Hoe kan je PolarLearn gebruiken?
 
 Je kan PolarLearn gebruiken door naar [PolarLearn](https://polarlearn.nl) te gaan. Hier kan je je aanmelden en beginnen met leren. Je kan ook PolarLearn zelf hosten door de code te downloaden en te volgen wat er in de wiki staat.
-> [!IMPORTANT]  
-> 🌴 PolarLearn is momenteel op vakantie tot 1 sep. 2025. Tot die tijd als je het wilt proberen kan je PolarLearn zelf proberen te draaien. Voor hulp join de discord.
+
+Wil je PolarLearn op een school gebruiken? Laat het ons weten, zodat wij je kunnen helpen met de installatie.
 
 ---
 

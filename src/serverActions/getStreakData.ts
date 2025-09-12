@@ -61,23 +61,55 @@ export async function getStreakData(): Promise<StreakData> {
     const hasActivityToday = (streakData as Record<string, string>)[today] === 'done';
 
     // Check if user had activity yesterday (or used a freeze)
-    const yesterdayActivity = (streakData as Record<string, string>)[yesterdayStr];
-    const hadActivityYesterday = yesterdayActivity === 'done' || yesterdayActivity === 'frozen';
+    let yesterdayActivity = (streakData as Record<string, string>)[yesterdayStr];
+    let hadActivityYesterday = yesterdayActivity === 'done' || yesterdayActivity === 'frozen';
 
-    // Reset streak if no activity today AND no activity/freeze yesterday AND streak > 0
-    if (!hasActivityToday && !hadActivityYesterday && streakCount > 0) {
-      console.log(`Resetting streak for user ${user.id}: no activity today (${today}) and no activity/freeze yesterday (${yesterdayStr})`);
+    // Auto-apply freeze if needed: no activity yesterday but has freezes and streak > 0
+    let freezeApplied = false;
+    if (!hadActivityYesterday && freezeCount > 0 && streakCount > 0) {
+      // Apply freeze to yesterday automatically
+      (streakData as Record<string, string>)[yesterdayStr] = 'frozen';
+      freezeCount = freezeCount - 1;
+      hadActivityYesterday = true;
+      freezeApplied = true;
 
-      // Reset streak in database
+      console.log(`Auto-applied freeze for user ${user.id} on ${yesterdayStr}`);
+    }
+
+    // Always recalculate streak count based on consecutive days from today backwards
+    let currentStreakCount = 0;
+    // Always start counting from today, regardless of today's activity status
+    const todayDate = new Date();
+    for (let i = 0; i < 365; i++) { // Max reasonable streak length
+      const checkDate = new Date(todayDate);
+      checkDate.setDate(checkDate.getDate() - i);
+      const checkDateStr = checkDate.toISOString().split('T')[0];
+
+      const activity = (streakData as Record<string, string>)[checkDateStr];
+      if (activity === 'done') {
+        currentStreakCount++;
+      } else if (activity === 'frozen') {
+        // Frozen days don't count toward streak but don't break it
+        // Continue without incrementing
+        continue;
+      } else {
+        break; // Stop at first gap
+      }
+    }
+
+    // Use the recalculated streak count
+    streakCount = currentStreakCount;
+
+    // Update database with recalculated streak count and any freeze changes
+    if (freezeApplied || currentStreakCount !== (user.streakCount || 0)) {
       await prisma.user.update({
         where: { id: user.id },
         data: {
-          streakCount: 0,
-          lastActivity: null
+          streakData: streakData,
+          freezeCount: freezeCount,
+          streakCount: streakCount
         }
       });
-
-      streakCount = 0;
     }
 
     // Generate week activity data (last 7 days)

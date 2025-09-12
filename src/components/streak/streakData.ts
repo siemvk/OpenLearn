@@ -108,12 +108,6 @@ export async function getAllStreakData() {
         // Convert the streakData JSON to a usable format
         const streakDataObj = streakData as Record<string, string> || {};
 
-        // Map the dates to statuses
-        const weekActivity = pastWeek.map(date => {
-            const status = streakDataObj[date] || 'none';
-            return { date, status };
-        });
-
         // Check if streak should be reset due to missed days
         let finalStreakCount = streakCount || 0;
 
@@ -132,22 +126,71 @@ export async function getAllStreakData() {
 
         // Check if we have activity from today or yesterday
         const hasActivityToday = streakDataObj[todayStr] === 'done' || streakDataObj[todayStr] === 'frozen';
-        const hadYesterdayActivity = streakDataObj[yesterdayStr] === 'done' || streakDataObj[yesterdayStr] === 'frozen';
+        let hadYesterdayActivity = streakDataObj[yesterdayStr] === 'done' || streakDataObj[yesterdayStr] === 'frozen';
         const hadDayBeforeYesterdayActivity = streakDataObj[dayBeforeYesterdayStr] === 'done' || streakDataObj[dayBeforeYesterdayStr] === 'frozen';
 
-        // Streak should be reset only if:
-        // 1. User has a streak count > 0
-        // 2. User has no activity today AND had no activity yesterday
-        if (!hasActivityToday && !hadYesterdayActivity && finalStreakCount > 0) {
-            // User missed a day - reset streak
-            // We don't actually update the database here, just what we return
-            // Next time updateDailyStreak is called, it will properly reset
-            finalStreakCount = 0;
+        // Auto-apply freeze if needed: no activity yesterday but has freezes and streak > 0
+        let freezeApplied = false;
+        let updatedFreezeCount = freezeCount || 0;
+        if (!hadYesterdayActivity && updatedFreezeCount > 0 && finalStreakCount > 0) {
+            // Apply freeze to yesterday automatically
+            streakDataObj[yesterdayStr] = 'frozen';
+            updatedFreezeCount = updatedFreezeCount - 1;
+            hadYesterdayActivity = true;
+            freezeApplied = true;
+
+            console.log(`Auto-applied freeze for user ${user.id} on ${yesterdayStr}`);
         }
+
+        // Always recalculate streak count based on consecutive days from today backwards
+        let currentStreakCount = 0;
+        // Always start counting from today, regardless of today's activity status
+        const todayDate = new Date();
+        for (let i = 0; i < 365; i++) { // Max reasonable streak length
+            const checkDate = new Date(todayDate);
+            checkDate.setDate(checkDate.getDate() - i);
+            const checkDateStr = checkDate.toISOString().split('T')[0];
+
+            const activity = streakDataObj[checkDateStr];
+            if (activity === 'done') {
+                currentStreakCount++;
+            } else if (activity === 'frozen') {
+                // Frozen days don't count toward streak but don't break it
+                // Continue without incrementing
+                continue;
+            } else {
+                break; // Stop at first gap
+            }
+        }
+
+        // Use the recalculated streak count
+        finalStreakCount = currentStreakCount;
+
+        // Update database with recalculated streak count and any freeze changes
+        if (freezeApplied || currentStreakCount !== (streakCount || 0)) {
+            try {
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                        streakData: streakDataObj,
+                        freezeCount: updatedFreezeCount,
+                        streakCount: finalStreakCount
+                    }
+                });
+            } catch (error) {
+                console.error("Error updating streak data in database:", error);
+            }
+        }
+
+        // Update weekActivity to reflect any freeze that was applied
+        const weekActivity = pastWeek.map(date => {
+            const status = streakDataObj[date] || 'none';
+            return { date, status };
+        });
 
         return {
             streak: finalStreakCount,
-            freezes: freezeCount || 0,
+            freezes: updatedFreezeCount,
             weekActivity
         };
     } catch (error) {

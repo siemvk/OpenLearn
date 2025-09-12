@@ -205,13 +205,13 @@ if [ ! -f .env ]; then
 DATABASE_URL=\"mongodb://127.0.0.1:27017,127.0.0.1:27018,127.0.0.1:27019/$DB_NAME?replicaSet=rs0\"
 POLARLEARN_URL=\"http://localhost:3000\"
 
-AUTH_GOOGLE_ID=\"Stop hier de Google OAuth2 Client ID die je hebt gekregen van de google cloud console\"
-AUTH_GOOGLE_SECRET=\"Stop hier de Google OAuth2 Client Secret die je hebt gekregen van de google cloud console\"
-AUTH_GITHUB_ID=\"Stop hier de GitHub OAuth2 Client ID die je hebt gekregen van de GitHub Developer Settings\"
-AUTH_GITHUB_SECRET=\"Stop hier de GitHub OAuth2 Client Secret die je hebt gekregen van de GitHub Developer Settings\"
+GOOGLE_ID=\"Stop hier de Google OAuth2 Client ID die je hebt gekregen van de google cloud console\"
+GOOGLE_SECRET=\"Stop hier de Google OAuth2 Client Secret die je hebt gekregen van de google cloud console\"
+GITHUB_ID=\"Stop hier de GitHub OAuth2 Client ID die je hebt gekregen van de GitHub Developer Settings\"
+GITHUB_SECRET=\"Stop hier de GitHub OAuth2 Client Secret die je hebt gekregen van de GitHub Developer Settings\"
 
-AUTH_SECRET=\"$random_string\"
-AUTH_URL=\"http://localhost:3000\"
+SECRET=\"$random_string\"
+NEXT_PUBLIC_URL=\"http://localhost:3000\"
 SECRET=\"$random_string\"
 DISCORD_WEBHOOK=\"\"
 " >> .env

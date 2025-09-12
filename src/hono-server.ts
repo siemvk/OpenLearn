@@ -155,7 +155,7 @@ app.get('/ws', upgradeWebSocket((c) => {
           user = await prisma.user.findUnique({ where: { id: session.userId } })
         }
         if (user) {
-          wsUsers.set(ws.raw as WebSocket, { id: user.id, name: user.name ?? 'anonymous' })
+          wsUsers.set(ws.raw as WebSocket, { id: user.id, name: user.name ?? 'onbekend' })
         }
       } catch (err) {
         console.error('Failed to fetch user for websocket:', err)
@@ -193,7 +193,7 @@ app.get('/ws', upgradeWebSocket((c) => {
           const chatMessage: any = {
             group: groupId,
             content: data.message,
-            creator: user?.name || "anonymous",
+            creator: user?.name || "?",
             creatorId: user?.id || null,
             time: new Date().toISOString(),
           };
