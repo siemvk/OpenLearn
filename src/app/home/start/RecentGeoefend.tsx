@@ -26,10 +26,20 @@ interface RecentGeoefendProps {
 export default function RecentGeoefend({ items, currentUserName, isAdmin }: RecentGeoefendProps) {
   const [select, setSelect] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const router = useRouter();
-  const isMobile = () => screen.width <= 760;
-  //console.log('kijk: ', screen.width)
-  //console.log('niet telefoon: ' + !isMobile())
+
+  // Check if we're on mobile after component mounts
+  React.useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 760);
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const handleCheckboxChange = (itemId: string, isChecked: boolean) => {
     if (isChecked) {
@@ -274,7 +284,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                       </span>
                     </div>
                     <div className="flex-grow" />
-                    {(!isMobile()) && (
+                    {(!isMobile) && (
                       <div className="flex items-center pr-2">
                         {Array.isArray(item.data) && item.data.length === 1
                           ? '1 woord'
@@ -283,7 +293,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                     )}
                   </div>
 
-                  {item.creator && !isMobile() && (
+                  {item.creator && !isMobile && (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center z-10">
                       <div className="pointer-events-auto">
                         <CreatorLink
@@ -296,7 +306,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                   )}
 
                   <div className="flex items-center gap-2 relative z-10">
-                    {(item.creator === currentUserName || isAdmin && !isMobile()) && (
+                    {(item.creator === currentUserName || isAdmin && !isMobile) && (
                       <Link
                         href={`/learn/editlist/${item.list_id}`}
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors"
@@ -305,7 +315,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                         <PencilIcon className="h-5 w-5 text-white" />
                       </Link>
                     )}
-                    {(item.creator === currentUserName || isAdmin && !isMobile()) && (
+                    {(item.creator === currentUserName || isAdmin && !isMobile) && (
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors">
                         <DeleteListButton listId={item.list_id} isCreator={true} />
                       </div>
@@ -339,7 +349,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                     </div>
                   </div>
 
-                  {item.creator && (
+                  {item.creator && !isMobile && (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center z-10">
                       <div className="pointer-events-auto">
                         <CreatorLink
@@ -352,15 +362,17 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                   )}
 
                   <div className="flex items-center gap-2 relative z-10">
-                    <Link
-                      href={`/learn/editsummary/${item.list_id}`}
-                      className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors"
-                      title="Samenvatting bewerken"
-                    >
-                      <PencilIcon className="h-5 w-5 text-white" />
-                    </Link>
-                    {(item.creator === currentUserName || isAdmin) && (
-                      <DeleteSummaryButton summaryId={item.list_id} />
+                    {(item.creator === currentUserName || isAdmin) && !isMobile && (
+                      <>
+                        <Link
+                          href={`/learn/editsummary/${item.list_id}`}
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors"
+                          title="Samenvatting bewerken"
+                        >
+                          <PencilIcon className="h-5 w-5 text-white" />
+                        </Link>
+                        <DeleteSummaryButton summaryId={item.list_id} />
+                      </>
                     )}
                   </div>
                 </div>

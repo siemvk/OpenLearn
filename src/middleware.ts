@@ -69,7 +69,15 @@ export async function middleware(request: NextRequest) {
   ) {
     const embed = new Embed()
       .setTitle("Automatische scanrapport")
-      .addField({ name: "IP", value: request.headers.get("x-forwarded-for") || "Onbekend", inline: true })
+      .addField({
+        name: "IP",
+        value: request.headers.get("CF-Connecting-IP")
+          ? `${request.headers.get("CF-Connecting-IP")} (CF-Connecting-IP)`
+          : request.headers.get("x-forwarded-for")
+            ? `${request.headers.get("x-forwarded-for")} (x-forwarded-for)`
+            : "Onbekend",
+        inline: true
+      })
       .addField({ name: "useragent", value: userAgent, inline: true })
       .addField({ name: "Geprobeerde pad", value: pathname, inline: true })
       .setColor("#0099ff")
@@ -91,6 +99,18 @@ Geprobeerde pad: ${pathname}
     return new NextResponse(
       "Foei kutbot!! Tyf nu maar op voordat wij lekker snel een abusereport sturen naar je ISP!"
     );
+  }
+
+  const { finishedTour } = await getTourState();
+  if (
+    !finishedTour &&
+    pathname !== "/home/start" &&
+    !pathname.startsWith("/auth") &&
+    pathname !== "/" &&
+    pathname !== "/home/forum" &&
+    await getUserFromSession(request.cookies.get("polarlearn.session-id")?.value)
+  ) {
+    return NextResponse.redirect(new URL("/home/start", request.url));
   }
 
   return resp;
