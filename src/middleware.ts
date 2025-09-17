@@ -67,15 +67,16 @@ export async function middleware(request: NextRequest) {
       userAgent.toLowerCase().includes(bot)
     )
   ) {
+    const ip = request.headers.get("CF-Connecting-IP")
+      ? `${request.headers.get("CF-Connecting-IP")} (CF-Connecting-IP)`
+      : request.headers.get("x-forwarded-for")
+        ? `${request.headers.get("x-forwarded-for")} (x-forwarded-for)`
+        : "Onbekend"
     const embed = new Embed()
       .setTitle("Automatische scanrapport")
       .addField({
         name: "IP",
-        value: request.headers.get("CF-Connecting-IP")
-          ? `${request.headers.get("CF-Connecting-IP")} (CF-Connecting-IP)`
-          : request.headers.get("x-forwarded-for")
-            ? `${request.headers.get("x-forwarded-for")} (x-forwarded-for)`
-            : "Onbekend",
+        value: ip,
         inline: true
       })
       .addField({ name: "useragent", value: userAgent, inline: true })
@@ -89,7 +90,7 @@ export async function middleware(request: NextRequest) {
 \`\`\`
 [ Automatische scanrapport ]
 Tijd: ${new Date().toLocaleString()}
-IP: ${request.headers.get("x-forwarded-for") || "Onbekend"}
+IP: ${ip}
 useragent: ${userAgent}
 Geprobeerde pad: ${pathname}
 

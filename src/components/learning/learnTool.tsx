@@ -12,7 +12,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
-import { useRouter } from 'next/navigation';
 import { useStreakUpdate } from '@/hooks/useStreakUpdate';
 
 
@@ -25,6 +24,7 @@ import check from "@/app/img/check.svg";
 import wrong from "@/app/img/wrong.svg";
 import Button1 from "@/components/button/Button1";
 
+// Utility functions - moved outside component to prevent recreation
 function verwijderSpecialeTekens(tekst: string): string {
   return tekst
     .replace(/[^a-zA-Z0-9\s]/g, "")
@@ -32,11 +32,32 @@ function verwijderSpecialeTekens(tekst: string): string {
     .toLowerCase();
 }
 
-// Add a small, fast Levenshtein distance helper for typo detection
+// Helper for generating seeds from arrays/items
+function generateSeed(items: any[]): number {
+  let seed = 0;
+  for (const item of items) {
+    const str = (item?.vraag || item?.["1"] || "") + (item?.antwoord || item?.["2"] || "");
+    for (let i = 0; i < str.length; i++) {
+      seed = ((seed << 5) - seed + str.charCodeAt(i)) & 0xffffffff;
+    }
+  }
+  return seed;
+}
+
+// Levenshtein distance helper for typo detection with limited cache
+const levenshteinCache = new Map<string, number>();
+const MAX_CACHE_SIZE = 1000;
+
 const levenshtein = (a: string, b: string): number => {
+  const cacheKey = `${a}|${b}`;
+  if (levenshteinCache.has(cacheKey)) {
+    return levenshteinCache.get(cacheKey)!;
+  }
+
   const al = a.length, bl = b.length;
   if (al === 0) return bl;
   if (bl === 0) return al;
+
   const dp: number[][] = Array.from({ length: al + 1 }, () =>
     new Array(bl + 1).fill(0)
   );
@@ -52,22 +73,35 @@ const levenshtein = (a: string, b: string): number => {
       );
     }
   }
-  return dp[al][bl];
+
+  const result = dp[al][bl];
+
+  // Limit cache size
+  if (levenshteinCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = levenshteinCache.keys().next().value;
+    if (firstKey) levenshteinCache.delete(firstKey);
+  }
+  levenshteinCache.set(cacheKey, result);
+  return result;
 };
 
-// Constants for repeated styles and values
-const STYLES = {
-  questionCard: "p-4 bg-neutral-700 rounded-lg text-center mb-4 max-h-[120px] overflow-y-auto",
-  centeredText: "text-center text-white p-4",
-  overlay: "absolute z-50 bottom-0 left-0 right-0 flex items-center justify-center",
-} as const;
+// Seeded random function with limited cache
+const seededRandomCache = new Map<number, number>();
+const seededRandom = (seed: number): number => {
+  if (seededRandomCache.has(seed)) {
+    return seededRandomCache.get(seed)!;
+  }
+  let x = Math.sin(seed) * 10000;
+  const result = x - Math.floor(x);
 
-const DELAYS = {
-  correctOverlay: 1000,
-  incorrectOverlay: 5000,
-  animationLoad: 10,
-  animationShow: 50,
-} as const;
+  // Limit cache size
+  if (seededRandomCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = seededRandomCache.keys().next().value;
+    if (firstKey !== undefined) seededRandomCache.delete(firstKey);
+  }
+  seededRandomCache.set(seed, result);
+  return result;
+};
 
 // Memoize the question display component
 const QuestionDisplay = memo(({ question }: { question: string }) => (
@@ -76,11 +110,12 @@ const QuestionDisplay = memo(({ question }: { question: string }) => (
   </div>
 ));
 
-// Memoize the answer overlay component
+// Optimized memoized overlay components - prevent unnecessary re-renders
 const AnswerOverlay = memo(
   ({ correct, answer }: { correct: boolean; answer?: string }) => (
     <motion.div
-      className={`absolute z-50 bottom-0 left-0 right-0 flex items-center justify-center ${correct ? "bg-green-700" : "bg-red-700"} text-white rounded-lg text-2xl font-extrabold max-h-[60vh]`}
+      className={`absolute z-50 bottom-0 left-0 right-0 flex items-center justify-center ${correct ? "bg-green-700" : "bg-red-700"
+        } text-white rounded-lg text-2xl font-extrabold max-h-[60vh]`}
       initial={{ y: "100%" }}
       animate={{ y: "0%" }}
       exit={{ y: "100%" }}
@@ -117,6 +152,7 @@ const AnswerOverlay = memo(
     </motion.div>
   )
 );
+AnswerOverlay.displayName = 'AnswerOverlay';
 
 const GedachtenOverlay = memo(
   ({
@@ -154,6 +190,7 @@ const GedachtenOverlay = memo(
     </motion.div>
   )
 );
+GedachtenOverlay.displayName = 'GedachtenOverlay';
 
 // Typo overlay: ask user whether to count a near-correct answer as correct
 const TypoOverlay = memo(
@@ -166,7 +203,7 @@ const TypoOverlay = memo(
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
       <div className="w-full p-4 max-h-[inherit] overflow-y-auto text-center">
-        <div className="font-extrabold text-xl mb-2">Je hebt een typfout gemaakt: { }</div>
+        <div className="font-extrabold text-xl mb-2">Je hebt een typfout gemaakt</div>
         <div className="text-sm mb-4">Wil je dit als goed of fout rekenen?</div>
         <div className="flex gap-3 justify-center">
           <Button1 onClick={onGood} text="Goed rekenen" />
@@ -192,11 +229,11 @@ const StreakCelebration = memo(
       const loadAnimation = async () => {
         try {
           // Add a slight delay to ensure component is fully mounted
-          await new Promise((resolve) => setTimeout(resolve, DELAYS.animationLoad));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           const animationModule = await import("@/app/img/flame.json");
           setAnimation(animationModule.default);
           // Add a slight delay before showing to ensure smooth transition
-          setTimeout(() => setIsLoading(false), DELAYS.animationShow);
+          setTimeout(() => setIsLoading(false), 50);
         } catch (error) {
           console.error("Failed to load animation:", error);
           setIsLoading(false); // Show fallback on error
@@ -236,7 +273,7 @@ const StreakCelebration = memo(
   }
 );
 
-// Memoize the multi-choice button component
+// Optimized multi-choice button component with better memoization
 const MultiChoiceButton = memo(
   ({
     onClick,
@@ -252,6 +289,7 @@ const MultiChoiceButton = memo(
     disabled: boolean;
   }) => {
     const needsClamp = text.length > 40;
+
     return (
       <div className="relative transform-gpu h-full w-full">
         <TooltipProvider>
@@ -277,8 +315,18 @@ const MultiChoiceButton = memo(
         </TooltipProvider>
       </div>
     );
+  },
+  // Custom comparison function for better performance
+  (prevProps, nextProps) => {
+    return (
+      prevProps.text === nextProps.text &&
+      prevProps.disabled === nextProps.disabled &&
+      prevProps.isCorrect === nextProps.isCorrect &&
+      prevProps.optionNumber === nextProps.optionNumber
+    );
   }
 );
+MultiChoiceButton.displayName = 'MultiChoiceButton';
 
 const getHint = (answer: string): string => {
   if (!answer || answer.length === 0) return "";
@@ -340,56 +388,26 @@ const LearnTool = ({
   onComplete?: () => void;
   flipQuestionLang?: boolean;
 }) => {
-  const router = useRouter();
   const { handleListCompletion } = useStreakUpdate();
-  const prevFlipQuestionLang = useRef(flipQuestionLang);
 
-  // Seeded random number generator for deterministic results
-  // Simple utility functions (no need for useCallback with empty deps)
-  const seededRandom = (seed: number) => {
-    let x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  };
-
-  const getQuestionKey = (question: string, answer: string): string => {
+  // Memoized utility functions to prevent recreation on each render
+  const getQuestionKey = useCallback((question: string, answer: string): string => {
     return `${question}|${answer}`;
-  };
+  }, []);
 
-  // Create a deterministic shuffle based on list content
-  const shuffleArray = useCallback(
-    <T,>(array: T[]): T[] => {
-      if (array.length === 0) return array;
+  const shuffleArray = useCallback(<T,>(array: T[]): T[] => {
+    if (array.length === 0) return array;
 
-      // Create a seed based on the array content for deterministic results
-      let seed = 0;
-      for (let i = 0; i < array.length; i++) {
-        const item = array[i];
-        if (item && typeof item === "object") {
-          // Type-safe property access
-          const str =
-            ((item as any).vraag || (item as any)["1"] || "") +
-            ((item as any).antwoord || (item as any)["2"] || "");
-          for (let j = 0; j < str.length; j++) {
-            seed = ((seed << 5) - seed + str.charCodeAt(j)) & 0xffffffff;
-          }
-        } else {
-          const str = String(item || "");
-          for (let j = 0; j < str.length; j++) {
-            seed = ((seed << 5) - seed + str.charCodeAt(j)) & 0xffffffff;
-          }
-        }
-      }
+    const seed = generateSeed(array);
 
-      // Use seeded random for deterministic shuffle
-      const shuffled = [...array];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(seededRandom(seed + i) * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      return shuffled;
-    },
-    [seededRandom]
-  );
+    // Use seeded random for deterministic shuffle
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(seededRandom(seed + i) * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, []);
 
   // Use useMemo for initial data processing
   const initialMappedData = useMemo(() => {
@@ -438,14 +456,7 @@ const LearnTool = ({
       })
       .filter((item) => item.vraag && item.antwoord);
 
-    // Generate deterministic seed from content
-    let seed = 0;
-    for (const item of mappedData) {
-      const str = (item.vraag || "") + (item.antwoord || "");
-      for (let i = 0; i < str.length; i++) {
-        seed = ((seed << 5) - seed + str.charCodeAt(i)) & 0xffffffff;
-      }
-    }
+    const seed = generateSeed(mappedData);
 
     // Deterministic shuffle using seeded random
     const shuffled = [...mappedData];
@@ -458,131 +469,90 @@ const LearnTool = ({
     return shuffled;
   });
 
-  // Consolidate UI overlay state into single object to reduce re-renders
-  const [overlays, setOverlays] = useState({
+  // Optimized state management - consolidated overlays to reduce re-renders
+  const [overlayState, setOverlayState] = useState({
     toonAntwoord: false,
     showCorrect: false,
     showGedachtenOverlay: false,
     isAnswering: false,
-    toonTypo: false, // show a near-correct / typo overlay
+    toonTypo: false,
   });
 
-  // Consolidate learning progress state
-  const [learningState, setLearningState] = useState({
+  // Consolidated learning progress state
+  const [progressState, setProgressState] = useState({
     listCompleted: false,
     streakUpdateTriggered: false,
     currentLerenMethod: "multikeuze" as "gedachten" | "multikeuze" | "hints" | "toets",
   });
 
-  // Consolidated stats and UI state
-  const [stats, setStats] = useState({
-    streakInfo: {
-      currentStreak: 0,
-      isNewStreak: false,
-    },
-    lerenWordStats: new Map<
-      string,
-      {
-        attempts: number;
-        correctCount: number;
-        lastMethod: "gedachten" | "multikeuze" | "hints" | "toets";
-        methodsUsed: Set<string>;
-      }
-    >(),
-    lerenCompleted: new Set<string>(),
-  });
+  // Optimized state updates with batching
+  const updateOverlayState = useCallback((updates: Partial<typeof overlayState>) => {
+    setOverlayState(prev => ({ ...prev, ...updates }));
+  }, []);
 
-  const [uiState, setUiState] = useState({
-    userInput: "",
-    randomNumber: (() => {
-      if (
-        !rawlistdata ||
-        !Array.isArray(rawlistdata) ||
-        rawlistdata.length === 0
-      ) {
-        return 1;
-      }
-      let seed = 0;
-      for (const item of rawlistdata.slice(0, 5)) {
-        const str =
-          (item.vraag || item["1"] || "") + (item.antwoord || item["2"] || "");
-        for (let i = 0; i < str.length; i++) {
-          seed = ((seed << 5) - seed + str.charCodeAt(i)) & 0xffffffff;
-        }
-      }
-      let x = Math.sin(seed) * 10000;
-      const random = x - Math.floor(x);
-      return Math.floor(random * 4) + 1;
-    })(),
-  });
-
-  // Helper functions to update consolidated state
-  const updateOverlay = (key: keyof typeof overlays, value: boolean) => {
-    setOverlays(prev => ({ ...prev, [key]: value }));
-  };
-
-  const updateLearningState = (key: keyof typeof learningState, value: any) => {
-    setLearningState(prev => ({ ...prev, [key]: value }));
-  };
-
-  const updateStats = (key: keyof typeof stats, value: any) => {
-    setStats(prev => ({ ...prev, [key]: value }));
-  };
-
-  const updateUiState = (key: keyof typeof uiState, value: any) => {
-    setUiState(prev => ({ ...prev, [key]: value }));
-  };
+  const updateProgressState = useCallback((updates: Partial<typeof progressState>) => {
+    setProgressState(prev => ({ ...prev, ...updates }));
+  }, []);
 
   // Destructure for easier access
-  const { toonAntwoord, showCorrect, showGedachtenOverlay, isAnswering, toonTypo } = overlays;
-  const { listCompleted, streakUpdateTriggered, currentLerenMethod } = learningState;
-  const { streakInfo, lerenWordStats, lerenCompleted } = stats;
-  const { userInput, randomNumber } = uiState;
+  const { toonAntwoord, showCorrect, showGedachtenOverlay, isAnswering, toonTypo } = overlayState;
+  const { listCompleted, streakUpdateTriggered, currentLerenMethod } = progressState;
 
-  // Aliases for backward compatibility during migration
-  const setToonAntwoord = (value: boolean) => updateOverlay('toonAntwoord', value);
-  const setShowCorrect = (value: boolean) => updateOverlay('showCorrect', value);
-  const setShowGedachtenOverlay = (value: boolean) => updateOverlay('showGedachtenOverlay', value);
-  const setIsAnswering = (value: boolean) => updateOverlay('isAnswering', value);
-  const setToonTypo = (value: boolean) => updateOverlay('toonTypo', value);
-  const setListCompleted = (value: boolean) => updateLearningState('listCompleted', value);
-  const setStreakUpdateTriggered = (value: boolean) => updateLearningState('streakUpdateTriggered', value);
-  const setCurrentLerenMethod = (value: "gedachten" | "multikeuze" | "hints" | "toets") => updateLearningState('currentLerenMethod', value);
-  const setStreakInfo = (value: any) => updateStats('streakInfo', value);
-  const setLerenWordStats = (value: Map<string, { attempts: number; correctCount: number; lastMethod: "gedachten" | "multikeuze" | "hints" | "toets"; methodsUsed: Set<string>; }> | ((prev: Map<string, { attempts: number; correctCount: number; lastMethod: "gedachten" | "multikeuze" | "hints" | "toets"; methodsUsed: Set<string>; }>) => Map<string, { attempts: number; correctCount: number; lastMethod: "gedachten" | "multikeuze" | "hints" | "toets"; methodsUsed: Set<string>; }>)) => {
-    if (typeof value === 'function') {
-      updateStats('lerenWordStats', value(stats.lerenWordStats));
-    } else {
-      updateStats('lerenWordStats', value);
-    }
-  };
-  const setLerenCompleted = (value: Set<string> | ((prev: Set<string>) => Set<string>)) => {
-    if (typeof value === 'function') {
-      updateStats('lerenCompleted', value(stats.lerenCompleted));
-    } else {
-      updateStats('lerenCompleted', value);
-    }
-  };
-  const setUserInput = (value: string) => updateUiState('userInput', value);
-  const setRandomNumber = (value: number) => updateUiState('randomNumber', value);
+  // Additional state variables
+  const [streakInfo, setStreakInfo] = useState({
+    currentStreak: 0,
+    isNewStreak: false,
+  });
 
+  const [lerenWordStats, setLerenWordStats] = useState(new Map<string, {
+    attempts: number;
+    correctCount: number;
+    lastMethod: "gedachten" | "multikeuze" | "hints" | "toets";
+    methodsUsed: Set<string>;
+  }>());
+
+  const [lerenCompleted, setLerenCompleted] = useState(new Set<string>());
+
+  const [userInput, setUserInput] = useState("");
+
+  const [randomNumber, setRandomNumber] = useState(() => {
+    if (!rawlistdata || !Array.isArray(rawlistdata) || rawlistdata.length === 0) {
+      return 1;
+    }
+    const seed = generateSeed(rawlistdata.slice(0, 5));
+    return Math.floor(seededRandom(seed) * 4) + 1;
+  });
+
+  // Helper functions for overlay state
+  const setToonAntwoord = useCallback((value: boolean) =>
+    updateOverlayState({ toonAntwoord: value }), [updateOverlayState]);
+  const setShowCorrect = useCallback((value: boolean) =>
+    updateOverlayState({ showCorrect: value }), [updateOverlayState]);
+  const setShowGedachtenOverlay = useCallback((value: boolean) =>
+    updateOverlayState({ showGedachtenOverlay: value }), [updateOverlayState]);
+  const setIsAnswering = useCallback((value: boolean) =>
+    updateOverlayState({ isAnswering: value }), [updateOverlayState]);
+  const setToonTypo = useCallback((value: boolean) =>
+    updateOverlayState({ toonTypo: value }), [updateOverlayState]);
+
+  // Helper functions for progress state
+  const setListCompleted = useCallback((value: boolean) =>
+    updateProgressState({ listCompleted: value }), [updateProgressState]);
+  const setStreakUpdateTriggered = useCallback((value: boolean) =>
+    updateProgressState({ streakUpdateTriggered: value }), [updateProgressState]);
+  const setCurrentLerenMethod = useCallback((value: "gedachten" | "multikeuze" | "hints" | "toets") =>
+    updateProgressState({ currentLerenMethod: value }), [updateProgressState]);
 
   // Computed values for UI state
-  const locked = overlays.toonAntwoord || overlays.showCorrect || overlays.showGedachtenOverlay || overlays.toonTypo;
+  const locked = toonAntwoord || showCorrect || showGedachtenOverlay || toonTypo;
 
   // Generate deterministic random number for multiple choice
   const generateRandomNumber = useCallback(() => {
-    // Use current question content as seed for consistency
-    let seed = 0;
-    if (lijstData.length > 0) {
-      const currentItem = lijstData[0];
-      const str = (currentItem?.vraag || "") + (currentItem?.antwoord || "");
-      for (let i = 0; i < str.length; i++) {
-        seed = ((seed << 5) - seed + str.charCodeAt(i)) & 0xffffffff;
-      }
-      // Add current list length to vary the seed when questions change
-      seed += lijstData.length;
-    }
+    if (lijstData.length === 0) return 1;
+
+    const currentItem = lijstData[0];
+    let seed = generateSeed([currentItem]);
+    seed += lijstData.length; // Vary seed when questions change
     return Math.floor(seededRandom(seed) * 4) + 1;
   }, [lijstData, seededRandom]);
 
@@ -594,9 +564,9 @@ const LearnTool = ({
   const [typoSubmitted, setTypoSubmitted] = useState<string | null>(null);
 
   // Track current question and reset input when it changes
-  const currentQuestion = lijstData.length > 0 ? lijstData[0]?.vraag || "" : "";
+  const currentQuestion = lijstData[0]?.vraag || "";
 
-  // Combined effect for input and UI state management
+  // Optimized combined effect for input and UI state management
   useEffect(() => {
     // Reset input when question changes
     setUserInput("");
@@ -610,12 +580,9 @@ const LearnTool = ({
     ) {
       setIsAnswering(false);
     }
-  }, [currentQuestion, locked, isAnswering, mode, currentLerenMethod]);
 
-  // Combined effect for input management and autofocus
-  useEffect(() => {
+    // Auto-focus management
     if (!locked && lijstData.length > 0) {
-      // Small delay to ensure the component is fully rendered
       const timer = setTimeout(() => {
         if (
           (mode === "toets" ||
@@ -634,7 +601,7 @@ const LearnTool = ({
 
       return () => clearTimeout(timer);
     }
-  }, [locked, mode, currentLerenMethod, lijstData.length, currentQuestion]);
+  }, [currentQuestion, locked, isAnswering, mode, currentLerenMethod, lijstData.length]);
 
   const getWordStats = useCallback(
     (questionKey: string) => {
@@ -664,8 +631,7 @@ const LearnTool = ({
       // Calculate success rate
       const successRate = attempts > 0 ? correctCount / attempts : 0;
 
-      // Always try to use methods not used yet first, regardless of performance or attempts
-      // Exclude "gedachten" from the leren mode - only use multikeuze, hints, and toets
+      // Exclude "gedachten" from the leren mode
       const unusedMethods = ["multikeuze", "hints", "toets"].filter(
         (method) => !methodsUsed.has(method)
       ) as ("gedachten" | "multikeuze" | "hints" | "toets")[];
@@ -679,8 +645,7 @@ const LearnTool = ({
         return unusedMethods[randomIndex];
       }
 
-      // All methods used - now base on performance
-      // If struggling (low success rate), use easier methods
+      // Base selection on performance when all methods have been used
       if (successRate < 0.4) {
         // Cycle through easier methods (excluding gedachten)
         const easyMethods: ("gedachten" | "multikeuze" | "hints" | "toets")[] =
@@ -785,7 +750,7 @@ const LearnTool = ({
         setCurrentLerenMethod(optimalMethod);
       }
     }
-  }, [currentQuestionKey, mode, selectOptimalMethod, lerenWordStats]); // Include lerenWordStats to recalculate when stats change
+  }, [currentQuestionKey, mode, selectOptimalMethod, lerenWordStats]);
 
   // Handle focus and keyboard events when locked
   useEffect(() => {
@@ -875,8 +840,7 @@ const LearnTool = ({
 
                     setLijstData(shuffleArray(filteredRest));
                   } else {
-                    // For "leren" mode, always move the word to the end after each answer
-                    // This ensures we cycle through different words instead of staying on the same word
+                    // Move the word to the end after each answer in "leren" mode
                     setLijstData([...rest, huidigeVraag]);
                   }
                 } else {
@@ -962,8 +926,7 @@ const LearnTool = ({
 
                 setLijstData(shuffleArray(filteredRest));
               } else {
-                // For "leren" mode, always move the word to the end after each answer
-                // This ensures we cycle through different words instead of staying on the same word
+                // Move the word to the end after each answer in "leren" mode
                 setLijstData([...rest, huidigeVraag]);
               }
             } else {
@@ -1061,8 +1024,7 @@ const LearnTool = ({
   // Allow keyboard interactions for gedachten overlay
   useEffect(() => {
     if (showGedachtenOverlay) {
-      // Allow keyboard events specifically for the gedachten overlay
-      // This creates a separate effect that doesn't interfere with the locked effect
+      // Allow keyboard events for the gedachten overlay
       const handleGedachtenKeyDown = (e: KeyboardEvent) => {
         // Allow key events for the Yes/No buttons but protect against unwanted key events
         if (!["Tab", "Enter", " "].includes(e.key)) {
@@ -1313,8 +1275,6 @@ const LearnTool = ({
     updateWordStats,
     currentLerenMethod,
   ]);
-
-  // Handlers for TypoOverlay buttons
 
   // TypoOverlay component
   const TypoOverlayComponent = memo(
@@ -1579,21 +1539,11 @@ const LearnTool = ({
   // Scramble the questions after they have been generated
   useEffect(() => {
     if (initialMappedData.length > 0 && lijstData.length === 0 && !listCompleted) {
-      // Only restart if the list hasn't been explicitly completed
-      // Additional scramble after initial data processing
+      // Restart if list not explicitly completed and additional scrambling
       const scrambled = shuffleArray([...initialMappedData]);
       setLijstData(scrambled);
     }
   }, [initialMappedData, lijstData.length, shuffleArray, listCompleted]);
-
-  // Update lijstData when flipQuestionLang changes
-  // NOTE: This is now handled server-side, so this effect is disabled
-  // Data comes pre-transformed from the server
-
-  // Keep ref in sync on mount (no longer needed but kept for compatibility)
-  useEffect(() => {
-    prevFlipQuestionLang.current = flipQuestionLang;
-  }, []);
 
   return (
     <div className="bg-neutral-800 relative min-w-[240px] w-full max-w-[600px] h-[60vh] rounded-lg flex flex-col justify-center overflow-hidden p-4">
@@ -1604,7 +1554,7 @@ const LearnTool = ({
         />
       )}
       {initialMappedData.length === 0 ? (
-        <div className={STYLES.centeredText}>Lijst niet gevonden</div>
+        <div className="text-center text-white p-4">Lijst niet gevonden</div>
       ) : (
         mode === "leren"
           ? initialMappedData.every((item) => {
@@ -1628,15 +1578,7 @@ const LearnTool = ({
           <div className="space-x-2 mt-4">
             <Button1
               onClick={() => {
-                setLijstData(shuffleArray(initialMappedData));
-                // Generate new deterministic random number
-                setRandomNumber(generateRandomNumber());
-                setListCompleted(false);
-                setStreakUpdateTriggered(false);
-                // Reset "leren" mode state
-                setLerenWordStats(new Map());
-                setLerenCompleted(new Set());
-                setCurrentLerenMethod("multikeuze");
+                window.location.reload()
               }}
               text="Opnieuw beginnen"
               className="mt-4"
