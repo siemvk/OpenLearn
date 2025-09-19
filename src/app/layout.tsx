@@ -155,8 +155,50 @@ export default async function RootLayout({
     // fallback: keep userData as default
   }
 
+
   // Server-side streak data hydration
   const streakData = await getStreakData();
+
+  // Server-side system message hydration from config collection
+  let sysMsgData = { message: '', color: 'info' };
+  try {
+    const sysMsgConfig = await prisma.config.findUnique({ where: { key: 'systemMessage' } });
+    if (sysMsgConfig && sysMsgConfig.value) {
+      // Expecting value to be a JSON string: { message: string, color: string }
+      try {
+        const parsed = JSON.parse(sysMsgConfig.value);
+        sysMsgData = {
+          message: parsed.message || '',
+          color: parsed.color || 'info',
+        };
+      } catch (e) {
+        // fallback: treat as plain string
+        sysMsgData = { message: sysMsgConfig.value, color: 'info' };
+      }
+    }
+  } catch (e) {
+    // fallback: keep sysMsgData as default
+  }
+
+  // Compute a stable key for this message and respect per-message dismissal via cookie.
+  // New messages will show again because the key is derived from message + color.
+  try {
+    const c = await cookies();
+    const currentRaw = `${sysMsgData.message}|${sysMsgData.color}`;
+    const currentKey = encodeURIComponent(currentRaw);
+    const dismissedRaw = c.get('polarlearn.sysmsg_dismissed')?.value;
+    const dismissed = (() => {
+      try { return dismissedRaw ? decodeURIComponent(dismissedRaw) : undefined; } catch { return dismissedRaw; }
+    })();
+    if (dismissed && dismissed === currentRaw) {
+      sysMsgData = { message: '', color: sysMsgData.color, key: currentKey } as any;
+    } else {
+      sysMsgData = { ...sysMsgData, key: currentKey } as any;
+    }
+  } catch {
+    // even if cookie fails, still pass key for client-side usage
+    sysMsgData = { ...sysMsgData, key: encodeURIComponent(`${sysMsgData.message}|${sysMsgData.color}`) } as any;
+  }
 
   return (
     <html
@@ -212,6 +254,7 @@ export default async function RootLayout({
             streakData={streakData}
             finishedTour={finishedTour}
             footerContent={footerContent}
+            sysMsgData={sysMsgData}
           >
             {children}
             <DelWindowNext />

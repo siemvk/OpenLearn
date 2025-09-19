@@ -14,6 +14,8 @@ import TourNavigator from "@/components/TourNavigator";
 import ImpersonationCheck from "@/components/ImpersonationCheck";
 import ImpersonationStyles from "@/components/ImpersonationStyles";
 import { TopNavBar } from "@/components/navbar/TopNavBar";
+import { SysMsgProvider } from "@/store/sysmsg/SysMsgProvider";
+import { MessageBanner } from "@/components/messageBanner";
 
 const steps = [
   {
@@ -168,53 +170,58 @@ export default function Providers({
   streakData,
   finishedTour,
   footerContent,
-}: ProvidersProps) {
+  sysMsgData, // <-- add prop for sysMsgData
+}: ProvidersProps & { sysMsgData: any }) {
   return (
     <UserDataProvider userData={userData}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem={false}
-        storageKey="polarlearn.theme"
-      >
-        {!finishedTour ? (
-          <NextStepProvider>
-            <TourInitializer tourName="mainTour" />
-            <NextStep steps={steps} cardComponent={DarkCard}>
-              <TourNavigator />
-              <ToastProvider>
-                <StreakProvider streakData={streakData}>
-                  <WSProvider>
-                    <>
-                      <ImpersonationCheck />
-                      <ImpersonationStyles />
-                      <TopNavBar isAdmin={userData.isAdmin} />
-                      {children}
-                    </>
-                    {footerContent}
-                    <AnalyticsProvider />
-                  </WSProvider>
-                </StreakProvider>
-              </ToastProvider>
-            </NextStep>
-          </NextStepProvider>
-        ) : (
-          <ToastProvider>
-            <StreakProvider streakData={streakData}>
-              <WSProvider>
-                <>
-                  <ImpersonationCheck />
-                  <ImpersonationStyles />
-                  <TopNavBar isAdmin={userData.isAdmin} />
-                  {children}
-                </>
-                {footerContent}
-                <AnalyticsProvider />
-              </WSProvider>
-            </StreakProvider>
-          </ToastProvider>
-        )}
-      </ThemeProvider>
+      <SysMsgProvider sysMsgData={sysMsgData}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          storageKey="polarlearn.theme"
+        >
+          {!finishedTour ? (
+            <NextStepProvider>
+              <TourInitializer tourName="mainTour" />
+              <NextStep steps={steps} cardComponent={DarkCard}>
+                <TourNavigator />
+                <ToastProvider>
+                  <StreakProvider streakData={streakData}>
+                    <WSProvider>
+                      <>
+                        <ImpersonationCheck />
+                        <ImpersonationStyles />
+                        <MessageBanner />
+                        <TopNavBar isAdmin={userData.isAdmin} />
+                        {children}
+                      </>
+                      {footerContent}
+                      <AnalyticsProvider />
+                    </WSProvider>
+                  </StreakProvider>
+                </ToastProvider>
+              </NextStep>
+            </NextStepProvider>
+          ) : (
+            <ToastProvider>
+              <StreakProvider streakData={streakData}>
+                <WSProvider>
+                  <>
+                    <ImpersonationCheck />
+                    <ImpersonationStyles />
+                    <MessageBanner />
+                    <TopNavBar isAdmin={userData.isAdmin} />
+                    {children}
+                  </>
+                  {footerContent}
+                  <AnalyticsProvider />
+                </WSProvider>
+              </StreakProvider>
+            </ToastProvider>
+          )}
+        </ThemeProvider>
+      </SysMsgProvider>
     </UserDataProvider>
   );
 }

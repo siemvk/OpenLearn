@@ -22,6 +22,7 @@ import StreakNavbarThing from "../streak/streakNav";
 import NotificationNav from "../notification/notificiationNav";
 import PlusBtn from "@/components/button/plusbutton";
 import PlusBtnMb from "@/components/button/plusbuttonmobile";
+import { MessageBanner } from "../messageBanner";
 
 // SearchBar component
 const SearchBar = memo(({ onExpand }: { onExpand: () => void }) => {
@@ -528,7 +529,7 @@ export const TopNavBar = memo(function TopNavBar({
         onExpandSearch={handleExpandSearch}
       />
 
-      <div className="h-16" />
+      <div aria-hidden className="shrink-0" style={{ height: `calc(4rem + var(--sys-banner-height, 0px))` }} />
       <style>{`
         nav.fixed {
           transition: top 0.3s ease;

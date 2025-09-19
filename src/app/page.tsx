@@ -27,9 +27,9 @@ import de_img from '@/app/img/pretzel.svg';
 import nl_img from '@/app/img/nl.svg';
 import ak_img from '@/app/img/geography.svg';
 import ckv_img from '@/app/img/ckv.svg';
-import logo from '@/app/img/pl-500.svg'; // Added back logo import
+import logo from '@/app/img/pl-500.svg';
 
-import down from '@/app/img/down.svg'; // Added back down import
+import down from '@/app/img/down.svg';
 import shield from '@/app/img/secure-icon-marketing.svg';
 import banner from '@/../public/banner.png';
 
@@ -40,27 +40,7 @@ import SecondMarketingComponent from '@/components/marketing/2';
 export default function Home() {
     return (
         <div className='p-0 m-0'>
-            {/* ontcomment dit als de db in de brand staat */}
-            {/* Siem als de db in de brand staat dan werkt heel polarlearn niet */}
-            {/* AI CODE START */}
-            {/* <div className="bg-yellow-400 text-yellow-800 p-3 w-full flex justify-center items-center">
-                <div className="flex items-center gap-2 max-w-4xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <p className="font-medium">We ervaren momenteel enkele technische problemen. Onze excuses voor het ongemak.</p>
-                </div>
-            </div> */}
-
-            {/* <div className="bg-yellow-400 text-yellow-800 p-3 w-full flex justify-center items-center">
-                <div className="flex items-center gap-2 max-w-4xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <p className="font-medium">We zijn bezig met upgrades voor de Polarlearn-servers, daarom is Polarlearn momenteel wat langzamer!</p>
-                </div>
-            </div> */}
-            {/* AI CODE END */}
+            
             <div className="hidden md:flex flex-col">
                 <div className="hidden md:flex flex-col">
                     <div className="relative flex">
@@ -271,7 +251,7 @@ export default function Home() {
                                                 whileInView={{ y: 0, opacity: 1 }}
                                                 transition={{ duration: 0.7, delay: 0.7 }}
                                                 className='text-xl'>
-                                                PolarLearn is een FOSS (gratis en Open-Source) leerprogramma, voor al je vakken. PolarLearn kan ook gebruikt worden als een alternatief voor het betaalde StudyGo.
+                                                PolarLearn is een FOSS (gratis en Open-Source) leerplatform, voor al je schoolvakken.
                                             </motion.p>
                                         </div>
                                     </div>
@@ -370,7 +350,7 @@ export default function Home() {
                         PolarLearn
                     </h1>
                 </div>
-                <h1>Polarlearn op kleine schermen is nog in beta, will je doorgaan?</h1>
+                <h1>PolarLearn op kleine schermen is nog in beta, will je doorgaan?</h1>
                 <Button1 text='ja!' redirectTo='/home/start' />
             </div>
         </div>
