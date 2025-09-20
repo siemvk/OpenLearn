@@ -1187,8 +1187,8 @@ const LearnTool = ({
     }
     // goed antwoord met "of" of "/"
     if (
-      huidigeVraag.antwoord.includes("of") ||
-      huidigeVraag.antwoord.includes("/")
+      huidigeVraag.antwoord.includes(" of ") ||
+      huidigeVraag.antwoord.includes(" / ")
     ) {
       const antwoorden = huidigeVraag.antwoord
         .split(/\s*(?:of|\/)\s*/)
