@@ -10,6 +10,7 @@ interface ListItem {
   "1": string;
   "2": string;
   id?: number; // Optional id field from database
+  options?: string[];
 }
 
 interface List {
@@ -81,7 +82,7 @@ export default async function LearningPages({ params }: { params: Promise<{ lear
     : [];
 
   // Apply question language flipping if preference is enabled
-  if (!flipQuestionLang) {
+  if (flipQuestionLang) {
     parsedData = parsedData.map(item => ({
       "1": item["2"],
       "2": item["1"],
@@ -90,7 +91,25 @@ export default async function LearningPages({ params }: { params: Promise<{ lear
   }
 
   // Shuffle the data server-side for consistent SSR
-  const shuffledData = [...parsedData].sort(() => Math.random() - 0.5);  // Create the list object for the store
+  const shuffledData = [...parsedData].sort(() => Math.random() - 0.5);
+
+  // If the selected method is multichoice, precompute options for each item server-side
+  const itemsWithOptions: ListItem[] = (method === 'multichoice')
+    ? shuffledData.map((item, idx, arr) => {
+      // gather all other answers as distractors
+      const allAnswers = arr.map(i => i["2"]).filter(a => a !== item["2"]);
+      // shuffle distractors
+      const shuffled = allAnswers.sort(() => Math.random() - 0.5);
+      // pick up to 3 distractors (or fewer if list is small)
+      const numOptions = Math.min(4, arr.length);
+      const distractors = shuffled.slice(0, Math.max(0, numOptions - 1));
+      // Insert correct answer at random position
+      const options = [...distractors];
+      const insertAt = Math.floor(Math.random() * (options.length + 1));
+      options.splice(insertAt, 0, item["2"]);
+      return { ...item, options };
+    })
+    : shuffledData;
   const list: List = {
     list_id: listData.list_id,
     name: listData.name,
@@ -98,7 +117,7 @@ export default async function LearningPages({ params }: { params: Promise<{ lear
     subject: listData.subject,
     lang_from: listData.lang_from || 'NL',
     lang_to: listData.lang_to || 'NL',
-    data: shuffledData,
+    data: itemsWithOptions,
     creator: listData.creator,
     createdAt: listData.createdAt?.toISOString(),
     updatedAt: listData.updatedAt?.toISOString(),

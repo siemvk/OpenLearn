@@ -206,6 +206,11 @@ export const getSubjectName = (subjectCode: string) => {
     const vak = Vakken.find(v => v.afkorting === subjectCode);
     return vak?.naam ?? subjectCode;
 };
+
+export const isLanguageSubject = (subjectCode: string) => {
+    const vak = Vakken.find(v => v.afkorting === subjectCode);
+    return vak?.istaal ?? false;
+};
 const SubjectLabel = memo(({ icon, alt, label }: { icon: any; alt: string; label: string }) => (
     <div className="flex items-center">
         <Image src={icon} alt={alt} width={24} height={24} className="mr-2" />

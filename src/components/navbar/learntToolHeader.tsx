@@ -9,7 +9,7 @@ import Image from "next/image";
 import Timer from "./Timer";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { getSubjectName, getSubjectIcon } from "@/components/icons";
+import { getSubjectName, getSubjectIcon, isLanguageSubject } from "@/components/icons";
 import { useListStore } from "@/components/learning/listStore";
 
 // Import the images for the learning methods
@@ -84,6 +84,10 @@ const SettingsButton = memo(({ onFlipQuestionLangChange }: {
     const langFromIcon = langFromCode ? getSubjectIcon(langFromCode) : null;
     const langToIcon = langToCode ? getSubjectIcon(langToCode) : null;
 
+    // Check if this is a language subject based on the actual subject, not lang_from
+    const subjectCode = currentList?.subject;
+    const isLanguage = subjectCode ? isLanguageSubject(subjectCode) : false;
+
     // Preferences are now loaded server-side, no need for client-side request
 
     const handleTempFlipToggle = (checked: boolean) => {
@@ -155,7 +159,7 @@ const SettingsButton = memo(({ onFlipQuestionLangChange }: {
                 <div className="space-y-6 p-4">
                     <div className="space-y-3">
                         <Label htmlFor="flip-lang" className="text-sm font-medium">
-                            Vraag taal
+                            {isLanguage ? 'Vraag taal' : 'Vraag om'}
                         </Label>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
@@ -166,27 +170,32 @@ const SettingsButton = memo(({ onFlipQuestionLangChange }: {
                                     disabled={loading || isCombinedList}
                                 />
                                 <span className="text-sm text-neutral-400 flex items-center gap-2">
-                                    {tempFlipQuestionLang ? (
-                                        <>
-                                            {langToIcon && (
-                                                <Image src={langToIcon} alt={langTo} width={16} height={16} className="rounded-sm" />
-                                            )}
-                                            {langTo}
-                                        </>
+                                    {isLanguage ? (
+                                        // For language subjects, show language icons and names
+                                        tempFlipQuestionLang ? (
+                                            <>
+                                                {langToIcon && (
+                                                    <Image src={langToIcon} alt={langTo} width={16} height={16} className="rounded-sm" />
+                                                )}
+                                                {langTo}
+                                            </>
+                                        ) : (
+                                            <>
+                                                {langFromIcon && (
+                                                    <Image src={langFromIcon} alt={langFrom} width={16} height={16} className="rounded-sm" />
+                                                )}
+                                                {langFrom}
+                                            </>
+                                        )
                                     ) : (
-                                        <>
-                                            {langFromIcon && (
-                                                <Image src={langFromIcon} alt={langFrom} width={16} height={16} className="rounded-sm" />
-                                            )}
-                                            {langFrom}
-                                        </>
+                                        tempFlipQuestionLang ? 'Definitie' : 'Begrip'
                                     )}
                                 </span>
                             </div>
                         </div>
                         {isCombinedList && (
                             <p className="text-xs text-neutral-500">
-                                Taal omwisselen is niet beschikbaar voor gecombineerde lijsten.
+                                {isLanguage ? 'Taal omwisselen' : 'Vraag type omwisselen'} is niet beschikbaar voor gecombineerde lijsten.
                             </p>
                         )}
                     </div>

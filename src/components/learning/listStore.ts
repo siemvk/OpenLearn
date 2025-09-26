@@ -105,10 +105,12 @@ export const createListStore = (initData?: { list?: List; method?: string; flipQ
       const correctAnswer = state.currentWord["2"].toLowerCase().trim();
       const normalizedUserAnswer = userAnswer.toLowerCase().trim();
 
-      // Check for exact match or multiple correct answers separated by "/"
-      const correctAnswers = correctAnswer.split('/').map(answer => answer.trim());
-      const isCorrect = correctAnswers.some(answer => answer === normalizedUserAnswer);
+      const correctAnswers = correctAnswer
+        .split(/[/,]/)
+        .map(answer => answer.trim())
+        .filter(answer => answer !== '');
 
+      const isCorrect = correctAnswers.some(answer => answer === normalizedUserAnswer);
       return isCorrect;
     },
     answerCorrect: () => {
