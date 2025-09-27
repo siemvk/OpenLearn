@@ -97,7 +97,7 @@ function IncorrectScreen({ show, correctAnswer, progress, showProgress }: {
   )
 }
 
-function BlueReview({ show, answer, onMark, progress, showProgress }: {
+function BlueReview({ show, answer, onMark }: {
   show: boolean;
   answer: string;
   onMark: (correct: boolean) => void;
@@ -128,22 +128,11 @@ function BlueReview({ show, answer, onMark, progress, showProgress }: {
             <h1 className='text-xl font-bold'>Het antwoord is: </h1>
             <h1 className='text-2xl font-bold'>{answer}</h1>
             <h1 className='text-xl font-bold'>Had je het goed?</h1>
-            <div className='flex flex-row gap-4'>
+            <div className='flex flex-row gap-4 mt-2'>
               <Button1 text="Ja" onClick={() => onMark(true)} />
               <Button1 text="Nee" onClick={() => onMark(false)} />
             </div>
           </motion.div>
-          {showProgress && (
-            <motion.div
-              className="absolute bottom-4 left-4 right-4 pointer-events-auto z-30"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <Progress value={progress} className="h-2" />
-            </motion.div>
-          )}
         </>
       )}
     </AnimatePresence>
@@ -195,7 +184,7 @@ export default function LearnTool() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTimerActive && showResult) {
-      const duration = isCorrect ? 1500 : 3000; // 1.5s for correct, 3s for incorrect
+      const duration = isCorrect ? 1000 : 3000; // 1.5s for correct, 3s for incorrect
       const intervalTime = 50; // Update every 50ms for smooth animation
       let timeLeft = duration;
 
