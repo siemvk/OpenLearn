@@ -669,7 +669,6 @@ export default function CreateListTool({
   }, [langFrom, langTo, selectedSubject]);
 
   async function publishList() {
-    // Same validation as saveList
     if (!listName.trim()) {
       toast.error("Voer een naam in voor de lijst.");
       return;
