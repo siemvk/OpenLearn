@@ -13,6 +13,34 @@ const nextConfig: NextConfig = {
     // Enable server source maps for better error debugging
     serverSourceMaps: true,
   },
+  // Webpack configuration for banner injection
+  webpack: (config, { buildId, dev, isServer, webpack }) => {
+    if (!dev && !isServer) {
+      class BannerInjectorPlugin {
+        apply(compiler: any) {
+          compiler.hooks.emit.tapAsync('BannerInjectorPlugin', (compilation: any, callback: any) => {
+            Object.keys(compilation.assets).forEach((filename) => {
+              if (filename.endsWith('.js')) {
+                const asset = compilation.assets[filename];
+                const originalSource = asset.source();
+                const banner = `/* PolarLearn is Open-Source: https://github.com/polarnl/polarlearn */\n/* Wat zit je hier te doen tho? */\n`;
+
+                compilation.assets[filename] = {
+                  source: () => banner + originalSource,
+                  size: () => banner.length + originalSource.length
+                };
+              }
+            });
+            callback();
+          });
+        }
+      }
+
+      config.plugins.push(new BannerInjectorPlugin());
+    }
+
+    return config;
+  },
 };
 
 // Only apply Sentry config in production
