@@ -9,6 +9,7 @@ const languageCodeMap: Record<string, string> = {
   'DE': 'de', // German
   'GR': 'el', // Greek
   'LA': 'la', // Latin
+  'ES': 'es', // Spaans
 };
 
 // Function to convert internal language code to ISO code

@@ -23,7 +23,7 @@ import ot_img from '@/app/img/anders.svg'
 import gl_img from '@/app/img/gl.svg'
 import gr_img from '@/app/img/oude_taal2.svg'
 import ckv_img from '@/app/img/ckv.svg'
-
+import es_img from '@/app/img/es.svg'
 // als je een vak wil toevoegen voeg die toe aan vakken verder hoef je niks te doen!!
 
 interface taal {
@@ -88,6 +88,14 @@ export const Vakken: vak[] = [
         icon: gr_img,
         istaal: true,
         van: { afkorting: "GR", naam: "Grieks", icon: gr_img },
+        naar: { afkorting: "NL", naam: "Nederlands", icon: nl_img }
+    },
+    {
+        afkorting: "ES",
+        naam: "Spaans",
+        icon: es_img,
+        istaal: true,
+        van: { afkorting: "ES", naam: "Spaans", icon: es_img },
         naar: { afkorting: "NL", naam: "Nederlands", icon: nl_img }
     },
     {
