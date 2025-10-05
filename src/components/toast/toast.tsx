@@ -2,7 +2,7 @@
 
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, Slide } from "react-toastify";
-import { CircleX, Check, TriangleAlert, CircleCheck, Info } from "lucide-react";
+import { CircleX, TriangleAlert, CircleCheck, Info } from "lucide-react";
 
 interface ToastProviderProps {
   children: React.ReactNode;
@@ -26,14 +26,12 @@ export default function ToastProvider({ children }: ToastProviderProps) {
           width: "400px", 
           maxWidth: "90vw"
         }}
-        icon={({ type, theme }) => {
+        icon={({ type }) => {
           switch (type) {
             case "success":
               return <CircleCheck />;
             case "error":
               return <CircleX />;
-            case "success":
-              return <Check />;
             case "warning":
               return <TriangleAlert />;
             case "info":

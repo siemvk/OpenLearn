@@ -65,7 +65,7 @@ async function initKafka() {
 
     // Start consuming messages
     await consumer.run({
-      eachMessage: async ({ topic, partition, message }) => {
+      eachMessage: async ({ topic, message }) => {
         try {
           const messageData = JSON.parse(message.value?.toString() || '{}')
 

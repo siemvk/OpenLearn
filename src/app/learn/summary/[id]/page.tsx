@@ -1,5 +1,5 @@
 import { prisma } from "@/utils/prisma"
-import { getSubjectIcon, getSubjectName } from "@/components/icons"
+import { getSubjectIcon } from "@/components/icons"
 import Image from "next/image"
 import MarkdownRenderer from "@/components/md"
 import CreatorLink from "@/components/CreatorLink"
@@ -48,7 +48,7 @@ export async function generateMetadata({
         if (summary.summaryContent) {
             // Clean the markdown content for description
             const cleanContent = summary.summaryContent
-                .replace(/[#*`_~\[\]()]/g, '') // Remove markdown characters
+                .replace(/[#*`_~[\]()]/g, '') // Remove markdown characters
                 .replace(/\n+/g, ' ') // Replace newlines with spaces
                 .trim();
 
@@ -63,6 +63,7 @@ export async function generateMetadata({
             description, // Already truncated to 160 characters
         };
     } catch (error) {
+        console.error("Error generating metadata for summary:", error);
         return {
             title: "PolarLearn Samenvattingen",
             description: "Bestudeer samenvattingen en verbeter je kennis op PolarLearn",
@@ -98,18 +99,15 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
     // Prefetch creator info to avoid CSR waterfall
     let creatorName = summary?.creator || "";
-    let creatorJdenticonValue = summary?.creator || "";
     let creatorUserId: string | null = null;
     if (summary?.creator) {
         try {
             if (isUUID(summary.creator)) {
                 const info = await getUserNameById(summary.creator);
                 creatorName = info.name || summary.creator;
-                creatorJdenticonValue = info.jdenticonValue || summary.creator;
                 creatorUserId = summary.creator; // The creator field is already the UUID
             } else {
                 creatorName = summary.creator;
-                creatorJdenticonValue = summary.creator;
                 // For name-based creators, we should fetch the ID
                 const userInfo = await getUserIdByName(summary.creator);
                 creatorUserId = userInfo.id;

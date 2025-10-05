@@ -1,4 +1,4 @@
-import { getGoogleAuthUrl, getGoogleTokens, scanGoogleEmails, mergeGoogleAccount } from "@/utils/auth/oauth";
+import { getGoogleAuthUrl, getGoogleTokens, scanGoogleEmails } from "@/utils/auth/oauth";
 import { prisma } from "@/utils/prisma";
 import { createSession } from "@/utils/auth/session";
 import { NextResponse } from "next/server";

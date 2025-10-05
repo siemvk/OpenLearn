@@ -23,7 +23,7 @@ function ThemeSync() {
             setTheme(data.theme)
           }
         })
-        .catch(err => {
+        .catch(() => {
           setTheme("dark")
         })
     }

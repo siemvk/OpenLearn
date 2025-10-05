@@ -21,10 +21,6 @@ export default function DeletePostButton({
     const [isDeleting, setIsDeleting] = useState(false)
     const router = useRouter()
 
-    if (!isCreator) {
-        return null;
-    }
-
     const handleDelete = useCallback(async () => {
         setIsDeleting(true)
         try {
@@ -49,6 +45,10 @@ export default function DeletePostButton({
             setOpen(false)
         }
     }, [postId, router])
+
+    if (!isCreator) {
+        return null;
+    }
 
     // Use event.stopPropagation to prevent triggering the link click when clicking the delete button
     return (

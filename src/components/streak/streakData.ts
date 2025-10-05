@@ -119,15 +119,8 @@ export async function getAllStreakData() {
         // Get day before yesterday's date (to check for freezes)
         const dayBeforeYesterday = new Date();
         dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
-        const dayBeforeYesterdayStr = dayBeforeYesterday.toISOString().split('T')[0];
 
-        // Today's date in YYYY-MM-DD format
-        const todayStr = new Date().toISOString().split('T')[0];
-
-        // Check if we have activity from today or yesterday
-        const hasActivityToday = streakDataObj[todayStr] === 'done' || streakDataObj[todayStr] === 'frozen';
         let hadYesterdayActivity = streakDataObj[yesterdayStr] === 'done' || streakDataObj[yesterdayStr] === 'frozen';
-        const hadDayBeforeYesterdayActivity = streakDataObj[dayBeforeYesterdayStr] === 'done' || streakDataObj[dayBeforeYesterdayStr] === 'frozen';
 
         // Auto-apply freeze if needed: no activity yesterday but has freezes and streak > 0
         let freezeApplied = false;

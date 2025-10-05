@@ -249,7 +249,7 @@ export async function createUserCredentials(
       try {
         (userData as any).activationToken = activationToken;
         (userData as any).scheduledDeletion = scheduledDeletion;
-      } catch (e) {
+      } catch {
         console.warn("Prisma schema may not include activationToken/scheduledDeletion fields");
       }
 

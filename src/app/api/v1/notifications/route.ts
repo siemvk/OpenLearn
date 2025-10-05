@@ -25,7 +25,7 @@ function safelyParseNotificationData(data: any): NotificationData {
   return data as NotificationData;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const user = await getUserFromSession();
 

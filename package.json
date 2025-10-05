@@ -5,9 +5,12 @@
   "private": false,
   "scripts": {
     "dev": "NODE_ENV=development tsx src/main.ts --turbo",
-    "build": "GITINF=\"$(git rev-parse --short HEAD)@$(git rev-parse --abbrev-ref HEAD)\" rm -rf .next/; next build",
+    "build": "NEXT_PUBLIC_GITINF=$(git rev-parse --short HEAD)@$(git rev-parse --abbrev-ref HEAD) rm -rf .next/; next build",
+    "build:turbo": "NEXT_PUBLIC_GITINF=$(git rev-parse --short HEAD)@$(git rev-parse --abbrev-ref HEAD) rm -rf .next/; next build --turbopack",
     "start": "NODE_ENV=production tsx src/main.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.896.0",
@@ -96,20 +99,23 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@eslint/js": "^9.36.0",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.37.0",
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "eslint": "^9.36.0",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^9.37.0",
+    "eslint-config-next": "^15.5.4",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^6.1.1",
     "globals": "^16.4.0",
     "postcss": "^8.5.6",
     "prisma": "^6.16.2",
     "tailwindcss": "^4.1.13",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.44.1"
+    "typescript": "^5.9.2"
   }
 }

@@ -97,7 +97,7 @@ export async function generateMetadata({
                     wordCount = parsedData.length;
                 }
             } catch (error) {
-                // If parsing fails, default to 0
+                console.log("Error parsing list data for metadata:", error);
                 wordCount = 0;
             }
         }
@@ -128,6 +128,7 @@ export async function generateMetadata({
             description: description.substring(0, 160), // Limit for SEO
         };
     } catch (error) {
+        console.error("Error generating metadata:", error);
         return {
             title: "PolarLearn Woordenlijsten",
             description: "Oefen met woordenlijsten en verbeter je kennis op PolarLearn",
@@ -176,18 +177,15 @@ const ViewListPage: NextPage<any, PageParams> = async ({ params }: PageParams) =
 
     // Prefetch creator info to avoid CSR waterfall
     let creatorName = listData?.creator || "";
-    let creatorJdenticonValue = listData?.creator || "";
     let creatorUserId: string | null = null;
     if (listData?.creator) {
         try {
             if (isUUID(listData.creator)) {
                 const info = await getUserNameById(listData.creator);
                 creatorName = info.name || listData.creator;
-                creatorJdenticonValue = info.jdenticonValue || listData.creator;
                 creatorUserId = listData.creator; // The creator field is already the UUID
             } else {
                 creatorName = listData.creator;
-                creatorJdenticonValue = listData.creator;
                 // For name-based creators, we should fetch the ID
                 const { getUserIdByName } = await import("@/serverActions/getUserName");
                 const userInfo = await getUserIdByName(listData.creator);

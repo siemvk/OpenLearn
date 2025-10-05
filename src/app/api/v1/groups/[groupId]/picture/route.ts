@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromSession } from '@/utils/auth/auth'
 import { prisma } from '@/utils/prisma'
 import { S3 } from '@/utils/s3'
-import { PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
+import { PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
 import sharp from 'sharp'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB

@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { getUserFromSession } from "@/utils/auth/auth";
 import { Badge } from "@/components/ui/badge";
 import { getGroupLists, getPendingApprovals, getAvailableLists } from "@/serverActions/groupActions";
-import { AlertTriangle, Send } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import SettingsForm from "@/components/groups/SettingsForm";
 import DeleteGroupButton from "@/components/groups/DeleteGroupButton";
 import AdminToggleButton from "@/components/groups/AdminToggleButton";
@@ -95,8 +95,6 @@ export default async function Page({
     return <div className="text-center text-neutral-400">Je moet ingelogd zijn om deze pagina te bekijken.</div>;
   }
 
-  // Automatically elect a new owner if the current owner no longer exists
-  let isNewOwner = false;
   const ownerExists = await prisma.user.findUnique({ where: { id: groupData.creator } });
   if (!ownerExists && Array.isArray(groupData.members) && groupData.members.length > 0) {
     // Fetch existing member details
@@ -112,9 +110,6 @@ export default async function Page({
         `Sindsdat de eigenaar van "${groupData.name}" zijn/haar account heeft verwijdert, ben je de nieuwe eigenaar van deze groep!`,
         'Award'
       );
-      if (currentUserId === newOwnerId) {
-        isNewOwner = true;
-      }
     }
   }
 
@@ -433,6 +428,7 @@ export async function generateMetadata({
       description: cleanDescription,
     };
   } catch (error) {
+    console.error("Error generating metadata for group:", error);
     return {
       title: "PolarLearn | Groep",
       description: "Een onbekende fout is opgetreden bij het ophalen van de groepsgegevens.",

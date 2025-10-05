@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-import { Trash, Loader2 } from "lucide-react";
+import { Trash } from "lucide-react";
 import { deleteGroup } from "@/serverActions/groupActions";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";

@@ -69,8 +69,7 @@ export async function POST(request: NextRequest) {
 
     const groupId = uuidv4();
 
-    // Create the group
-    const group = await prisma.group.create({
+    await prisma.group.create({
       data: {
         groupId,
         name: trimmedName,

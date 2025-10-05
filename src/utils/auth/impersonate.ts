@@ -4,7 +4,7 @@ import { prisma } from "../prisma";
 import * as crypto from "crypto";
 import { cookies } from "next/headers";
 import { getUserFromSession } from "./auth";
-import { createCookie, decodeCookie } from "./session";
+import { createCookie } from "./session";
 import { revalidatePath } from "next/cache";
 
 // Use the same cookie name as the normal session to make it work with the existing app

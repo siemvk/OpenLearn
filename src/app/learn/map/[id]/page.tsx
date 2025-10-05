@@ -170,6 +170,7 @@ export async function generateMetadata({
       description: cleanDescription,
     };
   } catch (error) {
+    console.error("Error generating metadata for map:", error);
     return {
       title: "PolarLearn | Map",
       description: "Een onbekende fout is opgetreden bij het ophalen van de mapgegevens.",

@@ -14,9 +14,9 @@ export type ForumFormValues = z.infer<typeof formSchema>;
 export function useForumCreation() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [banned, setBanned] = useState(false);
-    const [banreason, setBanreason] = useState<string | null>(null);
-    const [banEnd, setBanEnd] = useState<Date | null>(null);
+    const [banned, _setBanned] = useState(false);
+    const [banreason, _setBanreason] = useState<string | null>(null);
+    const [banEnd, _setBanEnd] = useState<Date | null>(null);
     const router = useRouter();
 
     // Get user data from Zustand store (SSR'd data)

@@ -11,8 +11,7 @@ async function isSecureContext(): Promise<boolean> {
     const headersList = await headers();
     return headersList.get('x-forwarded-proto') === 'https' ||
       process.env.NODE_ENV === 'production';
-  } catch (error) {
-    // Default to production check if headers aren't available
+  } catch {
     return process.env.NODE_ENV === 'production';
   }
 }

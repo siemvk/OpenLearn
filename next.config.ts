@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     serverSourceMaps: true,
   },
   // Webpack configuration for banner injection
-  webpack: (config, { buildId, dev, isServer, webpack }) => {
+  webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
       class BannerInjectorPlugin {
         apply(compiler: any) {

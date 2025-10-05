@@ -1,6 +1,4 @@
 import ViewUserTabsWrapper from "./ViewUserTabsWrapper";
-import { getUserFromSession } from "@/utils/auth/auth";
-import { cookies } from "next/headers";
 import { prisma } from "@/utils/prisma";
 import { notFound } from "next/navigation";
 
@@ -15,13 +13,6 @@ export default async function ViewUserLayout({
 }: ViewUserLayoutProps) {
     const params = await paramsPromise;
     const { id } = params;
-
-    // Get current session for permission checks
-    const sessionCookie = (await cookies()).get("polarlearn.session-id");
-    const currentUser = sessionCookie
-        ? await getUserFromSession(sessionCookie.value)
-        : null;
-    const currentUserName = currentUser?.name || null;
 
     // Get the user data
     let user;

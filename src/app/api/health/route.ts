@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/utils/prisma";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const start = Date.now();
     const result = (await prisma.$runCommandRaw({ ping: 1 })) as { ok?: number } | unknown;

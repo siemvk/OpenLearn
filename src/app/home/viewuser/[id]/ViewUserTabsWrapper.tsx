@@ -1,7 +1,6 @@
 "use client";
 
 import Tabs, { TabItem } from "@/components/Tabs";
-import Image from "next/image";
 import Jdenticon from "@/components/Jdenticon";
 
 interface ViewUserTabsWrapperProps {

@@ -113,39 +113,6 @@ async function getRecentLists() {
   );
 }
 
-async function getUserGroups() {
-  const user = await getUserFromSession(
-    (await cookies()).get("polarlearn.session-id")?.value as string
-  );
-  if (!user?.id) return [];
-
-  const userData = await prisma.user.findUnique({
-    where: { id: user.id },
-  });
-
-  // Get IDs of groups the user is in
-  const userOwnGroups = (userData?.ownGroups as string[]) || [];
-  const userInGroups = (userData?.inGroups as string[]) || [];
-
-  // Combine and deduplicate group IDs
-  const allUserGroupIds = [...new Set([...userOwnGroups, ...userInGroups])];
-
-  if (allUserGroupIds.length === 0) return [];
-
-  // Fetch all groups the user is a member of
-  return await prisma.group.findMany({
-    where: {
-      OR: [
-        { groupId: { in: allUserGroupIds } },
-        // Remove the problematic members query
-        { creator: user.id },
-      ],
-    },
-    orderBy: { updatedAt: "desc" },
-    take: 5, // Limit to 5 most recent groups
-  });
-}
-
 export default async function Start() {
   const recentSubjects = await getRecentSubjects();
   const recentLists = await getRecentLists();

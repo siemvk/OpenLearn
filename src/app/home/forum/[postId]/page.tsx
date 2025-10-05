@@ -71,7 +71,7 @@ export async function generateMetadata({
 
     // Clean the content for description (remove markdown and limit length)
     const cleanContent = post.content
-      .replace(/[#*`_~\[\]()]/g, "") // Remove markdown characters
+      .replace(/[#*`_~[\]()]/g, "") // Remove markdown characters
       .replace(/\n+/g, " ") // Replace newlines with spaces
       .trim()
       .substring(0, 160); // Limit to 160 characters for SEO
@@ -81,7 +81,7 @@ export async function generateMetadata({
       description:
         cleanContent || "Bekijk deze discussie op het PolarLearn forum",
     };
-  } catch (error) {
+  } catch {
     return {
       title: "PolarLearn | Forum",
       description:
@@ -318,7 +318,6 @@ export default async function Page({
                   <EditPostBtn
                     postId={post.post_id}
                     isCreator={isPostCreator}
-                    isMainPost={true}
                   />
                   <DeletePostButton
                     postId={post.post_id}

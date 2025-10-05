@@ -221,7 +221,6 @@ export default function LearnTool() {
     checkAnswer,
     answerCorrect,
     answerWrong,
-    score
   } = useListStore();
 
   const [userInput, setUserInput] = useState('');
@@ -488,7 +487,7 @@ export default function LearnTool() {
             <hr className="border-neutral-600" />
             <div className="space-y-4">
               <div className="flex flex-col gap-3">
-                {mcOptions.map((option, idx) => (
+                {mcOptions.map((option) => (
                   <Button1
                     key={option}
                     text={option}

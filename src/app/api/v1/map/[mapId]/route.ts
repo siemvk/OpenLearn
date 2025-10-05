@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ mapId: string }> }
+  { params: _params }: { params: Promise<{ mapId: string }> }
 ) {
   try {
     const body = await request.json();

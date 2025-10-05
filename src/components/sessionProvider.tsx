@@ -40,7 +40,7 @@ export default function SessionProvider({
 
             setIsAuthenticated(true);
             return true;
-        } catch (error) {
+        } catch {
             setIsAuthenticated(false);
             return false;
         } finally {

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getUserFromSession } from "@/utils/auth/auth";
 import { prisma } from "@/utils/prisma";
 import { Prisma } from "@prisma/client";
@@ -25,7 +25,7 @@ function safelyParseNotificationData(data: any): NotificationData {
   return data as NotificationData;
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT() {
   try {
     const user = await getUserFromSession();
 

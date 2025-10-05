@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import Button1 from "@/components/button/Button1";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { useUserDataStore } from "@/store/user/UserDataProvider";
 import Tabs from "@/components/Tabs";
 import MarkdownRenderer from "@/components/md";
 
@@ -32,18 +31,9 @@ export default function EditSummaryClient({
   initialSubjectId,
   initialPublished,
   initialLastSaved,
-  creatorId,
 }: EditSummaryClientProps) {
-  // Get user data from the store
-  const userStore = useUserDataStore();
-  const isAdmin = userStore.getState().isAdmin;
-  const userId = userStore.getState().id;
-
-  // Check if admin is editing someone else's summary
-  const isEditingOthersSummary = isAdmin && creatorId && creatorId !== userId;
-
   // Tab state
-  const [activeTab, setActiveTab] = useState<string>("write");
+  const [_activeTab, setActiveTab] = useState<string>("write");
 
   const [selectedSubject, setSelectedSubject] = useState<{ id: string; display: ReactNode } | undefined>(
     initialSubjectId ? { id: initialSubjectId, display: defaultItems.find(item => item.value === initialSubjectId)?.label || initialSubjectId } : undefined
@@ -91,7 +81,7 @@ export default function EditSummaryClient({
         setLastAutosavedSubjectId(currentSubjectId || selectedSubject?.id || undefined);
       }
     } catch (error) {
-      // Optionally handle error
+      console.error("Autosave failed:", error);
     } finally {
       setIsSaving(false);
     }
@@ -160,7 +150,7 @@ export default function EditSummaryClient({
         toast.error("Er is een onbekende fout opgetreden bij het opslaan.");
       }
     } catch (error) {
-      toast.error("Kon samenvatting niet opslaan.");
+      toast.error("Kon samenvatting niet opslaan: " + (error instanceof Error ? error.message : "Onbekende fout"));
     } finally {
       setIsSaving(false);
     }
@@ -185,7 +175,7 @@ export default function EditSummaryClient({
         toast.error(result.error || "Kon samenvatting niet publiceren.");
       }
     } catch (error) {
-      toast.error("Er is een onbekende fout opgetreden bij het publiceren.");
+      toast.error("Er is een onbekende fout opgetreden bij het publiceren: " + (error instanceof Error ? error.message : "Onbekende fout"));
     } finally {
       setIsPublishing(false);
     }

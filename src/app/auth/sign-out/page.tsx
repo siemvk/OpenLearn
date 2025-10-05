@@ -11,7 +11,7 @@ export default function Page() {
             logOut();
             router.push('/auth/sign-in');
         } catch (error) {
-            toast.error("Error");
+            toast.error("Error: " + (error as Error).message);
         }
 
     }, [router]); // Add dependency array to prevent unnecessary re-renders

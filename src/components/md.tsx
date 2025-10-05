@@ -1,11 +1,11 @@
-import React, { ReactElement } from "react";
+import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 
 const ALERT_LABELS: Record<string, string> = {
-  NOTE: 'Notitie', // Translate here
+  NOTE: 'Notitie',
   TIP: 'Tip',
   IMPORTANT: 'Belangrijk',
   WARNING: 'Waarschuwing',

@@ -54,7 +54,7 @@ export default function DeleteSummaryButton({ summaryId, customText }: DeleteSum
                 console.error('[DeleteSummaryButton] Deletion failed:', result.error);
             }
         } catch (error) {
-            toast.error('Er is een onverwachte fout opgetreden.');
+            toast.error('Er is een onverwachte fout opgetreden: ' + (error as Error).message);
         } finally {
             setIsDeleting(false);
             setOpen(false);

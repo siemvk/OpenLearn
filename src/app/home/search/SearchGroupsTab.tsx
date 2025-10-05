@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { getSearchResults } from "./getSearchResults";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Jdenticon from "@/components/Jdenticon";
@@ -26,8 +25,8 @@ export default function SearchGroupsTab({
     const router = useRouter();
     const [groups, setGroups] = useState(initialGroups);
     const [hasMore, setHasMore] = useState(initialGroups.length < initialTotal);
-    const [userMapById, setUserMapById] = useState(initialUserMapById);
-    const [userMapByName, setUserMapByName] = useState(initialUserMapByName);
+    const [_userMapById, setUserMapById] = useState(initialUserMapById);
+    const [_userMapByName, setUserMapByName] = useState(initialUserMapByName);
     const [loading, setLoading] = useState(false);
 
     const loadMoreGroups = async () => {
@@ -77,8 +76,6 @@ export default function SearchGroupsTab({
         >
             <div className="space-y-4">
                 {groups.map((group) => {
-                    const creatorId = group.creator;
-                    const user = userMapById[creatorId] || userMapByName[creatorId];
                     const memberCount = Array.isArray(group.members) ? group.members.length : 0;
                     const listCount = Array.isArray(group.listsAdded) ? group.listsAdded.length : 0;
 

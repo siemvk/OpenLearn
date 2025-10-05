@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 }
 
 export default async function ForumHome({
-  searchParams,
   params,
 }: {
   searchParams: Promise<{ page?: string }>;

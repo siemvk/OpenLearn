@@ -1,6 +1,5 @@
 "use client";
-import { LetterText, List, MessageCircle, Plus, Users } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { LetterText, List, MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
 import GroupDialog from "@/app/learn/groups/groupDialog";
 import ForumCreateDialog from "@/components/forum/ForumDialog";

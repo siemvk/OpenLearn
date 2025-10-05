@@ -21,18 +21,6 @@ function PinPostButton({
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
 
-    // Don't render if not admin
-    if (!isAdmin) {
-        return null
-    }
-
-    // Create handle button click, similar to other post action buttons
-    const handleButtonClick = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        handleTogglePin();
-    }, []);
-
     // Create handle toggle pin function
     const handleTogglePin = useCallback(async () => {
         setIsLoading(true)
@@ -55,6 +43,18 @@ function PinPostButton({
             setIsLoading(false)
         }
     }, [postId, router])
+
+    // Create handle button click, similar to other post action buttons
+    const handleButtonClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        handleTogglePin();
+    }, [handleTogglePin]);
+
+    // Don't render if not admin
+    if (!isAdmin) {
+        return null
+    }
 
     return (
         <button

@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     // Ensure we have a valid string key for the votes_data object
     const userName = session.name as string;
 
-    const reply = await prisma.forum.create({
+    await prisma.forum.create({
       data: {
         post_id: replyId,
         type: "reply",

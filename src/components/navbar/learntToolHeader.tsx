@@ -265,11 +265,10 @@ interface LearnToolHeaderProps {
 
 const HeaderLearnTool = memo(({
     progress: externalProgress,
-    onMethodChange,
     onFlipQuestionLangChange,
 }: LearnToolHeaderProps) => {
     // Get stats and list info from the store
-    const { score, currentList, answerLog, currentMethod, originalWordCount, flipQuestionLang } = useListStore();
+    const { score, currentList, currentMethod, originalWordCount } = useListStore();
     const correctAnswers = score.correct;
     const wrongAnswers = score.wrong;
 

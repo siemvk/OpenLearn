@@ -1,7 +1,6 @@
 "use client"
 import Button1 from "@/components/button/Button1";
-import Dropdown from "@/components/button/DropdownBtn";
-import { BookOpen, List, MousePointerClick } from "lucide-react";
+import { List, MousePointerClick } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,7 +10,6 @@ import learn from '@/app/img/learn.svg';
 import test from '@/app/img/test.svg';
 import hints from '@/app/img/hint.svg';
 import mind from '@/app/img/mind.svg';
-import livequiz from '@/app/img/livequiz.svg';
 
 export default function ListTableComponent({
     wordPairs,

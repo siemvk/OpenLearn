@@ -48,13 +48,11 @@ const getFormSchema = (isAdmin: boolean) => {
     }
   );
 };
-import ReactMarkdown from "react-markdown";
 import Tabs from "@/components/Tabs";
 import { Combobox } from "../selectSubjCombobox";
 import { SelectCategoryCombobox } from "../selectCategoryCombobox";
 import { toast } from "react-toastify";
 import MarkdownRenderer from "@/components/md";
-import { MarkdownPreview } from "../ForumDialog";
 
 
 interface EditPostButtonProps {
@@ -67,13 +65,12 @@ interface EditPostButtonProps {
 function EditPostButton({
   postId,
   isCreator,
-  isMainPost = false,
 }: EditPostButtonProps) {
   const userStore = useUserDataStore();
   const isAdmin = userStore.getState().isAdmin;
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleting, _setIsDeleting] = useState(false);
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [formSchema, setFormSchema] = useState(() => getFormSchema(isAdmin));
@@ -128,38 +125,6 @@ function EditPostButton({
 
   // Simple strict comparison for school category
   const isSchoolCategory = selectedCategory === "school";
-
-  // Only show edit button if user is creator or admin
-  if (!isCreator && !isAdmin) {
-    return null;
-  }
-
-  const handleDelete = useCallback(async () => {
-    if (!postId) return;
-
-    setIsDeleting(true);
-    try {
-      const response = await fetch(`/api/v1/forum/delete?postId=${postId}`, {
-        method: "DELETE",
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        if (result.isMainPost) {
-          router.push("/home/forum");
-        } else {
-          router.refresh();
-        }
-      } else {
-        throw new Error(result.error || "Failed to delete post");
-      }
-    } catch (error) {
-      console.error("Error deleting post:", error);
-      setIsDeleting(false);
-      setOpen(false);
-    }
-  }, [postId, router]);
 
   const handleUpdate = useCallback(
     async (values: z.infer<typeof formSchema>) => {
@@ -218,6 +183,11 @@ function EditPostButton({
   const handleFormSubmit = useCallback(() => {
     form.handleSubmit(handleUpdate)();
   }, [form, handleUpdate]);
+
+  // Only show edit button if user is creator or admin
+  if (!isCreator && !isAdmin) {
+    return null;
+  }
 
   return (
     <>
@@ -329,7 +299,7 @@ function EditPostButton({
                           {
                             id: "preview",
                             label: "Voorbeeld",
-                            content: <MarkdownPreview content={content} />,
+                            content: <MarkdownRenderer content={content} />,
                           },
                         ]}
                         defaultActiveTab="write"

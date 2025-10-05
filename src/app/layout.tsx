@@ -149,7 +149,7 @@ export default async function RootLayout({
     if (impersonationData) {
       userData.impersonation = impersonationData;
     }
-  } catch (e) {
+  } catch {
     // fallback: keep userData as default
   }
 
@@ -169,12 +169,12 @@ export default async function RootLayout({
           message: parsed.message || '',
           color: parsed.color || 'info',
         };
-      } catch (e) {
+      } catch {
         // fallback: treat as plain string
         sysMsgData = { message: sysMsgConfig.value, color: 'info' };
       }
     }
-  } catch (e) {
+  } catch {
     // fallback: keep sysMsgData as default
   }
 

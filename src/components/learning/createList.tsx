@@ -137,7 +137,7 @@ export default function CreateListTool({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [autosavedListId, setAutosavedListId] = useState<string | null>(null);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [_hasChanges, setHasChanges] = useState(false);
   const debouncedSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const translationTimeoutRef = useRef<NodeJS.Timeout | null>(null);

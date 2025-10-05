@@ -46,7 +46,7 @@ function DeletePostButton({
             setIsDeleting(false)
             setOpen(false)
             router.refresh()
-        } catch (error) {
+        } catch {
 
         }
     }, [userId, router])

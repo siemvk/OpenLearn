@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-function createNotFoundResponse(req: NextRequest) {
+function createNotFoundResponse() {
     return NextResponse.json(
         { error: 'Not Found', message: 'Endpoint bestaat niet' },
         { status: 404 }
@@ -8,10 +8,10 @@ function createNotFoundResponse(req: NextRequest) {
 }
 
 // Export route handlers directly
-export const GET = (req: NextRequest) => createNotFoundResponse(req)
-export const POST = (req: NextRequest) => createNotFoundResponse(req)
-export const PUT = (req: NextRequest) => createNotFoundResponse(req)
-export const DELETE = (req: NextRequest) => createNotFoundResponse(req)
-export const PATCH = (req: NextRequest) => createNotFoundResponse(req)
-export const OPTIONS = (req: NextRequest) => createNotFoundResponse(req)
-export const HEAD = (req: NextRequest) => createNotFoundResponse(req)
+export const GET = () => createNotFoundResponse()
+export const POST = () => createNotFoundResponse()
+export const PUT = () => createNotFoundResponse()
+export const DELETE = () => createNotFoundResponse()
+export const PATCH = () => createNotFoundResponse()
+export const OPTIONS = () => createNotFoundResponse()
+export const HEAD = () => createNotFoundResponse()

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, memo, useEffect } from "react";
+import { useState, useCallback, memo } from "react";
 import { getPost } from "@/actions/forum";
 import { useRouter } from "next/navigation";
 import {
@@ -82,7 +82,6 @@ function EditReplyButton({
 }: EditReplyButtonProps) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [reply, setReply] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
@@ -101,7 +100,6 @@ function EditReplyButton({
         try {
             setLoading(true);
             const replyData = await getPost(postId);
-            setReply(replyData);
 
             if (replyData) {
                 form.reset({
@@ -115,13 +113,6 @@ function EditReplyButton({
             setLoading(false);
         }
     }, [postId, form]);
-
-    // Extract content separately to avoid re-rendering the entire form
-    const content = form.watch("content");
-
-    if (!isCreator && !isAdmin) {
-        return null;
-    }
 
     const handleUpdate = useCallback(
         async (values: z.infer<typeof replyFormSchema>) => {
@@ -180,6 +171,13 @@ function EditReplyButton({
     const handleFormSubmit = useCallback(() => {
         form.handleSubmit(handleUpdate)();
     }, [form, handleUpdate]);
+
+    // Extract content separately to avoid re-rendering the entire form
+    const content = form.watch("content");
+
+    if (!isCreator && !isAdmin) {
+        return null;
+    }
 
     return (
         <>

@@ -1,12 +1,11 @@
 "use client"
 
-import React, { memo } from "react"
+import React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { SearchIcon } from "lucide-react"
-import Image from "next/image"
-import { icons, defaultItems } from "@/components/icons"
+import { defaultItems } from "@/components/icons"
 
 // Define the item type to support ReactNode in the label
 interface ComboboxItem {

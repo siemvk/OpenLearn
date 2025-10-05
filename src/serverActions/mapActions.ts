@@ -4,7 +4,6 @@ import { prisma } from '@/utils/prisma';
 import { cookies } from 'next/headers';
 import { getUserFromSession } from '@/utils/auth/auth';
 import { revalidatePath } from 'next/cache';
-import { v4 as uuidv4 } from 'uuid';
 
 // Get lists that are part of a map/folder
 export async function getMapLists(mapId: string) {
