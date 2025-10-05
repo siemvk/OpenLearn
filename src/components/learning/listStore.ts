@@ -57,7 +57,7 @@ export interface ListStoreState {
 }
 
 // Store factory for SSR hydration
-export const createListStore = (initData?: { list?: List; method?: string; flipQuestionLang?: boolean }) =>
+export const createListStore = (initData?: { list?: List; method?: string; flipQuestionLang?: boolean, learnListQueue?: { word: string, mode: string } }) =>
   createStore<ListStoreState>((set, get) => ({
     currentList: initData?.list || null,
     currentWord: initData?.list?.data?.[0] || null, // Set first word immediately for SSR
@@ -66,6 +66,7 @@ export const createListStore = (initData?: { list?: List; method?: string; flipQ
     flipQuestionLang: initData?.flipQuestionLang || false,
     score: { correct: 0, wrong: 0 },
     lastAnswer: null,
+    learnListQueue: {},
     answerLog: [],
     shuffleList: () => {
       set((state: ListStoreState) => ({

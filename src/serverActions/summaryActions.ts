@@ -24,6 +24,7 @@ export async function saveSummary(
 
     const { id: listIdFromInput, subjectId, content, name, autosave } = data; // id from input is list_id (UUID)
     const isAutosave = autosave === true;
+    const isAdmin = user.role === 'admin';
 
     if (!subjectId) {
         return { error: "Vak is vereist." };
@@ -38,9 +39,19 @@ export async function saveSummary(
 
         if (listIdFromInput) {
             // Update existing summary
+            const whereClause: any = {
+                list_id: listIdFromInput,
+                mode: "summary"
+            };
+
+            // Only restrict to user's own summaries if not admin
+            if (!isAdmin) {
+                whereClause.creator = user.id;
+            }
+
             const summaryToUpdate = await prisma.practice.findFirst({
-                where: { list_id: listIdFromInput, creator: user.id, mode: "summary" },
-                select: { id: true, published: true } // Select the MongoDB _id and published state
+                where: whereClause,
+                select: { id: true, published: true, creator: true } // Select the MongoDB _id, published state, and creator
             });
 
             if (!summaryToUpdate) {
@@ -143,6 +154,7 @@ export async function getSummaryById(list_id: string): Promise<{
     name: string;
     lastSaved: Date;
     published: boolean; // Added published state
+    creator?: string; // Added creator for admin display
 } | { error: string }> {
     const user = await getUserFromSession();
     if (!user || !user.id) {
@@ -152,13 +164,21 @@ export async function getSummaryById(list_id: string): Promise<{
         return { error: "Samenvatting ID (UUID) is vereist." };
     }
 
+    const isAdmin = user.role === 'admin';
+
     try {
+        const whereClause: any = {
+            list_id: list_id, // Query by list_id (UUID)
+            mode: "summary",
+        };
+
+        // Only restrict to user's own summaries if not admin
+        if (!isAdmin) {
+            whereClause.creator = user.id;
+        }
+
         const summary = await prisma.practice.findFirst({
-            where: {
-                list_id: list_id, // Query by list_id (UUID)
-                creator: user.id, // Ensure user owns the summary
-                mode: "summary",
-            },
+            where: whereClause,
             select: {
                 list_id: true,
                 subject: true,
@@ -166,6 +186,7 @@ export async function getSummaryById(list_id: string): Promise<{
                 name: true,
                 updatedAt: true,
                 published: true, // Select published state
+                creator: true, // Select creator for admin display
             },
         });
 
@@ -180,6 +201,7 @@ export async function getSummaryById(list_id: string): Promise<{
             name: summary.name,
             lastSaved: summary.updatedAt,
             published: summary.published, // Return published state
+            creator: isAdmin ? summary.creator : undefined, // Only return creator info for admins
         };
     } catch (error: any) {
         console.error("Error fetching summary:", error);
@@ -340,15 +362,26 @@ export async function publishSummary(
     }
 
     const { id: listIdFromInput } = data;
+    const isAdmin = user.role === 'admin';
 
     if (!listIdFromInput) {
         return { error: "Samenvatting ID (UUID) is vereist om te publiceren." };
     }
 
     try {
+        const whereClause: any = {
+            list_id: listIdFromInput,
+            mode: "summary"
+        };
+
+        // Only restrict to user's own summaries if not admin
+        if (!isAdmin) {
+            whereClause.creator = user.id;
+        }
+
         const summaryToPublish = await prisma.practice.findFirst({
-            where: { list_id: listIdFromInput, creator: user.id, mode: "summary" },
-            select: { id: true } // Select the MongoDB _id for update
+            where: whereClause,
+            select: { id: true, creator: true } // Select the MongoDB _id and creator for update
         });
 
         if (!summaryToPublish) {
@@ -364,9 +397,13 @@ export async function publishSummary(
         });
 
         // Update user's recent_lists and created_lists if it's the first time publishing
-        // This logic is similar to createListAction
+        // For admin actions, update the original creator's metadata, not the admin's
+        const userToUpdate = isAdmin && summaryToPublish.creator !== user.id
+            ? summaryToPublish.creator
+            : user.id;
+
         const userData = await prisma.user.findUnique({
-            where: { id: user.id },
+            where: { id: userToUpdate },
             select: { list_data: true }
         });
 
@@ -385,7 +422,7 @@ export async function publishSummary(
             }
 
             await prisma.user.update({
-                where: { id: user.id },
+                where: { id: userToUpdate },
                 data: {
                     list_data: {
                         ...currentListData,
