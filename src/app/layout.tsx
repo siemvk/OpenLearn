@@ -12,6 +12,7 @@ import { getImpersonationData } from "@/utils/auth/getImpersonationData";
 import { getStreakData } from "@/serverActions/getStreakData";
 import Providers from "@/components/providers";
 import DelWindowNext from "@/components/DelWindowNext";
+import EasterEgg from "@/components/EasterEgg";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -255,6 +256,7 @@ export default async function RootLayout({
           >
             {children}
             <DelWindowNext />
+            <EasterEgg />
           </Providers>
         </SessionWrapper>
       </body>
