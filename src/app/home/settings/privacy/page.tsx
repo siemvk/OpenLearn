@@ -12,20 +12,10 @@ export default function PrivacySettings() {
                 <CardHeader>
                     <CardTitle>Analytics</CardTitle>
                     <CardDescription className="text-neutral-400">
-                        Je kunt kiezen of PolarLearn gebruik mag maken van Google Analytics om je websitegebruik te analyseren.
-                        De analyses helpen ons om PolarLearn te verbeteren.
+                        Dit is tijdenlijk uitgeschakeld omdat
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <AnalyticsToggle />
-                </CardContent>
             </Card>
-
-            <p className="text-sm text-muted-foreground mt-6">
-                PolarLearn slaat alleen noodzakelijke data op voor de werking van de website.
-                We verkopen geen data aan derden en gebruiken cookies alleen voor essentiële functies
-                en eventueel analyse als je dat expliciet toestaat via de knop hierboven.
-            </p>
         </div>
     )
 }

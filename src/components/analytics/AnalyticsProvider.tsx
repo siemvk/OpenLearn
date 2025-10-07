@@ -5,7 +5,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 
 const ANALYTICS_COOKIE_NAME = "polarlearn.enable-analytics"
 // is dit niet prive??
-const ANALYTICS_ID = "G-C17NNNRTEM" 
+const ANALYTICS_ID = "G-C17NNNRTEM"
 
 export function AnalyticsProvider() {
     const [analyticsEnabled, setAnalyticsEnabled] = useState(false)
@@ -21,7 +21,8 @@ export function AnalyticsProvider() {
 
     }, [])
 
-    return analyticsEnabled ? <GoogleAnalytics gaId={ANALYTICS_ID} /> : null
+    // return analyticsEnabled ? <GoogleAnalytics gaId={ANALYTICS_ID} /> : null
+    return null
 }
 
 // Helper function to set the analytics cookie
