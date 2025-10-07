@@ -13,7 +13,7 @@ function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showP
       {show && (
         <>
           <motion.div
-            className="absolute inset-0 bg-yellow-500 opacity-35 rounded-lg pointer-events-none"
+            className="absolute inset-0 bg-yellow-500    rounded-lg pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.35 }}
             exit={{ opacity: 0 }}
@@ -27,7 +27,7 @@ function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showP
             transition={{ duration: 0.3 }}
             style={{ pointerEvents: 'auto' }}
           >
-            <CircleAlert size={50}  />
+            <CircleAlert size={50} />
             <h1 className="text-2xl font-bold mt-2">Je hebt een typfout gemaakt!</h1>
             <div className="mt-4 text-lg">
               <span className="block">Ingevuld: <span className="font-mono bg-neutral-900/60 px-2 py-1 rounded">{userInput}</span></span>
@@ -73,7 +73,7 @@ function CorrectScreen({ show, progress, showProgress }: {
       {show && (
         <>
           <motion.div
-            className='absolute inset-0 bg-green-500 opacity-35 rounded-lg pointer-events-none'
+            className='absolute inset-0 bg-green-500    rounded-lg pointer-events-none'
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.35 }}
             exit={{ opacity: 0 }}
@@ -85,6 +85,7 @@ function CorrectScreen({ show, progress, showProgress }: {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
+
           >
             <CircleCheck size={50} />
             <h1 className='text-2xl font-bold'>Correct!</h1>
@@ -106,18 +107,20 @@ function CorrectScreen({ show, progress, showProgress }: {
   )
 }
 
-function IncorrectScreen({ show, correctAnswer, progress, showProgress }: {
+function IncorrectScreen({ show, correctAnswer, progress, showProgress, setIsCorrect }: {
   show: boolean;
   correctAnswer: string;
   progress: number;
   showProgress: boolean;
+  setIsCorrect: (correct: boolean) => void;
+
 }) {
   return (
     <AnimatePresence>
       {show && (
         <>
           <motion.div
-            className='absolute inset-0 bg-red-500 opacity-35 rounded-lg pointer-events-none'
+            className='absolute inset-0 bg-red-500    rounded-lg pointer-events-none'
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.35 }}
             exit={{ opacity: 0 }}
@@ -129,12 +132,17 @@ function IncorrectScreen({ show, correctAnswer, progress, showProgress }: {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
+            style={{ pointerEvents: 'auto' }}
           >
             <CircleX size={50} />
             <h1 className='text-2xl font-bold'>Incorrect!</h1>
             <p className="mt-2 text-lg">
               Het juiste antwoord is: <strong>{correctAnswer}</strong>
             </p>
+            <div className="flex gap-4 mt-6">
+              <Button1 text="Goed rekenen" onClick={() => setIsCorrect(true)} />
+            </div>
+
           </motion.div>
           {showProgress && (
             <motion.div
@@ -457,7 +465,6 @@ export default function LearnTool() {
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={handleKeyPress}
                 placeholder="Typ je antwoord..."
                 className="w-full bg-neutral-700 text-white h-13 rounded-lg text-center text-lg"
               />
@@ -545,6 +552,7 @@ export default function LearnTool() {
             correctAnswer={currentWord?.["2"] || ""}
             progress={progress}
             showProgress={isTimerActive}
+            setIsCorrect={handleTypfoutMark}
           />
           <TypfoutScreen
             show={showTypfout}
@@ -556,7 +564,6 @@ export default function LearnTool() {
           />
         </>
       )}
-      {/* Blue review overlay for 'mind' mode - placed with other overlays so it spans the full card */}
       {currentMethod === 'mind' && (
         <BlueReview
           show={showBlueReview}
