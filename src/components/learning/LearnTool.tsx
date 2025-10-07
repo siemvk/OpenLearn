@@ -1,4 +1,5 @@
 "use client";
+import { updateDailyStreak } from '../streak/updateStreak';
 
 function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showProgress }: {
   show: boolean;
@@ -236,6 +237,7 @@ export default function LearnTool() {
   const [isCorrect, setIsCorrect] = useState(false);
   const [isTypfout, setIsTypfout] = useState(false);
   const [showTypfout, setShowTypfout] = useState(false);
+  const [streakUpdate, setStreakUpdate] = useState<{ success?: boolean; streakUpdated?: boolean; currentStreak?: number } | null>(null);
   const [progress, setProgress] = useState(100);
   const [isTimerActive, setIsTimerActive] = useState(false);
   // For multiple choice: options are provided server-side on the currentWord as `options`.
@@ -268,6 +270,16 @@ export default function LearnTool() {
       if (interval) clearInterval(interval);
     };
   }, [isTimerActive, showResult, isCorrect]);
+
+  // regel de streak update
+  useEffect(() => {
+    async function fetchStreakUpdate() {
+      const result = await updateDailyStreak();
+      console.log('Streak update result:', JSON.stringify(result));
+      setStreakUpdate(result);
+    }
+    fetchStreakUpdate();
+  }, []);
 
   // Global handler: when an overlay is visible (result screens), allow Enter to advance
   useEffect(() => {
@@ -392,12 +404,19 @@ export default function LearnTool() {
   };
   const displayWord = currentWord;
 
+
   if ((!currentList || !currentList.data?.length) && !showResult) {
+
     return (
       <div className="bg-neutral-800 rounded-lg p-8 w-full max-w-md mx-auto text-white text-center">
         {currentList && currentList.data?.length === 0 ? (
           <>
             <h2 className="text-2xl font-bold mb-2">Einde van de lijst!</h2>
+            {streakUpdate?.success && streakUpdate?.streakUpdated ? (
+              <p className="text-lg text-neutral-300">
+                Je huidige streak is nu <strong>{streakUpdate.currentStreak}</strong> dagen!
+              </p>
+            ) : null}
             <p className="text-lg text-neutral-300">Je hebt alle woorden geoefend. Goed gedaan!</p>
           </>
         ) : (
