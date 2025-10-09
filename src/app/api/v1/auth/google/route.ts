@@ -6,9 +6,6 @@ import { cookies } from "next/headers";
 import { getValidRedirectPath } from "@/utils/auth/redirect";
 
 export async function GET(request: Request) {
-  const baseUrl = process.env.NEXT_PUBLIC_URL && process.env.NEXT_PUBLIC_URL.trim() !== ""
-    ? process.env.NEXT_PUBLIC_URL
-    : "http://localhost:3000";
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
 
@@ -31,10 +28,8 @@ export async function GET(request: Request) {
   const email = payload.email;
 
   if (!email) {
-    return NextResponse.redirect(
-      new URL("/auth/sign-in?error=oautherror&provider=google", baseUrl),
-      302
-    );
+    const signInUrl = new URL('/auth/sign-in?error=oautherror&provider=google', request.url).toString();
+    return NextResponse.redirect(signInUrl, 302);
   }
 
   // Only allow OAuth sign‑in if a user with the email already exists
@@ -50,10 +45,8 @@ export async function GET(request: Request) {
   }
 
   if (!user) {
-    return NextResponse.redirect(
-      new URL("/auth/sign-in?error=usernotfound&provider=google", baseUrl),
-      302
-    );
+    const signInUrl = new URL('/auth/sign-in?error=usernotfound&provider=google', request.url).toString();
+    return NextResponse.redirect(signInUrl, 302);
   }
 
   // If user's googleOAuthID is not set, update it
@@ -71,7 +64,8 @@ export async function GET(request: Request) {
   const redirectPath = getValidRedirectPath(gotoCookie?.value);
 
   // Create response with redirect and clear the goto cookie
-  const response = NextResponse.redirect(new URL(redirectPath, baseUrl), 302);
+  const redirectUrl = new URL(redirectPath, request.url).toString();
+  const response = NextResponse.redirect(redirectUrl, 302);
   response.cookies.delete('polarlearn.goto');
 
   return response;

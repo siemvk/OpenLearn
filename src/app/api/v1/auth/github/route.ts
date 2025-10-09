@@ -7,11 +7,7 @@ import { getValidRedirectPath } from "@/utils/auth/redirect";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const code = searchParams.get("code");
-
-  const baseUrl = process.env.NEXT_PUBLIC_URL && process.env.NEXT_PUBLIC_URL.trim() !== ""
-    ? process.env.NEXT_PUBLIC_URL
-    : "http://localhost:3000";
+  const code = searchParams.get("code");;
 
   if (!code) {
     const url = await getGithubAuthUrl();
@@ -33,10 +29,7 @@ export async function GET(request: Request) {
       email = primaryEmailObj.email;
       githubProfile.email = email;
     } else {
-      return NextResponse.redirect(
-        new URL("/auth/sign-in?error=oautherror&provider=github", baseUrl),
-        302
-      );
+      return NextResponse.redirect("/auth/sign-in?error=oautherror&provider=github", 302);
     }
   }
 
@@ -53,10 +46,7 @@ export async function GET(request: Request) {
   }
 
   if (!user) {
-    return NextResponse.redirect(
-      new URL("/auth/sign-in?error=usernotfound&provider=github", baseUrl),
-      302
-    );
+    return NextResponse.redirect("/auth/sign-in?error=usernotfound&provider=github", 302);
   }
 
   if (!user.githubOAuthID) {
@@ -73,7 +63,7 @@ export async function GET(request: Request) {
   const redirectPath = getValidRedirectPath(gotoCookie?.value);
 
   // Create response with redirect and clear the goto cookie
-  const response = NextResponse.redirect(new URL(redirectPath, baseUrl), 302);
+  const response = NextResponse.redirect(redirectPath, 302);
   response.cookies.delete('polarlearn.goto');
 
   return response;

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { transporter } from "../mail";
 import { Prisma } from "@prisma/client";
 import { Embed, Webhook } from '@vermaysha/discord-webhook'
+import { getUserFromSession } from './auth'
 const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
 
 interface PasswordActionResult {
@@ -315,6 +316,25 @@ export async function resetUserPassword(userId: string): Promise<PasswordActionR
       }
     });
 
+    // Notify via Discord webhook (do not include plaintext password)
+    try {
+      let adminIdentifier = 'unknown'
+      try {
+        const admin = await getUserFromSession()
+        if (admin) adminIdentifier = admin.name ?? admin.email ?? admin.id
+      } catch { /* ignore */ }
+
+      const embed = new Embed()
+        .setTitle('Wachtwoord gereset')
+        .setDescription(`Het wachtwoord voor gebruiker ${userId} is gereset (willekeurig gegenereerd).\nActie door: ${adminIdentifier}`)
+        .setColor('#ff9900')
+        .setTimestamp()
+      hook.addEmbed(embed)
+      await hook.send()
+    } catch (webhookErr) {
+      console.warn('Failed to send password reset webhook:', webhookErr)
+    }
+
     return { success: true, tempPassword };
   } catch (error) {
     console.error("Error resetting password:", error);
@@ -338,6 +358,25 @@ export async function setCustomPassword(userId: string, password: string): Promi
       }
     });
 
+    // Notify via Discord webhook (do not include plaintext password)
+    try {
+      let adminIdentifier = 'unknown'
+      try {
+        const admin = await getUserFromSession()
+        if (admin) adminIdentifier = admin.name ?? admin.email ?? admin.id
+      } catch { /* ignore */ }
+
+      const embed = new Embed()
+        .setTitle('Wachtwoord aangepast')
+        .setDescription(`Het wachtwoord voor gebruiker ${userId} is handmatig aangepast door een admin.\nActie door: ${adminIdentifier}`)
+        .setColor('#ff9900')
+        .setTimestamp()
+      hook.addEmbed(embed)
+      await hook.send()
+    } catch (webhookErr) {
+      console.warn('Failed to send custom password webhook:', webhookErr)
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Error setting custom password:", error);
@@ -351,27 +390,42 @@ export async function deleteUser(userId: string) {
     await prisma.session.deleteMany({
       where: { userId }
     });
-    const naam = await prisma.user.findUnique({
+
+    // Fetch name before deleting so we can log it
+    const found = await prisma.user.findUnique({
       where: { id: userId },
       select: { name: true }
     });
+    const deletedName = found?.name ?? null;
+
     // Delete the user
     await prisma.user.delete({
       where: { id: userId }
     });
 
     revalidatePath('/admin');
-    hook.addEmbed(
-      new Embed()
+    // Send webhook including acting admin identity
+    try {
+      let adminIdentifier = 'unknown'
+      try {
+        const admin = await getUserFromSession()
+        if (admin) adminIdentifier = admin.name ?? admin.email ?? admin.id
+      } catch { /* ignore */ }
+
+      const embed = new Embed()
         .setTitle('Gebruiker Verwijderd')
-        .setDescription(`Gebruiker met de naam ${naam} is verwijderd`)
+        .setDescription(`Gebruiker ${deletedName ?? userId} is verwijderd.\nActie door: ${adminIdentifier}`)
         .setColor('#ff0000')
         .setTimestamp()
         .setFooter({
           text: 'Van ' + process.env.NEXT_PUBLIC_URL,
         })
-    )
-    await hook.send();
+
+      hook.addEmbed(embed)
+      await hook.send()
+    } catch (webhookErr) {
+      console.warn('Failed to send delete user webhook:', webhookErr)
+    }
     return { success: true };
   } catch (error) {
     console.error("Error deleting user:", error);

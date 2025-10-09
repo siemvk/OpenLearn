@@ -81,6 +81,8 @@
     "react-scan": "^0.4.3",
     "react-scroll-motion": "^0.3.5",
     "react-toastify": "^11.0.5",
+    "react-day-picker": "^8.4.0",
+    "date-fns": "^2.30.0",
     "rehype-highlight": "^7.0.2",
     "rehype-sanitize": "^6.0.0",
     "remark-emoji": "^5.0.2",

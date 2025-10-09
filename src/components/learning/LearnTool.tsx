@@ -1,5 +1,13 @@
 "use client";
 import { updateDailyStreak } from '../streak/updateStreak';
+import React, { useState, useEffect } from 'react';
+import { useListStore } from './listStore';
+import Button1 from '@/components/button/Button1';
+import { Input } from '../ui/input';
+import { detectTypfout } from './typfout';
+import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
+import { Progress } from '../ui/progress';
+import { motion, AnimatePresence } from 'motion/react';
 
 function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showProgress }: {
   show: boolean;
@@ -29,6 +37,7 @@ function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showP
             style={{ pointerEvents: 'auto' }}
           >
             <CircleAlert size={50} />
+            <CircleAlert size={50} />
             <h1 className="text-2xl font-bold mt-2">Je hebt een typfout gemaakt!</h1>
             <div className="mt-4 text-lg">
               <span className="block">Ingevuld: <span className="font-mono bg-neutral-900/60 px-2 py-1 rounded">{userInput}</span></span>
@@ -55,14 +64,6 @@ function TypfoutScreen({ show, userInput, correctAnswer, onMark, progress, showP
     </AnimatePresence>
   );
 }
-import React, { useState, useEffect } from 'react';
-import { useListStore } from './listStore';
-import Button1 from '@/components/button/Button1';
-import { Input } from '../ui/input';
-import { detectTypfout } from './typfout';
-import { CircleAlert, CircleCheck, CircleX } from 'lucide-react';
-import { Progress } from '../ui/progress';
-import { motion, AnimatePresence } from 'motion/react';
 
 function CorrectScreen({ show, progress, showProgress }: {
   show: boolean;

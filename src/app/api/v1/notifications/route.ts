@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserFromSession } from "@/utils/auth/auth";
 import { prisma } from "@/utils/prisma";
 import { Prisma } from "@prisma/client";
+import { Embed, Webhook } from '@vermaysha/discord-webhook'
+const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
 
 // Define notification item type
 interface NotificationItem {
@@ -45,7 +47,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    
+
     const body = await request.json();
     const { userId, content, icon = "MessageSquare" } = body;
 
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
     if (!Cuser) {
       return NextResponse.json({}, { status: 400 });
     }
-    if(Cuser.role !== 'admin'){
+    if (Cuser.role !== 'admin') {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -105,6 +107,25 @@ export async function POST(request: NextRequest) {
         notificationData: updatedData as Prisma.InputJsonValue
       }
     });
+
+    // Notify via Discord webhook (include acting admin)
+    try {
+      let adminIdentifier = 'unknown'
+      try {
+        const admin = await getUserFromSession();
+        if (admin) adminIdentifier = admin.name ?? admin.email ?? admin.id;
+      } catch { /* ignore */ }
+
+      const embed = new Embed()
+        .setTitle('Admin notificatie gestuurd')
+        .setDescription(`Admin ${adminIdentifier} stuurde een notificatie naar gebruiker ${userId}: ${content}`)
+        .setColor('#00aaff')
+        .setTimestamp()
+      hook.addEmbed(embed)
+      await hook.send()
+    } catch (webhookErr) {
+      console.warn('Failed to send admin notification webhook:', webhookErr)
+    }
 
     return NextResponse.json(
       { success: true, message: "Notificatie succesvol verzonden" },

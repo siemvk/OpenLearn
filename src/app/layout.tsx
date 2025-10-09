@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     icons: [
       {
-        url: `${process.env.NEXT_PUBLIC_URL}/icon.png`,
+        url: `/icon.png`,
         type: "image/png",
         rel: "icon",
       },
@@ -62,7 +62,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "PolarLearn",
       images: [
         {
-          url: `${process.env.NEXT_PUBLIC_URL}/banner.png`,
+          url: `/banner.png`,
           width: 1200,
           height: 630,
           alt: "PolarLearn banner dingo",

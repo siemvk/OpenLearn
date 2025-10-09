@@ -6,11 +6,13 @@ import { cookies } from "next/headers";
 import { getUserFromSession } from "./auth";
 import { createCookie } from "./session";
 import { revalidatePath } from "next/cache";
+import { Embed, Webhook } from '@vermaysha/discord-webhook'
 
 // Use the same cookie name as the normal session to make it work with the existing app
 const IMPERSONATION_COOKIE_NAME = "polarlearn.session-id";
 // Cookie to store the admin's original session while impersonating
 const ADMIN_SESSION_COOKIE_NAME = "polarlearn.admin-session";
+const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
 
 /**
  * Start impersonating a user
@@ -79,6 +81,20 @@ export async function startImpersonation(userId: string) {
 
     revalidatePath('/');
 
+    // Send webhook notifying about impersonation start (include admin identity)
+    try {
+      const adminIdentifier = admin.name ?? admin.email ?? admin.id
+      const embed = new Embed()
+        .setTitle('Impersonatie gestart')
+        .setDescription(`Admin: ${adminIdentifier}\nImpersonating: ${userToImpersonate.name ?? userToImpersonate.email ?? userToImpersonate.id}`)
+        .setColor('#ff9900')
+        .setTimestamp()
+
+      hook.addEmbed(embed)
+      await hook.send()
+    } catch (webhookErr) {
+      console.warn('Failed to send impersonation start webhook:', webhookErr)
+    }
     // Return success with user info
     return {
       success: true,
@@ -125,6 +141,38 @@ export async function endImpersonation() {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax" as const,
     });
+
+    // Try to notify via webhook which admin ended impersonation
+    try {
+      const adminCookie = await (await cookies()).get('polarlearn.admin-id')
+      let adminIdentifier = 'unknown'
+      let impersonatedIdentifier = 'unknown'
+
+      if (adminCookie?.value) {
+        try {
+          const data = JSON.parse(adminCookie.value)
+          if (data?.adminId) {
+            const adminUser = await prisma.user.findUnique({ where: { id: data.adminId } })
+            if (adminUser) adminIdentifier = adminUser.name ?? adminUser.email ?? adminUser.id
+          }
+          if (data?.impersonatingUserId) {
+            const impUser = await prisma.user.findUnique({ where: { id: data.impersonatingUserId } })
+            if (impUser) impersonatedIdentifier = impUser.name ?? impUser.email ?? impUser.id
+          }
+        } catch { /* ignore parse errors */ }
+      }
+
+      const embed = new Embed()
+        .setTitle('Impersonatie beëindigd')
+        .setDescription(`Admin: ${adminIdentifier}\nImpersonated: ${impersonatedIdentifier}`)
+        .setColor('#00cc66')
+        .setTimestamp()
+
+      hook.addEmbed(embed)
+      await hook.send()
+    } catch (webhookErr) {
+      console.warn('Failed to send impersonation end webhook:', webhookErr)
+    }
 
     revalidatePath("/");
     return { success: true };
