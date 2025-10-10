@@ -1,14 +1,13 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { GoogleAnalytics } from '@next/third-parties/google'
 
 const ANALYTICS_COOKIE_NAME = "polarlearn.enable-analytics"
 // is dit niet prive??
-const ANALYTICS_ID = "G-C17NNNRTEM"
+// const ANALYTICS_ID = "G-C17NNNRTEM"
 
 export function AnalyticsProvider() {
-    const [analyticsEnabled, setAnalyticsEnabled] = useState(false)
+    const [_analyticsEnabled, setAnalyticsEnabled] = useState(false)
 
     useEffect(() => {
         // Check for the analytics cookie

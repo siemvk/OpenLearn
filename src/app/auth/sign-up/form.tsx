@@ -7,6 +7,21 @@ import { EyeOff } from "lucide-react";
 import { Eye } from "lucide-react";
 import Honeypot from "../honeypot";
 
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string, options: {
+        sitekey: string;
+        callback: (token: string) => void | Promise<void>;
+        "error-callback"?: () => void;
+      }) => number;
+      reset: (widgetId: number) => void;
+      remove: (widgetId: number) => void;
+      execute: (widgetId: number) => void;
+    };
+  }
+}
+
 export default function SignUpForm({ turnstileEnabled = false }: { turnstileEnabled?: boolean } = {}) {
   const [usernameError, setUsernameError] = useState("");
   const [emailError, setEmailError] = useState("");

@@ -12,6 +12,21 @@ import { useState, useRef, useEffect } from "react";
 import { getValidRedirectPath, clearRedirectCookie } from "@/utils/auth/redirect";
 import Honeypot from "../honeypot";
 
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string, options: {
+        sitekey: string;
+        callback: (token: string) => void | Promise<void>;
+        "error-callback"?: () => void;
+      }) => number;
+      reset: (widgetId: number) => void;
+      remove: (widgetId: number) => void;
+      execute: (widgetId: number) => void;
+    };
+  }
+}
+
 function getCookie(cname: string) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);

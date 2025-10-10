@@ -73,9 +73,6 @@ const SettingsButton = memo(({ onFlipQuestionLangChange }: {
     // Get list ID from the store
     const listId = currentList?.list_id || '';
 
-    // Extract the actual list ID (remove custom- prefix if present)
-    const actualListId = listId.startsWith('custom-') ? listId.replace('custom-', '') : listId;
-
     // Get language info from the store
     const langFromCode = currentList?.lang_from;
     const langToCode = currentList?.lang_to;
@@ -92,7 +89,7 @@ const SettingsButton = memo(({ onFlipQuestionLangChange }: {
 
     const handleTempFlipToggle = (checked: boolean) => {
         // Don't allow changes for combined lists
-        if (actualListId.startsWith('combined-')) {
+        if (listId.startsWith('combined-')) {
             return;
         }
         setTempFlipQuestionLang(checked);
@@ -100,13 +97,13 @@ const SettingsButton = memo(({ onFlipQuestionLangChange }: {
 
     const handleSaveAndRestart = async () => {
         // Don't allow changes for combined lists
-        if (actualListId.startsWith('combined-')) {
+        if (listId.startsWith('combined-')) {
             return;
         }
 
         setLoading(true);
         try {
-            const response = await fetch(`/api/v1/lists/${actualListId}/prefs`, {
+            const response = await fetch(`/api/v1/lists/${listId}/prefs`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -143,7 +140,7 @@ const SettingsButton = memo(({ onFlipQuestionLangChange }: {
         }
     };
 
-    const isCombinedList = actualListId.startsWith('combined-');
+    const isCombinedList = listId.startsWith('combined-');
 
     return (
         <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
@@ -268,7 +265,7 @@ const HeaderLearnTool = memo(({
     onFlipQuestionLangChange,
 }: LearnToolHeaderProps) => {
     // Get stats and list info from the store
-    const { score, currentList, currentMethod, originalWordCount } = useListStore();
+    const { score, currentList, currentMethod, originalWordCount, learnListQueue, originalQueueLength } = useListStore();
     const correctAnswers = score.correct;
     const wrongAnswers = score.wrong;
 
@@ -277,20 +274,24 @@ const HeaderLearnTool = memo(({
 
     // Calculate progress based on store data if no external progress provided
     const progress = externalProgress ?? (() => {
+        // If using learnListQueue, calculate progress based on queue
+        if (learnListQueue !== null && originalQueueLength > 0) {
+            const queueCompleted = originalQueueLength - learnListQueue.length;
+            return Math.min((queueCompleted / originalQueueLength) * 100, 100);
+        }
+
+        // Otherwise use the original word count based calculation
         if (!originalWordCount || originalWordCount === 0) return 0;
         // Progress is based on words completed (removed from list) vs total original words
         const wordsCompleted = originalWordCount - (currentList?.data.length || 0);
         return Math.min((wordsCompleted / originalWordCount) * 100, 100);
     })();
-    // Check if this is a custom learning session
-    const isCustomMode = listId.startsWith('custom-');
-    const actualListId = isCustomMode ? listId.replace('custom-', '') : listId;
 
     // Check if this is a combined list (multiple lists selected)
-    const isCombinedList = actualListId.startsWith('combined-');
+    const isCombinedList = listId.startsWith('combined-');
 
     // Determine the back button URL
-    const backButtonUrl = isCombinedList ? '/home/start' : `/learn/viewlist/${actualListId}`;
+    const backButtonUrl = isCombinedList ? '/home/start' : `/learn/viewlist/${listId}`;
 
     // Memoize the learning methods to prevent unnecessary re-renders
     const learningMethods = useMemo((): [React.ReactNode, string][] => [
@@ -305,7 +306,7 @@ const HeaderLearnTool = memo(({
                 />
                 <span className="font-medium">Leren</span>
             </div>,
-            isCustomMode ? `/learn/custom/learn` : `/learn/learnlist/${listId}`,
+            `/learn/learnlist/${listId}`,
         ],
         [
             <div key="toets" className="flex items-center">
@@ -318,7 +319,7 @@ const HeaderLearnTool = memo(({
                 />
                 <span className="font-medium">Toets</span>
             </div>,
-            isCustomMode ? `/learn/custom/test` : `/learn/test/${listId}`,
+            `/learn/test/${listId}`,
         ],
         [
             <div key="hints" className="flex items-center">
@@ -331,7 +332,7 @@ const HeaderLearnTool = memo(({
                 />
                 <span className="font-medium">Hints</span>
             </div>,
-            isCustomMode ? `/learn/custom/hints` : `/learn/hints/${listId}`,
+            `/learn/hints/${listId}`,
         ],
         [
             <div key="gedachten" className="flex items-center">
@@ -344,7 +345,7 @@ const HeaderLearnTool = memo(({
                 />
                 <span className="font-medium">In gedachten</span>
             </div>,
-            isCustomMode ? `/learn/custom/mind` : `/learn/mind/${listId}`,
+            `/learn/mind/${listId}`,
         ],
         [
             <div key="multikeuze" className="flex items-center">
@@ -357,9 +358,9 @@ const HeaderLearnTool = memo(({
                 />
                 <span className="font-medium">Multikeuze</span>
             </div>,
-            isCustomMode ? `/learn/custom/multichoice` : `/learn/multichoice/${listId}`,
+            `/learn/multichoice/${listId}`,
         ],
-    ], [isCustomMode, listId]);
+    ], [listId]);
 
     return (
         <>

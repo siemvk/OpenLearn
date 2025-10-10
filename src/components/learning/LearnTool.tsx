@@ -421,23 +421,26 @@ export default function LearnTool() {
   };
   const displayWord = currentWord;
 
-  if ((!currentList || !currentList.data?.length) && !showResult) {
+  console.log(learnListQueue)
+
+  // Check completion: if using learnListQueue, check if queue is empty; otherwise check currentList.data
+  const isCompleted = learnListQueue
+    ? learnListQueue.length === 0
+    : (!currentList || !currentList.data?.length);
+
+  if (isCompleted && !showResult) {
 
     return (
       <div className="bg-neutral-800 rounded-lg p-8 w-full max-w-md mx-auto text-white text-center">
-        {currentList && currentList.data?.length === 0 ? (
-          <>
-            <h2 className="text-2xl font-bold mb-2">Einde van de lijst!</h2>
-            {streakUpdate?.success && streakUpdate?.streakUpdated ? (
-              <p className="text-lg text-neutral-300">
-                Je huidige streak is nu <strong>{streakUpdate.currentStreak}</strong> dagen!
-              </p>
-            ) : null}
-            <p className="text-lg text-neutral-300">Je hebt alle woorden geoefend. Goed gedaan!</p>
-          </>
-        ) : (
-          <p>Er is iets misgegaan bij het laden van de lijst.</p>
-        )}
+        <>
+          <h2 className="text-2xl font-bold mb-2">Einde van de lijst!</h2>
+          {streakUpdate?.success && streakUpdate?.streakUpdated ? (
+            <p className="text-lg text-neutral-300">
+              Je huidige streak is nu <strong>{streakUpdate.currentStreak}</strong> dagen!
+            </p>
+          ) : null}
+          <p className="text-lg text-neutral-300">Je hebt alle woorden geoefend. Goed gedaan!</p>
+        </>
       </div>
     );
   }

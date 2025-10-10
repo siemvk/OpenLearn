@@ -38,6 +38,7 @@ export interface ListStoreState {
   currentWord: ListItem | null;
   currentMethod: string | null; // Current learning method (learnlist, hints, test, etc.)
   originalWordCount: number; // Total words at start (for progress calculation)
+  originalQueueLength: number; // Total queue items at start (for learnlist progress)
   flipQuestionLang: boolean; // Whether question/answer languages are flipped
   learnListQueue: { word: string; mode: string; answer: string; mcOpts?: string[] }[] | null;
   score: { correct: number; wrong: number };
@@ -70,6 +71,7 @@ export const createListStore = (initData?: { list?: List; method?: string; flipQ
     currentWord: initData?.list?.data?.[0] || null, // Set first word immediately for SSR
     currentMethod: initData?.method || null,
     originalWordCount: initData?.list?.data?.length || 0, // Track original count for progress
+    originalQueueLength: initData?.learnListQueue?.length || 0, // Track original queue length for learnlist progress
     flipQuestionLang: initData?.flipQuestionLang || false,
     learnListQueue: initData?.learnListQueue || null,
     score: { correct: 0, wrong: 0 },

@@ -1,6 +1,11 @@
 import ConstructionImg from "@/components/constructionImg";
 
-export default function AchievementsTabContent() {
+interface AchievementsTabContentProps {
+    userId: string;
+    isOwnProfile: boolean;
+}
+
+export default function AchievementsTabContent({ userId: _userId, isOwnProfile: _isOwnProfile }: AchievementsTabContentProps) {
     return (
         <div className="mt-4">
             {/* Achievements content will go here */}
