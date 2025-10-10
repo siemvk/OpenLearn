@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Play, Trash } from "lucide-react";
 
 interface SessionButtonsProps {
   listId: string;
@@ -87,11 +88,13 @@ export default function SessionButtons({ listId, sessions }: SessionButtonsProps
           <Button1
             text="Sessie hervatten"
             onClick={handleResume}
+            icon={<Play />}
           />
           <Button1
             text={isDeleting ? "Verwijderen..." : "Sessie verwijderen"}
             onClick={handleDeleteClick}
             disabled={isDeleting}
+            icon={<Trash className="text-red-500"/>}
           />
         </div>
       </div>
