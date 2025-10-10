@@ -77,7 +77,7 @@ Geprobeerde pad: ${pathname}
     ? ""
     : `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' ${process.env.NEXT_PUBLIC_URL} https://*.cloudflare.com https://*.sentry.io https://*.google.com;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.cloudflare.com https://*.sentry.io https://*.google.com;
     worker-src 'self' blob:;
     ${process.env.TURNSTILE_SECRET_KEY && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? "frame-src 'self' https://challenges.cloudflare.com;" : ""}
     style-src 'self' 'unsafe-inline';
@@ -87,7 +87,7 @@ Geprobeerde pad: ${pathname}
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    connect-src 'self' ${process.env.NEXT_PUBLIC_URL} https://*.cloudflare.com https://*.sentry.io https://*.google.com *;
+    connect-src 'self' https://*.cloudflare.com https://*.sentry.io https://*.google.com *;
     upgrade-insecure-requests;`.replace(/\s{2,}/g, " ").trim();
 
   const resp = NextResponse.next();
@@ -176,5 +176,5 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
 
 export const config = {
   runtime: "nodejs",
-  matcher: ["/:path*"], // Apply middleware to all paths, skip static/API inside the function
+  matcher: ["/:path*"],
 };

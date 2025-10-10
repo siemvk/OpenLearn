@@ -1,6 +1,5 @@
 // filepath: src/app/home/forum/layout.tsx
 import { getUserFromSession } from "@/utils/auth/auth";
-import { cookies } from "next/headers";
 import ForumHeaderTabs from "@/components/ForumHeaderTabs";
 import { ReactNode } from "react";
 import { prisma } from "@/utils/prisma";

@@ -39,11 +39,6 @@ type CreatePostResult =
   | { success: true; postId: string }
   | { success: false; error: string };
 
-// Export a function to get the form schema
-async function getFormSchema() {
-  return formSchema;
-}
-
 export async function createPostServer(
   formData: z.infer<typeof formSchema>
 ): Promise<CreatePostResult> {

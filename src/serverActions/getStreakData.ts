@@ -52,13 +52,9 @@ export async function getStreakData(): Promise<StreakData> {
     freezeCount = freezeCount ?? 0;
     streakData = streakData ?? {};
 
-    const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-    // Check if user has activity today
-    const hasActivityToday = (streakData as Record<string, string>)[today] === 'done';
 
     // Check if user had activity yesterday (or used a freeze)
     let yesterdayActivity = (streakData as Record<string, string>)[yesterdayStr];

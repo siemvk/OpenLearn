@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Button1 from "@/components/button/Button1";
 import ReactMarkdown from 'react-markdown';
-import Tabs, { TabItem } from "@/components/Tabs";
+import Tabs from "@/components/Tabs";
 import { SelectCategoryCombobox } from "@/app/home/forum/selectCategoryCombobox";
 import { Combobox } from "@/app/home/forum/selectSubjCombobox";
 import { ForumFormValues } from "@/hooks/useForumCreation";

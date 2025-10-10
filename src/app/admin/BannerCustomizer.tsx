@@ -50,7 +50,7 @@ const BannerCustomizer: React.FC = () => {
       store.setState({ message: text, color });
       toast.success('Banner opgeslagen!');
     } catch (e) {
-      toast.error('Fout bij opslaan van banner');
+      toast.error('Fout bij opslaan van banner: ' + (e as Error).message);
     }
   };
 

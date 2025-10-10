@@ -22,7 +22,7 @@ export default function GroupsTabContent({
     const [groupsData, setGroupsData] = useState(initialGroupsData);
     const [groupsHasMore, setGroupsHasMore] = useState(initialGroupsData.length < initialGroupsTotal);
     const [groupsTotal, setGroupsTotal] = useState(initialGroupsTotal);
-    const [userMapById, setUserMapById] = useState(initialUserMapById); // Store if needed later
+    const [_userMapById, setUserMapById] = useState(initialUserMapById); // Store if needed later
     const [loadingGroups, setLoadingGroups] = useState(false);
 
     const loadMoreGroups = async () => {

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { getPendingApprovals, handleMembershipRequest } from "@/serverActions/groupActions";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Jdenticon from "@/components/Jdenticon";
 import { Check, X, Loader2 } from "lucide-react";
 import Button1 from "@/components/button/Button1";

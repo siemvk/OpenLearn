@@ -32,11 +32,6 @@ export default function DeleteListButton({
     const router = useRouter();
     const pathname = usePathname();
 
-    // If we're not the creator and not explicitly passing isCreator=true, don't show button
-    if (!isCreator) {
-        return null;
-    }
-
     const handleDelete = useCallback(async () => {
         setIsDeleting(true);
         try {
@@ -67,6 +62,11 @@ export default function DeleteListButton({
             setOpen(false);
         }
     }, [listId, router, pathname, groupId]);
+
+    // If we're not the creator and not explicitly passing isCreator=true, don't show button
+    if (!isCreator) {
+        return null;
+    }
 
     // Use event.stopPropagation to prevent triggering the link click when clicking the delete button
     return (

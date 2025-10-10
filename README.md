@@ -67,7 +67,7 @@ Wil je PolarLearn op een school gebruiken? Laat het ons weten, zodat wij je kunn
 > Het zou fijn zijn als je zou [doneren](https://ko-fi.com/polarnl). Bedankt!
 
 join onze [Discordserver](https://discord.gg/TdYzXDzqSB)
-Je kan bijdragen aan PolarLearn door de code te downloaden (`git pull https://github.com/polarnl/polarlearn`) en te kijken wat je kan verbeteren. Ook kan je een issue aanmaken als je een bug hebt gevonden of een nieuwe functie wilt. Als je een feature request hebt, kan je ook een pull request aanmaken. Zie [CONTRIBUTING.md](https://github.com/polarnl/PolarLearn/blob/stable/CONTRIBUTING.md) voor meer informatie.
+Je kan bijdragen aan PolarLearn door de code te downloaden (`git clone https://github.com/polarnl/polarlearn`) en te kijken wat je kan verbeteren. Ook kan je een issue aanmaken als je een bug hebt gevonden of een nieuwe functie wilt. Als je een feature request hebt, kan je ook een pull request aanmaken. Zie [CONTRIBUTING.md](https://github.com/polarnl/PolarLearn/blob/stable/CONTRIBUTING.md) voor meer informatie.
 
 Als je een suggestie hebt voor een nieuwe functie of er is een fout in het systeem, ga dan naar de [issue pagina van GitHub](https://github.com/polarnl/PolarLearn/issues), en maak daar een nieuwe issue aan. Label hem correct en wees duidelijk en je functie komt er misschien wel in! Je kan ook in de [discord chat](https://discord.gg/TdYzXDzqSB) praten en contact opnemen.
 

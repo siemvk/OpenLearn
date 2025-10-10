@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -25,7 +24,6 @@ export default function SettingsForm({
     initialName,
     initialDescription,
     initialEveryoneCanAddLists,
-    isCreator
 }: SettingsFormProps) {
     const [name, setName] = useState(initialName);
     const [description, setDescription] = useState(initialDescription);

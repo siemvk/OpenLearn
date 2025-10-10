@@ -3,7 +3,6 @@
 import { getUserFromSession } from "@/utils/auth/auth"
 import { cookies } from "next/headers"
 import { prisma } from "@/utils/prisma"
-import { Prisma } from "@prisma/client"
 
 // Define notification item type
 interface NotificationItem {

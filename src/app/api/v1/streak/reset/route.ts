@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getUserFromSession } from '@/utils/auth/auth';
 import { prisma } from '@/utils/prisma';
 import { cookies } from 'next/headers';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const sessionId = (await cookies()).get("polarlearn.session-id")?.value as string;
     const session = await getUserFromSession(sessionId);

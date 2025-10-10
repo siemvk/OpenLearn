@@ -7,6 +7,8 @@ import Button1 from "@/components/button/Button1"
 import { banUserForum, banUserPlatform, unbanUserForum, unbanUserPlatform } from "@/utils/auth/ban"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
+import { useState as useStateLocal } from "react"
 
 interface DeletePostButtonProps {
     userId: string
@@ -23,6 +25,7 @@ function DeletePostButton({
 }: DeletePostButtonProps) {
     const [open, setOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [banDate, setBanDate] = useStateLocal<Date | undefined | null>(null)
     const router = useRouter()
 
     const handleDelete = useCallback(async () => {
@@ -30,15 +33,16 @@ function DeletePostButton({
         try {
             document.getElementById("Reden")?.setAttribute("disabled", "true")
             const reason = document.getElementById("Reden") as HTMLInputElement
+            const banEnd = banDate ? new Date(banDate).toISOString() : undefined
             if (platform) {
                 if (!unban) {
-                    await banUserPlatform(userId, reason.value || 'onbekend');
+                    await banUserPlatform(userId, reason.value || 'onbekend', banEnd);
                 } else {
                     await unbanUserPlatform(userId);
                 }
             } else {
                 if (!unban) {
-                    await banUserForum(userId, reason.value || 'onbekend');
+                    await banUserForum(userId, reason.value || 'onbekend', banEnd);
                 } else {
                     await unbanUserForum(userId);
                 }
@@ -46,7 +50,7 @@ function DeletePostButton({
             setIsDeleting(false)
             setOpen(false)
             router.refresh()
-        } catch (error) {
+        } catch {
 
         }
     }, [userId, router])
@@ -85,6 +89,8 @@ function DeletePostButton({
                         <div className="grid w-full max-w-sm items-center gap-1.5">
                             <Label htmlFor="Reden">Reden</Label>
                             <Input id="Reden" placeholder="Reden voor verbanning" />
+                            <Label htmlFor="BanEnd">Einddatum (optioneel)</Label>
+                            <DatePicker value={banDate ?? undefined} onSelect={(d) => setBanDate(d)} placeholder="Kies datum" />
                         </div>) : ""}
 
                     <div className="flex justify-end space-x-2 mt-4">

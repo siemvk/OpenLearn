@@ -1,6 +1,19 @@
 'use server'
 
+import { getUserFromSession } from '@/utils/auth/auth'
 import { prisma } from '@/utils/prisma'
+
+import { Embed, Webhook } from '@vermaysha/discord-webhook'
+
+async function sendDiscordEmbed(embed: Embed) {
+  try {
+    const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
+    hook.addEmbed(embed)
+    await hook.send()
+  } catch (err) {
+    console.warn('Failed to send discord embed:', err)
+  }
+}
 
 export async function getSystemMessage() {
   try {
@@ -19,13 +32,22 @@ export async function getSystemMessage() {
 }
 
 export async function setSystemMessage({ message, color }: { message: string; color: string }) {
+  let adminIdentifier = 'unknown'
   try {
+    const admin = await getUserFromSession()
+    if (admin) adminIdentifier = admin.name ?? admin.email ?? admin.id
     const value = JSON.stringify({ message, color })
     await prisma.config.upsert({
       where: { key: 'systemMessage' },
       update: { value },
       create: { key: 'systemMessage', value },
     })
+    const embed = new Embed()
+      .setTitle('Systeembanner gezet')
+      .setDescription(`Met tekst: ${message}\nKleur: ${color}\nActie door: ${adminIdentifier}`)
+      .setColor('#ff9900')
+      .setTimestamp()
+    await sendDiscordEmbed(embed)
     return { success: true }
   } catch (e) {
     console.error('setSystemMessage failed', e)
@@ -34,8 +56,17 @@ export async function setSystemMessage({ message, color }: { message: string; co
 }
 
 export async function clearSystemMessage() {
+  let adminIdentifier = 'unknown'
   try {
     await prisma.config.delete({ where: { key: 'systemMessage' } });
+    const admin = await getUserFromSession()
+    if (admin) adminIdentifier = admin.name ?? admin.email ?? admin.id
+    const embed = new Embed()
+      .setTitle('Systeembanner verwijderd')
+      .setDescription(`Systeembanner is verwijderd.\nActie door: ${adminIdentifier}`)
+      .setColor('#ff9900')
+      .setTimestamp()
+    await sendDiscordEmbed(embed)
   } catch (e: any) {
     // If it doesn't exist, ignore; otherwise rethrow
     if (e?.code === 'P2025') return; // Prisma record not found

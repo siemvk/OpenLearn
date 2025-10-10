@@ -53,7 +53,7 @@ export default function Page() {
                 // console.error("Autosave error:", result.error);
                 // Optionally show a non-intrusive error to the user
             }
-        } catch (error) {
+        } catch {
             // console.error("Autosave exception:", error);
         } finally {
             setIsSaving(false);

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import Jdenticon from "@/components/Jdenticon";
 import SendNotificationButton from "./SendNotificationButton";
 import BanButton from "./banButton";

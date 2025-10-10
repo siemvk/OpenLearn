@@ -1,11 +1,4 @@
 "use client";
-// Beste developer,
-// Ik heb mijn tijd enorm verspilt aan alle animaties maken.
-// Het zou fijn zijn als jij de animatie zou maken voor als de gebruiker een paar loslaat,
-// dus dat het mooi beweegt naar zijn plek.
-// ik heb dit al geprobeerd te doen, maar dat is verschrikkelijk mislukt.
-// const wastedHours = 4
-// Met vriendelijke groeten, andrei1010
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -45,7 +38,6 @@ async function sendListRequest(listData: any) {
   return response.json();
 }
 
-// import { createListAction } from "@/serverActions/createList";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -121,15 +113,13 @@ export default function CreateListTool({
 }: {
   listToEdit?: ListToEdit;
 }) {
-  const router = useRouter(); // Initialize router
-  const [selectedLanguage, setSelectedLanguage] = useState<string | undefined>(
-    undefined
-  );
+  const router = useRouter();
+  const [langFrom, setLangFrom] = useState<string | undefined>("NL");
+  const [langTo, setLangTo] = useState<string | undefined>("NL");
   const [listName, setListName] = useState("");
   const dropdownRef = useRef<DropdownHandle>(null);
   const naarDropdownRef = useRef<DropdownHandle>(null);
-  const vanDropdownRef = useRef<DropdownHandle>(null); // NEW ref for first language dropdown
-
+  const vanDropdownRef = useRef<DropdownHandle>(null);
   const [pairs, setPairs] = useState<Pair[]>([{ id: 0, "1": "", "2": "" }]);
   const [nextId, setNextId] = useState(1);
   const [selectedPairId, setSelectedPairId] = useState<number | null>(null);
@@ -140,9 +130,6 @@ export default function CreateListTool({
   const [leftInputTranslations, setLeftInputTranslations] = useState<{ [id: number]: string }>(
     {}
   );
-  const [selectedTaal, setSelectedTaal] = useState<string | undefined>(
-    undefined
-  );
   const [selectedSubject, setSelectedSubject] = useState<
     { id: string; display: ReactNode } | undefined
   >(undefined);
@@ -150,13 +137,13 @@ export default function CreateListTool({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [autosavedListId, setAutosavedListId] = useState<string | null>(null);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [_hasChanges, setHasChanges] = useState(false);
   const debouncedSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const translationTimeoutRef = useRef<NodeJS.Timeout | null>(null); // NEW: Add timeout ref for translation debouncing
-  const reverseTranslationTimeoutRef = useRef<NodeJS.Timeout | null>(null); // NEW: Add timeout ref for reverse translation debouncing
-  const currentTranslationRequestRef = useRef<string | null>(null); // NEW: Track current translation request to prevent race conditions
-  const currentReverseTranslationRequestRef = useRef<string | null>(null); // NEW: Track current reverse translation request to prevent race conditions
+  const translationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reverseTranslationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currentTranslationRequestRef = useRef<string | null>(null);
+  const currentReverseTranslationRequestRef = useRef<string | null>(null);
   const [isTranslationButtonFocused, setIsTranslationButtonFocused] = useState(false);
   const isEditMode = listToEdit;
   const [importText, setImportText] = useState<string>("");
@@ -203,10 +190,9 @@ export default function CreateListTool({
             <p>{krijgVak(krijgVak(selectedSubject.id).van.afkorting).naam}</p>
           </div>
         );
-        vanDropdownRef.current.setValue(
-          krijgVak(selectedSubject.id).van.afkorting,
-          langDisplay
-        );
+        const fromAfkorting = krijgVak(selectedSubject.id).van.afkorting;
+        vanDropdownRef.current.setValue(fromAfkorting, langDisplay);
+        setLangFrom(fromAfkorting);
       } else {
         vanDropdownRef.current.setValue("NL", defaultDutchDisplay);
       }
@@ -229,21 +215,16 @@ export default function CreateListTool({
             <p>{krijgVak(krijgVak(selectedSubject.id).naar.afkorting).naam}</p>
           </div>
         );
-        naarDropdownRef.current.setValue(
-          krijgVak(selectedSubject.id).naar.afkorting,
-          langDisplay
-        );
+        const toAfkorting = krijgVak(selectedSubject.id).naar.afkorting;
+        naarDropdownRef.current.setValue(toAfkorting, langDisplay);
+        setLangTo(toAfkorting);
       } else {
         naarDropdownRef.current.setValue("NL", defaultDutchDisplay);
       }
     }
   }, [selectedSubject]);
 
-  useEffect(() => {
-    if (selectedSubject) {
-      setSelectedTaal(selectedSubject.id);
-    }
-  }, [selectedSubject]);
+  // When selectedSubject changes we already handle langFrom/langTo above
 
   useEffect(() => {
     // On load, default both language dropdowns to Dutch.
@@ -260,9 +241,11 @@ export default function CreateListTool({
     );
     if (vanDropdownRef.current) {
       vanDropdownRef.current.setValue("NL", defaultDutchDisplay);
+      setLangFrom("NL");
     }
     if (naarDropdownRef.current) {
       naarDropdownRef.current.setValue("NL", defaultDutchDisplay);
+      setLangTo("NL");
     }
   }, []);
 
@@ -296,11 +279,7 @@ export default function CreateListTool({
             </div>
           );
 
-          setSelectedSubject({
-            id: listToEdit.subject,
-            display: subjectDisplay,
-          });
-          setSelectedLanguage(listToEdit.subject);
+          setSelectedSubject({ id: listToEdit.subject, display: subjectDisplay });
 
           if (dropdownRef.current) {
             dropdownRef.current.setValue(listToEdit.subject, subjectDisplay);
@@ -446,8 +425,9 @@ export default function CreateListTool({
   ): Promise<void> => {
     if (!word.trim()) return;
 
-    const fromLang = vanDropdownRef.current?.getSelectedItem();
-    const toLang = naarDropdownRef.current?.getSelectedItem();
+    // Prefer explicit state, fall back to dropdown refs
+    const fromLang = langFrom || vanDropdownRef.current?.getSelectedItem();
+    const toLang = langTo || naarDropdownRef.current?.getSelectedItem();
 
     // Only translate if both languages are set and different
     if (fromLang && toLang && fromLang !== toLang) {
@@ -478,8 +458,9 @@ export default function CreateListTool({
   ): Promise<void> => {
     if (!word.trim()) return;
 
-    const fromLang = naarDropdownRef.current?.getSelectedItem();
-    const toLang = vanDropdownRef.current?.getSelectedItem();
+    // Prefer explicit state, fall back to dropdown refs
+    const fromLang = langTo || naarDropdownRef.current?.getSelectedItem();
+    const toLang = langFrom || vanDropdownRef.current?.getSelectedItem();
 
     // Only translate if both languages are set and different
     if (fromLang && toLang && fromLang !== toLang) {
@@ -514,8 +495,8 @@ export default function CreateListTool({
   ): Promise<void> => {
     if (!word.trim() || !autotranslateEnabled) return;
 
-    const fromLang = vanDropdownRef.current?.getSelectedItem();
-    const toLang = naarDropdownRef.current?.getSelectedItem();
+    const fromLang = langFrom || vanDropdownRef.current?.getSelectedItem();
+    const toLang = langTo || naarDropdownRef.current?.getSelectedItem();
 
     // Only autotranslate if both languages are set and different
     if (fromLang && toLang && fromLang !== toLang) {
@@ -564,10 +545,33 @@ export default function CreateListTool({
 
   // Add constant to check if the selected subject is a language
   const isLanguage =
-    selectedLanguage &&
-    krijgTaalVaken()
-      .map((vak) => vak.afkorting)
-      .includes(selectedLanguage);
+    Boolean(
+      selectedSubject &&
+      krijgTaalVaken().map((vak) => vak.afkorting).includes(selectedSubject.id)
+    );
+
+  // small reusable translation suggestion button
+  function TranslationButton({
+    text,
+    onApply,
+    align = "end",
+  }: {
+    text: string;
+    onApply: () => void;
+    align?: "start" | "end";
+  }) {
+    return (
+      <div className={`mt-2 border-t border-neutral-600 pt-2 flex justify-${align}`}>
+        <div
+          data-translation-button="true"
+          onFocus={() => setIsTranslationButtonFocused(true)}
+          onBlur={() => setIsTranslationButtonFocused(false)}
+        >
+          <Button1 text={text} tabIndex={0} onClick={onApply} />
+        </div>
+      </div>
+    );
+  }
 
   // Function to autosave the list - simplified for reliability
   const autosaveList = async () => {
@@ -581,7 +585,6 @@ export default function CreateListTool({
     try {
       // Make sure we have minimal required data
       const formattedPairs = pairs.map((pair) => ({
-        id: pair.id,
         "1": pair["1"] || "",
         "2": pair["2"] || "",
       }));
@@ -591,8 +594,8 @@ export default function CreateListTool({
         name: listName || "Naamloze Lijst",
         mode: "list",
         data: formattedPairs,
-        lang_from: vanDropdownRef.current?.getSelectedItem() || "NL",
-        lang_to: naarDropdownRef.current?.getSelectedItem() || "NL",
+        lang_from: langFrom || vanDropdownRef.current?.getSelectedItem() || "NL",
+        lang_to: langTo || naarDropdownRef.current?.getSelectedItem() || "NL",
         subject: selectedSubject.id,
         autosave: true,
         published: false,
@@ -649,35 +652,23 @@ export default function CreateListTool({
     }
   }, [selectedSubject]);
 
-  // Monitor language dropdowns for autotranslate
+  // Monitor language selections for autotranslate: enable when both languages are set and different
   useEffect(() => {
-    const checkAutotranslate = () => {
-      const fromLang = vanDropdownRef.current?.getSelectedItem();
-      const toLang = naarDropdownRef.current?.getSelectedItem();
+    const fromLang = langFrom || vanDropdownRef.current?.getSelectedItem();
+    const toLang = langTo || naarDropdownRef.current?.getSelectedItem();
 
-      // Enable autotranslate when both languages are set and different
-      const shouldEnable = Boolean(
-        fromLang &&
-        toLang &&
-        fromLang !== toLang &&
-        krijgTaalVaken().some((vak) => vak.afkorting === fromLang) &&
-        krijgTaalVaken().some((vak) => vak.afkorting === toLang)
-      );
+    const shouldEnable = Boolean(
+      fromLang &&
+      toLang &&
+      fromLang !== toLang &&
+      krijgTaalVaken().some((vak) => vak.afkorting === fromLang) &&
+      krijgTaalVaken().some((vak) => vak.afkorting === toLang)
+    );
 
-      setAutotranslateEnabled(shouldEnable);
-    };
-
-    // Check immediately
-    checkAutotranslate();
-
-    // Set up periodic check to detect dropdown changes
-    const interval = setInterval(checkAutotranslate, 100);
-
-    return () => clearInterval(interval);
-  }, []);
+    setAutotranslateEnabled(shouldEnable);
+  }, [langFrom, langTo, selectedSubject]);
 
   async function publishList() {
-    // Same validation as saveList
     if (!listName.trim()) {
       toast.error("Voer een naam in voor de lijst.");
       return;
@@ -693,7 +684,6 @@ export default function CreateListTool({
     }
 
     const formattedPairs = pairs.map((pair) => ({
-      id: pair.id,
       "1": pair["1"] || "",
       "2": pair["2"] || "",
     }));
@@ -703,8 +693,8 @@ export default function CreateListTool({
       name: listName || "Naamloze Lijst",
       mode: "list",
       data: formattedPairs,
-      lang_from: vanDropdownRef.current?.getSelectedItem(),
-      lang_to: naarDropdownRef.current?.getSelectedItem(),
+      lang_from: langFrom || vanDropdownRef.current?.getSelectedItem(),
+      lang_to: langTo || naarDropdownRef.current?.getSelectedItem(),
       subject: selectedSubject.id,
       published: true, // Explicitly publish the list
     };
@@ -733,59 +723,33 @@ export default function CreateListTool({
     }
   }
 
-  async function logRawData() {
-    const listData = {
-      name: listName,
-      mode: "list",
-      data: pairs,
-      lang_from: vanDropdownRef.current?.getSelectedItem(),
-      lang_to: naarDropdownRef.current?.getSelectedItem(),
-      subject: selectedSubject?.id, // Include the subject
-    };
-  }
+  // removed debug helper logRawData
 
-  const parseCsv = (csvContent: string): string[][] => {
-    const lines = csvContent.split("\n");
-    const result: string[][] = [];
-
-    for (const line of lines) {
-      if (line.trim() === "") continue;
-
-      const row: string[] = [];
-      let current = "";
-      let inQuotes = false;
-
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-
-        if (char === '"') {
-          if (inQuotes && line[i + 1] === '"') {
-            // Escaped quote
-            current += '"';
-            i++; // Skip next quote
-          } else {
-            // Toggle quotes
-            inQuotes = !inQuotes;
-          }
-        } else if (char === "," && !inQuotes) {
-          // End of field
-          row.push(current.trim());
-          current = "";
-        } else {
-          current += char;
+  // compact CSV parser: handles quoted fields and commas
+  const parseCsv = (csvContent: string): string[][] =>
+    csvContent
+      .split(/\r?\n/) // lines
+      .map((line) => {
+        if (!line) return [];
+        const res: string[] = [];
+        let cur = "",
+          inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQ && line[i + 1] === '"') {
+              cur += '"';
+              i++;
+            } else inQ = !inQ;
+          } else if (ch === "," && !inQ) {
+            res.push(cur.trim());
+            cur = "";
+          } else cur += ch;
         }
-      }
-
-      // Add the last field
-      row.push(current.trim());
-
-      if (row.some((cell) => cell !== "")) {
-        result.push(row);
-      }
-    }
-
-    return result;
-  };
+        if (cur !== "") res.push(cur.trim());
+        return res;
+      })
+      .filter((r) => r.length && r.some((c) => c !== ""));
 
   const handleCsvImport = useCallback(
     (csvContent: string) => {
@@ -1038,7 +1002,6 @@ export default function CreateListTool({
               selectorMode={true}
               onChangeSelected={(selected) => {
                 setSelectedSubject(selected);
-                setSelectedLanguage(selected.id);
               }}
               zIndex={50}
             />
@@ -1081,10 +1044,8 @@ export default function CreateListTool({
                       content: (
                         <div className="mt-4">
                           <p className="text-sm text-neutral-400 mb-3">
-                            Ondersteunde formaten:
-                            <br />• Elk item op één regel: "woord : vertaling"
-                            <br />• Afwisselende regels: woord en vertaling op
-                            aparte regels
+                            Ondersteunde formaten: "woord:vertaling" of
+                            afwisselende regels
                           </p>
                           <Textarea
                             value={importText}
@@ -1101,10 +1062,7 @@ export default function CreateListTool({
                       content: (
                         <div className="mt-4">
                           <p className="text-sm text-neutral-400 mb-3">
-                            Upload een CSV bestand met twee kolommen:
-                            <br />• Eerste kolom: woord/begrip
-                            <br />• Tweede kolom: vertaling/uitleg
-                            <br />• Geen headers vereist
+                            Upload een CSV met twee kolommen (geen headers).
                           </p>
                           <div
                             className="border-2 border-dashed border-neutral-600 rounded-lg p-6 text-center hover:border-neutral-500 transition-colors"
@@ -1181,7 +1139,7 @@ export default function CreateListTool({
                 width={200}
                 dropdownMatrix={languageEntries}
                 selectorMode={true}
-                onChange={(selected) => setSelectedTaal(selected)}
+                onChange={(selected) => setLangFrom(selected.id)}
                 zIndex={50}
               />
             </div>
@@ -1192,6 +1150,7 @@ export default function CreateListTool({
                 width={200}
                 dropdownMatrix={languageEntries}
                 selectorMode={true}
+                onChange={(selected) => setLangTo(selected.id)}
                 zIndex={50}
               />
             </div>
@@ -1278,10 +1237,7 @@ export default function CreateListTool({
                               placeholder={
                                 isLanguage
                                   ? "Woord in het " +
-                                  (krijgVak(
-                                    vanDropdownRef.current?.getSelectedItem() ||
-                                    "NL"
-                                  )?.naam || "")
+                                  (krijgVak(langFrom || vanDropdownRef.current?.getSelectedItem() || "NL")?.naam || "")
                                   : "Begrip"
                               }
                               data-pair-id={pair.id}
@@ -1391,120 +1347,48 @@ export default function CreateListTool({
                         {translations[pair.id] &&
                           selectedPairId === pair.id &&
                           selectedInput === "secondInput" && (
-                            <div className="mt-2 border-t border-neutral-600 pt-2 flex justify-end">
-                              <div
-                                data-translation-button="true"
-                                onFocus={() => setIsTranslationButtonFocused(true)}
-                                onBlur={() => setIsTranslationButtonFocused(false)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    setPairs((p) =>
-                                      p.map((innerPair) =>
-                                        innerPair.id === pair.id
-                                          ? {
-                                            ...innerPair,
-                                            "2": translations[pair.id],
-                                          }
-                                          : innerPair
-                                      )
-                                    );
-                                    setTranslations((prev) => {
-                                      const { [pair.id]: removed, ...rest } =
-                                        prev;
-                                      return rest;
-                                    });
-                                    // Clear the selection state after applying translation
-                                    setSelectedPairId(null);
-                                    setSelectedInput(null);
-                                  }
-                                }}
-                              >
-                                <Button1
-                                  text={translations[pair.id]}
-                                  tabIndex={0}
-                                  onClick={() => {
-                                    setPairs((p) =>
-                                      p.map((innerPair) =>
-                                        innerPair.id === pair.id
-                                          ? {
-                                            ...innerPair,
-                                            "2": translations[pair.id],
-                                          }
-                                          : innerPair
-                                      )
-                                    );
-                                    setTranslations((prev) => {
-                                      const { [pair.id]: removed, ...rest } =
-                                        prev;
-                                      return rest;
-                                    });
-                                    // Clear the selection state after applying translation
-                                    setSelectedPairId(null);
-                                    setSelectedInput(null);
-                                  }}
-                                />
-                              </div>
-                            </div>
+                            <TranslationButton
+                              text={translations[pair.id]}
+                              align="end"
+                              onApply={() => {
+                                setPairs((p) =>
+                                  p.map((innerPair) =>
+                                    innerPair.id === pair.id
+                                      ? { ...innerPair, "2": translations[pair.id] }
+                                      : innerPair
+                                  )
+                                );
+                                setTranslations((prev) => {
+                                  const { [pair.id]: _, ...rest } = prev;
+                                  return rest;
+                                });
+                                setSelectedPairId(null);
+                                setSelectedInput(null);
+                              }}
+                            />
                           )}
                         {leftInputTranslations[pair.id] &&
                           selectedPairId === pair.id &&
                           selectedInput === "word" && (
-                            <div className="mt-2 border-t border-neutral-600 pt-2 flex justify-start">
-                              <div
-                                data-translation-button="true"
-                                onFocus={() => setIsTranslationButtonFocused(true)}
-                                onBlur={() => setIsTranslationButtonFocused(false)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    setPairs((p) =>
-                                      p.map((innerPair) =>
-                                        innerPair.id === pair.id
-                                          ? {
-                                            ...innerPair,
-                                            "1": leftInputTranslations[pair.id],
-                                          }
-                                          : innerPair
-                                      )
-                                    );
-                                    setLeftInputTranslations((prev) => {
-                                      const { [pair.id]: removed, ...rest } =
-                                        prev;
-                                      return rest;
-                                    });
-                                    // Clear the selection state after applying translation
-                                    setSelectedPairId(null);
-                                    setSelectedInput(null);
-                                  }
-                                }}
-                              >
-                                <Button1
-                                  text={leftInputTranslations[pair.id]}
-                                  tabIndex={0}
-                                  onClick={() => {
-                                    setPairs((p) =>
-                                      p.map((innerPair) =>
-                                        innerPair.id === pair.id
-                                          ? {
-                                            ...innerPair,
-                                            "1": leftInputTranslations[pair.id],
-                                          }
-                                          : innerPair
-                                      )
-                                    );
-                                    setLeftInputTranslations((prev) => {
-                                      const { [pair.id]: removed, ...rest } =
-                                        prev;
-                                      return rest;
-                                    });
-                                    // Clear the selection state after applying translation
-                                    setSelectedPairId(null);
-                                    setSelectedInput(null);
-                                  }}
-                                />
-                              </div>
-                            </div>
+                            <TranslationButton
+                              text={leftInputTranslations[pair.id]}
+                              align="start"
+                              onApply={() => {
+                                setPairs((p) =>
+                                  p.map((innerPair) =>
+                                    innerPair.id === pair.id
+                                      ? { ...innerPair, "1": leftInputTranslations[pair.id] }
+                                      : innerPair
+                                  )
+                                );
+                                setLeftInputTranslations((prev) => {
+                                  const { [pair.id]: _, ...rest } = prev;
+                                  return rest;
+                                });
+                                setSelectedPairId(null);
+                                setSelectedInput(null);
+                              }}
+                            />
                           )}
                       </div>
                     )}
@@ -1533,9 +1417,6 @@ export default function CreateListTool({
           text={isEditMode ? "Lijst updaten" : "Lijst publiceren"}
           onClick={publishList}
         />
-        {process.env.NODE_ENV === "development" && (
-          <Button1 text="Log Raw Data" onClick={logRawData} />
-        )}
       </div>
       <div className="h-8" />
     </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Jdenticon from "@/components/Jdenticon";
 import DeletePostButton from "@/components/DeletePostButton";
 import { formatRelativeTime } from "@/utils/formatRelativeTime";

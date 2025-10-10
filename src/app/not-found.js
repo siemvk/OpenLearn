@@ -6,6 +6,6 @@ export default async function NotFound() {
         <p className="mt-2 text-2xl">Foutcode 404: Pagina niet gevonden</p>
         <Button1 text={"Terug naar home"} redirectTo={'/home/start'}/>
       </div>
-    );``
+    );
   }
   

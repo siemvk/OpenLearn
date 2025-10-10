@@ -15,12 +15,13 @@ interface RemoveListFromGroupButtonProps {
 }
 
 export default function RemoveListFromGroupButton({ groupId, listId, isCreator, isAdmin, isPlatformAdmin }: RemoveListFromGroupButtonProps) {
-  // Only show to owner, group admin or platform admin
-  const canRemove = isCreator || isAdmin || isPlatformAdmin;
-  if (!canRemove) return null;
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Only show to owner, group admin or platform admin
+  const canRemove = isCreator || isAdmin || isPlatformAdmin;
+  if (!canRemove) return null;
 
   const handleRemove = async () => {
     if (isLoading) return;

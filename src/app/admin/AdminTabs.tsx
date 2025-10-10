@@ -14,7 +14,7 @@ import JweDecoderWrapper from "./JweDecoderWrapper";
 import Tabs, { TabItem } from "@/components/Tabs";
 import { getAdminData } from "./getAdminData";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { icons, getSubjectIcon, getSubjectName } from "@/components/icons";
+import { getSubjectIcon, getSubjectName } from "@/components/icons";
 import { Users, ListTodo, School, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import SendNotificationButton from "./SendNotificationButton";

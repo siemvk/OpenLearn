@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Jdenticon from "@/components/Jdenticon";
 import {
   Card,
@@ -64,7 +64,6 @@ export default function ClientAccountSettings({ initialData }: Props) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteLists, setDeleteLists] = useState(false);
   const [deleteForumPosts, setDeleteForumPosts] = useState(false);
-  const [exportLoading, setExportLoading] = useState(false);
   const [profilePictureLoading, setProfilePictureLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -108,7 +107,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
       }
     } catch (err) {
       toast.error(
-        "Er is een fout opgetreden bij het opslaan van je wijzigingen."
+        "Er is een fout opgetreden bij het opslaan van je wijzigingen: " + (err as Error).message
       );
     } finally {
       setLoading(false);
@@ -144,7 +143,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
       }
     } catch (err) {
       toast.error(
-        "Er is een fout opgetreden bij het wijzigen van je wachtwoord."
+        "Er is een fout opgetreden bij het wijzigen van je wachtwoord: " + (err as Error).message
       );
     } finally {
       setPasswordLoading(false);
@@ -192,8 +191,6 @@ export default function ClientAccountSettings({ initialData }: Props) {
 
       if (result.success) {
         toast.success(result.message);
-        // Update cache buster to force fresh image loads
-        const newCacheBuster = Date.now();
 
         // Use the URL returned from the server (which already includes cache busting)
         setUserData((prev) => ({
@@ -272,7 +269,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
       }
     } catch (err) {
       toast.error(
-        "Er is een fout opgetreden bij het verwijderen van je account."
+        "Er is een fout opgetreden bij het verwijderen van je account: " + (err as Error).message
       );
     } finally {
       setDeleteLoading(false);
@@ -292,7 +289,7 @@ export default function ClientAccountSettings({ initialData }: Props) {
       }
     } catch (error) {
       toast.error(
-        "Er is een fout opgetreden bij het annuleren van de verwijdering."
+        "Er is een fout opgetreden bij het annuleren van de verwijdering: " + (error as Error).message
       );
     }
   };

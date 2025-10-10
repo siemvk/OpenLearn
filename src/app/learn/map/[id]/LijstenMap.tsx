@@ -2,9 +2,8 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import CreatorLink from '@/components/links/CreatorLink';
-import { PencilIcon, List, PlusIcon } from 'lucide-react';
+import { PencilIcon, PlusIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getSubjectIcon } from '@/components/icons';
 import Button1 from '@/components/button/Button1';
@@ -49,10 +48,8 @@ export default function LijstenMap({
   lists,
   mapId,
   isCreator,
-  currentUserName,
   availableLists,
 }: MapListsDisplayProps) {
-  const router = useRouter();
 
   return (
     <div className="space-y-6">

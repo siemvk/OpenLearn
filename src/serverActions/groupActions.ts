@@ -389,7 +389,7 @@ export async function createGroupAction({
         const groupId = uuidv4();
 
         // Create the group with proper structure
-        const group = await prisma.group.create({
+        await prisma.group.create({
             data: {
                 groupId,
                 name,

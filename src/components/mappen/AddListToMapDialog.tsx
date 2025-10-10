@@ -35,7 +35,6 @@ export default function AddListToMapDialog({ mapId, children, initialLists }: Ad
   const [availableLists, setAvailableLists] = useState<List[]>(safeInitialLists);
   const [filteredLists, setFilteredLists] = useState<List[]>(safeInitialLists);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -157,12 +156,7 @@ export default function AddListToMapDialog({ mapId, children, initialLists }: Ad
 
           {/* List content */}
           <div className="mt-4 space-y-2">
-            {isLoading ? (
-              <div className="flex flex-col justify-center items-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-neutral-400 mb-2" />
-                <p className="text-neutral-400">Lijsten laden...</p>
-              </div>
-            ) : error ? (
+            {error ? (
               <div className="text-center py-8 text-neutral-400 flex flex-col items-center">
                 <AlertCircleIcon className="h-8 w-8 mb-2 text-yellow-500" />
                 <p>{error}</p>

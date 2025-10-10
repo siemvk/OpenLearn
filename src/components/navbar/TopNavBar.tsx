@@ -22,7 +22,6 @@ import StreakNavbarThing from "../streak/streakNav";
 import NotificationNav from "../notification/notificiationNav";
 import PlusBtn from "@/components/button/plusbutton";
 import PlusBtnMb from "@/components/button/plusbuttonmobile";
-import { MessageBanner } from "../messageBanner";
 
 // SearchBar component
 const SearchBar = memo(({ onExpand }: { onExpand: () => void }) => {
@@ -213,12 +212,12 @@ const MobileMenu = memo(
   ({
     isOpen,
     onClose,
-    pathname,
     onExpandSearch,
   }: {
     isOpen: boolean;
     onClose: () => void;
     pathname: string;
+    
     onExpandSearch: () => void;
   }) => {
     const [lerenOpen, setLerenOpen] = useState(false);

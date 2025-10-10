@@ -33,7 +33,7 @@ export async function signInCredentials(
         try {
           updateData.activationToken = newActivationToken;
           updateData.scheduledDeletion = newScheduledDeletion;
-        } catch (e) {
+        } catch {
           console.warn("Prisma schema may not include activationToken/scheduledDeletion fields");
         }
 

@@ -33,7 +33,7 @@ export async function updateUserProfile(formData: FormData) {
 
         try {
             profileSchema.parse({ username, email })
-        } catch (error) {
+        } catch {
             return { success: false, message: "Ongeldige invoer. Controleer je gebruikersnaam en e-mailadres." }
         }
 

@@ -1,19 +1,9 @@
 "use server";
 
 import { prisma } from "@/utils/prisma";
-import { getUserFromSession } from "@/utils/auth/auth";
-import { cookies } from "next/headers";
-
 type SearchTabType = "lists" | "forum" | "groups" | "summaries";
 
 export async function getSearchResults(query: string, tab: SearchTabType, skip: number, take: number, category?: string) {
-    const session = await getUserFromSession(
-        (await cookies()).get("polarlearn.session-id")?.value as string
-    );
-
-    // Get current user for permission checks if needed
-    const currentUserName = session?.name;
-
     // Escape regex special characters in the query
     const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 

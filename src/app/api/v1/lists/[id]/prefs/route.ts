@@ -21,7 +21,7 @@ export async function PATCH(
     let body;
     try {
       body = await request.json()
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Ongeldige JSON' },
         { status: 400 }

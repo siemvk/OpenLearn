@@ -27,7 +27,7 @@ const EditSummaryForm: React.FC<EditSummaryFormProps> = ({ summaryId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
-    const [autosavedSummaryId, setAutosavedSummaryId] = useState<string | null>(id);
+    const [autosavedSummaryId, _setAutosavedSummaryId] = useState<string | null>(id);
 
     const dropdownRef = useRef<DropdownHandle>(null);
     const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);

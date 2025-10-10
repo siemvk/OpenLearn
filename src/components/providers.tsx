@@ -1,14 +1,12 @@
 "use client";
 
 import React from "react";
-// Removed NextStep (tour) imports
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { UserDataProvider } from "../store/user/UserDataProvider";
 import { StreakProvider } from "@/store/streak/StreakProvider";
 import { WSProvider } from "../components/ws-provider";
 import ToastProvider from "@/components/toast/toast";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
-// Removed tour components
 import ImpersonationCheck from "@/components/ImpersonationCheck";
 import ImpersonationStyles from "@/components/ImpersonationStyles";
 import { TopNavBar } from "@/components/navbar/TopNavBar";
@@ -48,13 +46,11 @@ export default function Providers({
           <ToastProvider>
             <StreakProvider streakData={streakData}>
               <WSProvider>
-                <>
-                  <ImpersonationCheck />
-                  <ImpersonationStyles />
-                  <MessageBanner />
-                  <TopNavBar isAdmin={userData.isAdmin} />
-                  {children}
-                </>
+                <ImpersonationCheck />
+                <ImpersonationStyles />
+                <MessageBanner />
+                <TopNavBar isAdmin={userData.isAdmin} />
+                {children}
                 {footerContent}
                 <AnalyticsProvider />
               </WSProvider>

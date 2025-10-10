@@ -9,7 +9,8 @@ import Image from "next/image";
 import Timer from "./Timer";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { getSubjectName, getSubjectIcon } from "@/components/icons";
+import { getSubjectName, getSubjectIcon, isLanguageSubject } from "@/components/icons";
+import { useListStore } from "@/components/learning/listStore";
 
 // Import the images for the learning methods
 import learn from "@/app/img/learn.svg";
@@ -56,27 +57,36 @@ const StatsDisplay = memo(({ correctAnswers, wrongAnswers }: { correctAnswers: n
 ));
 StatsDisplay.displayName = "StatsDisplay";
 
-const SettingsButton = memo(({ listId, listData, onFlipQuestionLangChange, initialFlipQuestionLang }: {
-    listId: string;
-    listData: any;
+const SettingsButton = memo(({ onFlipQuestionLangChange }: {
     onFlipQuestionLangChange?: (flipped: boolean) => void;
-    initialFlipQuestionLang?: boolean;
 }) => {
-    const [flipQuestionLang, setFlipQuestionLang] = useState(initialFlipQuestionLang || false);
+    const { currentList, flipQuestionLang } = useListStore();
     const [loading, setLoading] = useState(false);
-    const [tempFlipQuestionLang, setTempFlipQuestionLang] = useState(initialFlipQuestionLang || false);
+    const [tempFlipQuestionLang, setTempFlipQuestionLang] = useState(flipQuestionLang);
     const [dialogOpen, setDialogOpen] = useState(false);
+
+    // Sync temp state when store state changes
+    useEffect(() => {
+        setTempFlipQuestionLang(flipQuestionLang);
+    }, [flipQuestionLang]);
+
+    // Get list ID from the store
+    const listId = currentList?.list_id || '';
 
     // Extract the actual list ID (remove custom- prefix if present)
     const actualListId = listId.startsWith('custom-') ? listId.replace('custom-', '') : listId;
 
-    // Get language info from listData with proper names and icons
-    const langFromCode = listData?.lang_from;
-    const langToCode = listData?.lang_to;
+    // Get language info from the store
+    const langFromCode = currentList?.lang_from;
+    const langToCode = currentList?.lang_to;
     const langFrom = langFromCode ? getSubjectName(langFromCode) : 'Onbekende taal';
     const langTo = langToCode ? getSubjectName(langToCode) : 'Onbekende taal';
     const langFromIcon = langFromCode ? getSubjectIcon(langFromCode) : null;
     const langToIcon = langToCode ? getSubjectIcon(langToCode) : null;
+
+    // Check if this is a language subject based on the actual subject, not lang_from
+    const subjectCode = currentList?.subject;
+    const isLanguage = subjectCode ? isLanguageSubject(subjectCode) : false;
 
     // Preferences are now loaded server-side, no need for client-side request
 
@@ -107,7 +117,6 @@ const SettingsButton = memo(({ listId, listData, onFlipQuestionLangChange, initi
             });
 
             if (response.ok) {
-                setFlipQuestionLang(tempFlipQuestionLang);
                 // Notify parent component of the change
                 if (onFlipQuestionLangChange) {
                     onFlipQuestionLangChange(tempFlipQuestionLang);
@@ -129,7 +138,7 @@ const SettingsButton = memo(({ listId, listData, onFlipQuestionLangChange, initi
     const handleDialogOpenChange = (open: boolean) => {
         setDialogOpen(open);
         if (open) {
-            // Reset temp state to current state when opening
+            // Reset temp state to current store state when opening
             setTempFlipQuestionLang(flipQuestionLang);
         }
     };
@@ -150,7 +159,7 @@ const SettingsButton = memo(({ listId, listData, onFlipQuestionLangChange, initi
                 <div className="space-y-6 p-4">
                     <div className="space-y-3">
                         <Label htmlFor="flip-lang" className="text-sm font-medium">
-                            Vraag taal
+                            {isLanguage ? 'Vraag taal' : 'Vraag om'}
                         </Label>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
@@ -161,27 +170,32 @@ const SettingsButton = memo(({ listId, listData, onFlipQuestionLangChange, initi
                                     disabled={loading || isCombinedList}
                                 />
                                 <span className="text-sm text-neutral-400 flex items-center gap-2">
-                                    {tempFlipQuestionLang ? (
-                                        <>
-                                            {langToIcon && (
-                                                <Image src={langToIcon} alt={langTo} width={16} height={16} className="rounded-sm" />
-                                            )}
-                                            {langTo}
-                                        </>
+                                    {isLanguage ? (
+                                        // For language subjects, show language icons and names
+                                        tempFlipQuestionLang ? (
+                                            <>
+                                                {langToIcon && (
+                                                    <Image src={langToIcon} alt={langTo} width={16} height={16} className="rounded-sm" />
+                                                )}
+                                                {langTo}
+                                            </>
+                                        ) : (
+                                            <>
+                                                {langFromIcon && (
+                                                    <Image src={langFromIcon} alt={langFrom} width={16} height={16} className="rounded-sm" />
+                                                )}
+                                                {langFrom}
+                                            </>
+                                        )
                                     ) : (
-                                        <>
-                                            {langFromIcon && (
-                                                <Image src={langFromIcon} alt={langFrom} width={16} height={16} className="rounded-sm" />
-                                            )}
-                                            {langFrom}
-                                        </>
+                                        tempFlipQuestionLang ? 'Definitie' : 'Begrip'
                                     )}
                                 </span>
                             </div>
                         </div>
                         {isCombinedList && (
                             <p className="text-xs text-neutral-500">
-                                Taal omwisselen is niet beschikbaar voor gecombineerde lijsten.
+                                {isLanguage ? 'Taal omwisselen' : 'Vraag type omwisselen'} is niet beschikbaar voor gecombineerde lijsten.
                             </p>
                         )}
                     </div>
@@ -244,28 +258,30 @@ const MethodDropdown = memo(({
 MethodDropdown.displayName = "MethodDropdown";
 
 interface LearnToolHeaderProps {
-    listId: string;
     progress?: number; // 0-100
-    correctAnswers?: number;
-    wrongAnswers?: number;
     onMethodChange?: (method: string) => void;
-    currentMethod?: string;
-    listData?: any; // Add listData prop
     onFlipQuestionLangChange?: (flipped: boolean) => void; // Add callback for flip changes
-    initialFlipQuestionLang?: boolean; // Add initial flip state for SSR
 }
 
 const HeaderLearnTool = memo(({
-    listId,
-    progress = 0,
-    correctAnswers = 0,
-    wrongAnswers = 0,
-    onMethodChange,
-    currentMethod = "leren",
-    listData,
+    progress: externalProgress,
     onFlipQuestionLangChange,
-    initialFlipQuestionLang,
 }: LearnToolHeaderProps) => {
+    // Get stats and list info from the store
+    const { score, currentList, currentMethod, originalWordCount } = useListStore();
+    const correctAnswers = score.correct;
+    const wrongAnswers = score.wrong;
+
+    // Get list ID from the store
+    const listId = currentList?.list_id || '';
+
+    // Calculate progress based on store data if no external progress provided
+    const progress = externalProgress ?? (() => {
+        if (!originalWordCount || originalWordCount === 0) return 0;
+        // Progress is based on words completed (removed from list) vs total original words
+        const wordsCompleted = originalWordCount - (currentList?.data.length || 0);
+        return Math.min((wordsCompleted / originalWordCount) * 100, 100);
+    })();
     // Check if this is a custom learning session
     const isCustomMode = listId.startsWith('custom-');
     const actualListId = isCustomMode ? listId.replace('custom-', '') : listId;
@@ -355,7 +371,7 @@ const HeaderLearnTool = memo(({
                 </div>
 
                 {/* Method dropdown */}
-                <MethodDropdown currentMethod={currentMethod} learningMethods={learningMethods} />
+                <MethodDropdown currentMethod={currentMethod || "learnlist"} learningMethods={learningMethods} />
 
                 {/* Progress bar */}
                 <ProgressBar progress={progress} />
@@ -363,10 +379,7 @@ const HeaderLearnTool = memo(({
                 {/* Right side: Settings, stats, and exit */}
                 <div className="flex items-center gap-4">
                     <SettingsButton
-                        listId={listId}
-                        listData={listData}
                         onFlipQuestionLangChange={onFlipQuestionLangChange}
-                        initialFlipQuestionLang={initialFlipQuestionLang}
                     />
                     <StatsDisplay correctAnswers={correctAnswers} wrongAnswers={wrongAnswers} />
                     <ExitButton />

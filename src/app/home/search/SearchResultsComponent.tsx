@@ -1,5 +1,5 @@
 import { prisma } from "@/utils/prisma";
-import Tabs, { TabItem } from "@/components/Tabs";
+import { TabItem } from "@/components/Tabs";
 import { getUserFromSession } from "@/utils/auth/auth";
 import { cookies } from "next/headers";
 import { Search } from "lucide-react";

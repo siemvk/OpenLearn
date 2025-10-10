@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useCallback, memo } from "react"
-import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Button1 from "@/components/button/Button1"
 import { resetUserPassword, setCustomPassword } from "@/utils/auth/user"
@@ -23,7 +22,6 @@ function ResetPasswordButton({ userId }: ResetPasswordButtonProps) {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
     const [passwordError, setPasswordError] = useState("")
-    const router = useRouter()
 
     const handleButtonClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();

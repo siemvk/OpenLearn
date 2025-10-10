@@ -11,7 +11,7 @@ interface GroupLayoutProps {
 }
 
 export default async function GroupLayout({ children, params }: GroupLayoutProps) {
-    const { id, tab } = await params;
+    const { id } = await params;
     const session = await getUserFromSession(
         (await cookies()).get('polarlearn.session-id')?.value as string
     );

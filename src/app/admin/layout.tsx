@@ -1,7 +1,6 @@
 import AdminNavWrapper from "./AdminNavWrapper";
 import { getUserFromSession } from "@/utils/auth/auth";
 import { cookies } from "next/headers";
-import { prisma } from "@/utils/prisma";
 import Image from "next/image";
 import Link from "next/link";
 import Button1 from "@/components/button/Button1";

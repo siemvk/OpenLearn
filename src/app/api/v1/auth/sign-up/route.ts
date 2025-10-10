@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createUserCredentials } from "@/utils/auth/user";
-import disposable from 'disposable-email';
 
 export async function POST(request: NextRequest) {
   try {

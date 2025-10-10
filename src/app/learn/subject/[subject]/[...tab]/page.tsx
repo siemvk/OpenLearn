@@ -9,7 +9,6 @@ import CreatorLink from "@/components/CreatorLink";
 import { formatRelativeTime } from "@/utils/formatRelativeTime";
 import { getSubjectIcon, getSubjectName } from "@/components/icons";
 import { prefetchCreatorInfo } from '@/utils/creator';
-import { formatWordCount } from '@/utils/list';
 
 import construction from '@/app/img/construction.gif';
 

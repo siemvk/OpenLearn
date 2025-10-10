@@ -12,6 +12,7 @@ import { getImpersonationData } from "@/utils/auth/getImpersonationData";
 import { getStreakData } from "@/serverActions/getStreakData";
 import Providers from "@/components/providers";
 import DelWindowNext from "@/components/DelWindowNext";
+import EasterEgg from "@/components/EasterEgg";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     icons: [
       {
-        url: `${process.env.NEXT_PUBLIC_URL}/icon.png`,
+        url: `/icon.png`,
         type: "image/png",
         rel: "icon",
       },
@@ -61,7 +62,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "PolarLearn",
       images: [
         {
-          url: `${process.env.NEXT_PUBLIC_URL}/banner.png`,
+          url: `/banner.png`,
           width: 1200,
           height: 630,
           alt: "PolarLearn banner dingo",
@@ -149,7 +150,7 @@ export default async function RootLayout({
     if (impersonationData) {
       userData.impersonation = impersonationData;
     }
-  } catch (e) {
+  } catch {
     // fallback: keep userData as default
   }
 
@@ -169,12 +170,12 @@ export default async function RootLayout({
           message: parsed.message || '',
           color: parsed.color || 'info',
         };
-      } catch (e) {
+      } catch {
         // fallback: treat as plain string
         sysMsgData = { message: sysMsgConfig.value, color: 'info' };
       }
     }
-  } catch (e) {
+  } catch {
     // fallback: keep sysMsgData as default
   }
 
@@ -255,6 +256,7 @@ export default async function RootLayout({
           >
             {children}
             <DelWindowNext />
+            <EasterEgg />
           </Providers>
         </SessionWrapper>
       </body>

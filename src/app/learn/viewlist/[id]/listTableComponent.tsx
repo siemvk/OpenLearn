@@ -1,7 +1,6 @@
 "use client"
 import Button1 from "@/components/button/Button1";
-import Dropdown from "@/components/button/DropdownBtn";
-import { BookOpen, List, MousePointerClick } from "lucide-react";
+import { List, MousePointerClick } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,7 +10,6 @@ import learn from '@/app/img/learn.svg';
 import test from '@/app/img/test.svg';
 import hints from '@/app/img/hint.svg';
 import mind from '@/app/img/mind.svg';
-import livequiz from '@/app/img/livequiz.svg';
 
 export default function ListTableComponent({
     wordPairs,
@@ -22,7 +20,7 @@ export default function ListTableComponent({
     isLanguageSubject,
     listId,
 }: {
-    wordPairs: { "1": string; "2": string; id: number }[];
+    wordPairs: { "1": string; "2": string }[];
     edit: boolean;
     fromLanguage?: string;
     toLanguage?: string;
@@ -100,7 +98,7 @@ export default function ListTableComponent({
                         />
                         <Button1
                             text="Meerkeuze"
-                            icon={<List width={16} height={16}/>}
+                            icon={<List width={16} height={16} />}
                             disabled={!select || selectedPairs.length === 0}
                             onClick={() => handleLearn('multichoice')}
                             wrapText={false}
@@ -182,28 +180,26 @@ export default function ListTableComponent({
                         .filter(
                             (pair) => pair["1"] !== "" || pair["2"] !== "" // Only filter out completely empty pairs
                         )
-                        .map((pair) => {
+                        .map((pair, index) => {
                             return (
                                 <tr
-                                    key={pair.id}
-                                    className={
-                                        pair.id % 2 === 0 ? "bg-neutral-800" : "bg-neutral-800"
-                                    }
+                                    key={index}
+                                    className="bg-neutral-800"
                                 >
                                     {select && (
                                         <td className="px-6 py-4 text-center">
                                             <div className="relative inline-block">
                                                 <input
                                                     type="checkbox"
-                                                    id={`checkbox-${pair.id}`}
+                                                    id={`checkbox-${index}`}
                                                     name="selectedPairs"
-                                                    value={pair.id}
-                                                    checked={selectedPairs.includes(pair.id)}
-                                                    onChange={(e) => handleCheckboxChange(pair.id, e.target.checked)}
+                                                    value={index}
+                                                    checked={selectedPairs.includes(index)}
+                                                    onChange={(e) => handleCheckboxChange(index, e.target.checked)}
                                                     className="peer sr-only"
                                                 />
                                                 <label
-                                                    htmlFor={`checkbox-${pair.id}`}
+                                                    htmlFor={`checkbox-${index}`}
                                                     className="block w-6 h-6 bg-gray-100 border-2 border-gray-300 rounded-full cursor-pointer relative transition-all duration-200 hover:border-sky-400 peer-checked:bg-sky-400 peer-checked:border-sky-400"
                                                 >
                                                     <div className="absolute inset-0 flex items-center justify-center">

@@ -32,7 +32,6 @@ export default function GroupHeaderTabs({
     isMember,
     isCreator,
     isAdmin,
-    sessionRole,
     groupId,
     hasPendingRequest
 }: GroupHeaderTabsProps) {

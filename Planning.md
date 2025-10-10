@@ -16,10 +16,9 @@
 - [ ] Vak en leerjaar gerelateerde groepen
 - [ ] Titels en Prestaties
 - [x] Profielen aanpassen (profielfoto, etc.)
-- [ ] LiveQuiz
+- [ ] LiveQuiz (Gepland voor V2)
 - [x] Accountinstellingen
 - [x] Meldingen
 - [ ] Quizzen
 - [x] Mappen
 - [ ] Pomodoro Timer
-- [ ] Spaced Repetition

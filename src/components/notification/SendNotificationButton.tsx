@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import Button1 from "@/components/button/Button1"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MessageSquare, Trash2 } from "lucide-react"
+import { MessageSquare } from "lucide-react"
 import { sendUserNotification } from "./notificationActions"
 
 interface SendNotificationButtonProps {
@@ -22,7 +22,6 @@ export default function SendNotificationButton({
     userName,
     buttonText = "Stuur bericht",
     className,
-    isAdmin = false
 }: SendNotificationButtonProps) {
     const [open, setOpen] = useState(false)
     const [isSending, setIsSending] = useState(false)
@@ -54,7 +53,11 @@ export default function SendNotificationButton({
                 setIsSending(false);
             }
         } catch (error) {
-            setStatus({ success: false, message: "Er is iets misgegaan" });
+            let errorMessage = "Er is iets misgegaan";
+            if (error && typeof error === "object" && "message" in error && typeof (error as any).message === "string") {
+                errorMessage += ": " + (error as any).message;
+            }
+            setStatus({ success: false, message: errorMessage });
             setIsSending(false);
         }
     }, [userId, content, icon, router]);

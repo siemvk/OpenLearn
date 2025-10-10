@@ -19,7 +19,6 @@ export default function ListsTabContent({
     initialListsData,
     initialListsTotal,
     initialUserMapById,
-    currentUserId,
 }: ListsTabContentProps) {
     const [listsData, setListsData] = useState(initialListsData);
     const [listsHasMore, setListsHasMore] = useState(initialListsData.length < initialListsTotal);
