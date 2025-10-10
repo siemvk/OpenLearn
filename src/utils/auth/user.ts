@@ -7,7 +7,16 @@ import { transporter } from "../mail";
 import { Prisma } from "@prisma/client";
 import { Embed, Webhook } from '@vermaysha/discord-webhook'
 import { getUserFromSession } from './auth'
-const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
+
+async function sendDiscordEmbed(embed: Embed) {
+  try {
+    const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
+    hook.addEmbed(embed)
+    await hook.send()
+  } catch (err) {
+    console.warn('Failed to send discord embed:', err)
+  }
+}
 
 interface PasswordActionResult {
   success: boolean;
@@ -329,8 +338,7 @@ export async function resetUserPassword(userId: string): Promise<PasswordActionR
         .setDescription(`Het wachtwoord voor gebruiker ${userId} is gereset (willekeurig gegenereerd).\nActie door: ${adminIdentifier}`)
         .setColor('#ff9900')
         .setTimestamp()
-      hook.addEmbed(embed)
-      await hook.send()
+      await sendDiscordEmbed(embed)
     } catch (webhookErr) {
       console.warn('Failed to send password reset webhook:', webhookErr)
     }
@@ -371,8 +379,7 @@ export async function setCustomPassword(userId: string, password: string): Promi
         .setDescription(`Het wachtwoord voor gebruiker ${userId} is handmatig aangepast door een admin.\nActie door: ${adminIdentifier}`)
         .setColor('#ff9900')
         .setTimestamp()
-      hook.addEmbed(embed)
-      await hook.send()
+      await sendDiscordEmbed(embed)
     } catch (webhookErr) {
       console.warn('Failed to send custom password webhook:', webhookErr)
     }
@@ -417,12 +424,8 @@ export async function deleteUser(userId: string) {
         .setDescription(`Gebruiker ${deletedName ?? userId} is verwijderd.\nActie door: ${adminIdentifier}`)
         .setColor('#ff0000')
         .setTimestamp()
-        .setFooter({
-          text: 'Van ' + process.env.NEXT_PUBLIC_URL,
-        })
 
-      hook.addEmbed(embed)
-      await hook.send()
+      await sendDiscordEmbed(embed)
     } catch (webhookErr) {
       console.warn('Failed to send delete user webhook:', webhookErr)
     }

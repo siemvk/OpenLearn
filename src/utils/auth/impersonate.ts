@@ -8,11 +8,20 @@ import { createCookie } from "./session";
 import { revalidatePath } from "next/cache";
 import { Embed, Webhook } from '@vermaysha/discord-webhook'
 
+async function sendDiscordEmbed(embed: Embed) {
+  try {
+    const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
+    hook.addEmbed(embed)
+    await hook.send()
+  } catch (err) {
+    console.warn('Failed to send discord embed:', err)
+  }
+}
+
 // Use the same cookie name as the normal session to make it work with the existing app
 const IMPERSONATION_COOKIE_NAME = "polarlearn.session-id";
 // Cookie to store the admin's original session while impersonating
 const ADMIN_SESSION_COOKIE_NAME = "polarlearn.admin-session";
-const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
 
 /**
  * Start impersonating a user
@@ -90,8 +99,7 @@ export async function startImpersonation(userId: string) {
         .setColor('#ff9900')
         .setTimestamp()
 
-      hook.addEmbed(embed)
-      await hook.send()
+      await sendDiscordEmbed(embed)
     } catch (webhookErr) {
       console.warn('Failed to send impersonation start webhook:', webhookErr)
     }
@@ -168,8 +176,7 @@ export async function endImpersonation() {
         .setColor('#00cc66')
         .setTimestamp()
 
-      hook.addEmbed(embed)
-      await hook.send()
+      await sendDiscordEmbed(embed)
     } catch (webhookErr) {
       console.warn('Failed to send impersonation end webhook:', webhookErr)
     }

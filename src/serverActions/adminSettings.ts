@@ -5,7 +5,15 @@ import { prisma } from '@/utils/prisma'
 import { Embed, Webhook } from '@vermaysha/discord-webhook'
 import { getUserFromSession } from '@/utils/auth/auth'
 
-const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
+async function sendDiscordEmbed(embed: Embed) {
+    try {
+        const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
+        hook.addEmbed(embed)
+        await hook.send()
+    } catch (err) {
+        console.warn('Failed to send discord embed:', err)
+    }
+}
 
 export async function getAdminSettings() {
     try {
@@ -72,8 +80,7 @@ export async function updateAdminSettings(formData: FormData) {
             .setTimestamp()
 
         try {
-            hook.addEmbed(embed)
-            await hook.send()
+            await sendDiscordEmbed(embed)
         } catch (webhookErr) {
             // Don't fail the settings update if the webhook is misconfigured or sending fails
             console.warn('Failed to send admin settings webhook:', webhookErr)

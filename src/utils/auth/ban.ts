@@ -4,7 +4,16 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "../prisma";
 import { Embed, Webhook } from '@vermaysha/discord-webhook'
 import { getUserFromSession } from './auth'
-const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
+
+async function sendDiscordEmbed(embed: Embed) {
+    try {
+        const hook = new Webhook(process.env.DISCORD_WEBHOOK || '')
+        hook.addEmbed(embed)
+        await hook.send()
+    } catch (err) {
+        console.warn('Failed to send discord embed:', err)
+    }
+}
 
 export async function banUserPlatform(userId: string, banReason: string, banEnd?: string) {
     try {
@@ -43,9 +52,7 @@ export async function banUserPlatform(userId: string, banReason: string, banEnd?
                 .setDescription(`De gebruiker met ID ${userId} is verbannen van het platform. met de reden: ${banReason}\nActie door: ${adminIdentifier}${banEnd ? `\nEindigt op: ${banEnd}` : ''}`)
                 .setColor('#ff0000')
                 .setTimestamp()
-                .setUrl(`/home/viewuser/${userId}`)
-            hook.addEmbed(embed)
-            await hook.send()
+            await sendDiscordEmbed(embed)
         } catch (webhookErr) {
             console.warn('Failed to send ban webhook:', webhookErr)
         }
@@ -82,8 +89,7 @@ export async function banUserForum(userId: string, banReason: string, banEnd?: s
                 .setDescription(`De gebruiker met ID ${userId} is verbannen van het forum. met de reden: ${banReason}\nActie door: ${adminIdentifier}${banEnd ? `\nEindigt op: ${banEnd}` : ''}`)
                 .setColor('#ff0000')
                 .setTimestamp()
-            hook.addEmbed(embed)
-            await hook.send()
+            await sendDiscordEmbed(embed)
         } catch (webhookErr) {
             console.warn('Failed to send forum ban webhook:', webhookErr)
         }
@@ -115,8 +121,7 @@ export async function unbanUserPlatform(userId: string) {
                 .setDescription(`De gebruiker met ID ${userId} is niet meer verbannen van het platform.\nActie door: ${adminIdentifier}`)
                 .setColor('#00ff00')
                 .setTimestamp()
-            hook.addEmbed(embed)
-            await hook.send()
+            await sendDiscordEmbed(embed)
         } catch (webhookErr) {
             console.warn('Failed to send unban webhook:', webhookErr)
         }
@@ -149,8 +154,7 @@ export async function unbanUserForum(userId: string) {
                 .setDescription(`De gebruiker met ID ${userId} is niet meer verbannen van het forum.\nActie door: ${adminIdentifier}`)
                 .setColor('#00ff00')
                 .setTimestamp()
-            hook.addEmbed(embed)
-            await hook.send()
+            await sendDiscordEmbed(embed)
         } catch (webhookErr) {
             console.warn('Failed to send forum unban webhook:', webhookErr)
         }
