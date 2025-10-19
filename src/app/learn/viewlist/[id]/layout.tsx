@@ -177,8 +177,18 @@ export default async function ViewListLayout({ children, params }: ViewListLayou
       <div className="px-4 py-4">
         <div className="flex items-center justify-between">
           <h1 className="text-4xl font-bold flex items-center gap-2">
-            <Image src={getSubjectIcon(subject)} alt="vak icon" width={30} height={30} className={"h-8 w-8 inline-block mr-2"} />
-            <span className="whitespace-normal break-words max-w-[40ch]">{listData?.name}</span>
+            <Image
+              src={getSubjectIcon(subject)}
+              alt="vak icon"
+              width={30}
+              height={30}
+              className={"h-8 w-8 inline-block mr-2"}
+            />
+            <span
+              className="whitespace-normal break-words max-w-[40ch]"
+            >
+              {listData?.name}
+            </span>
             {isUnpublished && (
               <Badge
                 variant="secondary"

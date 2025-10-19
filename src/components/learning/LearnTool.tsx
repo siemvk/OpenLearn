@@ -1,5 +1,6 @@
 "use client";
-import { updateDailyStreak } from '../streak/updateStreak';
+import Celebration from '@/components/streak/Celebration';
+import { useStreakUpdate } from '@/hooks/useStreakUpdate';
 import React, { useState, useEffect, useRef } from 'react';
 import { useListStore } from './listStore';
 import Button1 from '@/components/button/Button1';
@@ -243,7 +244,7 @@ export default function LearnTool() {
   const [isCorrect, setIsCorrect] = useState(false);
   const [isTypfout, setIsTypfout] = useState(false);
   const [showTypfout, setShowTypfout] = useState(false);
-  const [streakUpdate, setStreakUpdate] = useState<{ success?: boolean; streakUpdated?: boolean; currentStreak?: number } | null>(null);
+  const [streakUpdate, setStreakUpdate] = useState<{ success?: boolean; streakUpdated?: boolean; currentStreak?: number; isNewStreak?: boolean } | null>(null);
   const [progress, setProgress] = useState(100);
   const [isTimerActive, setIsTimerActive] = useState(false);
   // Determine effective mode: if we're in learnlist and have a queue, use the first queue item's mode
@@ -314,15 +315,6 @@ export default function LearnTool() {
       if (interval) clearInterval(interval);
     };
   }, [isTimerActive, showResult, isCorrect]);
-
-  // regel de streak update
-  useEffect(() => {
-    async function fetchStreakUpdate() {
-      const result = await updateDailyStreak();
-      setStreakUpdate(result);
-    }
-    fetchStreakUpdate();
-  }, []);
 
   // Auto-save session when queue changes (after dequeue) or when moving to next word
   const prevQueueLengthRef = useRef<number | null>(null);
@@ -497,6 +489,20 @@ export default function LearnTool() {
     ? learnListQueue.length === 0
     : (!currentList || !currentList.data?.length);
 
+  // When the list is completed, call handleListCompletion once to update the streak and show celebration if started
+  const { handleListCompletion } = useStreakUpdate();
+  const completedTriggeredRef = useRef(false);
+  useEffect(() => {
+    if (!isCompleted || showResult) return;
+    if (completedTriggeredRef.current) return;
+    completedTriggeredRef.current = true;
+
+    (async () => {
+      const result = await handleListCompletion();
+      setStreakUpdate(result as any);
+    })();
+  }, [isCompleted, showResult, handleListCompletion]);
+
   // Delete session when list is finished
   useEffect(() => {
     if (isCompleted && !showResult) {
@@ -511,9 +517,12 @@ export default function LearnTool() {
         <>
           <h2 className="text-2xl font-bold mb-2">Einde van de lijst!</h2>
           {streakUpdate?.success && streakUpdate?.streakUpdated ? (
-            <p className="text-lg text-neutral-300">
-              Je huidige streak is nu <strong>{streakUpdate.currentStreak}</strong> dagen!
-            </p>
+            <>
+              <p className="text-lg text-neutral-300">
+                Je huidige reeks is nu <strong>{streakUpdate.currentStreak}</strong> dagen!
+              </p>
+              {streakUpdate?.isNewStreak ? <Celebration /> : null}
+            </>
           ) : null}
           <p className="text-lg text-neutral-300">Je hebt alle woorden geoefend. Goed gedaan!</p>
         </>
