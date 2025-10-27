@@ -19,6 +19,7 @@
     <img width="122" height="20" src="http://made-with.prisma.io/dark.svg" alt="Made with Prisma" />
   </a>
   <a href="https://ko-fi.com/P5P31BIVLA"><img src="https://ko-fi.com/img/githubbutton_sm.svg" width="122" height= "20"/></a>
+  <a href="https://hcb.hackclub.com/donations/start/polarlearn"><img src="https://assets.hackclub.com/hcb-light.svg" width="20" height= "20"/></a>
   <br/>
   PolarLearn is een compleet gratis en Open-Source alternatief voor StudyGo.
 </div>
@@ -64,7 +65,7 @@ Wil je PolarLearn op een school gebruiken? Laat het ons weten, zodat wij je kunn
 
 > [!NOTE]
 > Ik, andrei1010 en een paar anderen doen al dit werk voor gratis
-> Het zou fijn zijn als je zou [doneren](https://ko-fi.com/polarnl). Bedankt!
+> Het zou fijn zijn als je zou [doneren](https://hcb.hackclub.com/donations/start/polarlearn). Bedankt!
 
 join onze [Discordserver](https://discord.gg/TdYzXDzqSB)
 Je kan bijdragen aan PolarLearn door de code te downloaden (`git clone https://github.com/polarnl/polarlearn`) en te kijken wat je kan verbeteren. Ook kan je een issue aanmaken als je een bug hebt gevonden of een nieuwe functie wilt. Als je een feature request hebt, kan je ook een pull request aanmaken. Zie [CONTRIBUTING.md](https://github.com/polarnl/PolarLearn/blob/stable/CONTRIBUTING.md) voor meer informatie.
