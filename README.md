@@ -19,7 +19,7 @@
     <img width="122" height="20" src="http://made-with.prisma.io/dark.svg" alt="Made with Prisma" />
   </a>
   <a href="https://ko-fi.com/P5P31BIVLA"><img src="https://ko-fi.com/img/githubbutton_sm.svg" width="122" height= "20"/></a>
-  <a href="https://hcb.hackclub.com/donations/start/polarlearn"><img src="https://assets.hackclub.com/hcb-light.svg" width="20" height= "20"/></a>
+  <a href="https://hcb.hackclub.com/donations/start/polarlearn"><img src="https://github.com/tmrxdev/PolarLearn/blob/patch-1/public/polarlearn-hackclub-donate-knop-madebytmrx.png?raw=true" width="122" height= "20"/></a>
   <br/>
   PolarLearn is een compleet gratis en Open-Source alternatief voor StudyGo.
 </div>
