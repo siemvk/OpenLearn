@@ -69,7 +69,7 @@ export function useMapCreation() {
         toast.success("Map met succes gemaakt!");
         setDialogOpen(false);
         form.reset();
-        router.push(`/map/${result.mapId}`);
+        router.push(`/learn/map/${result.mapId}`);
       } else {
         toast.error(result.error || "Map maken is mislukt met onbekende fout", {
           position: "top-right",

@@ -37,7 +37,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const currentUser = await getUserFromSession((await cookies()).get('polarlearn.session-id')?.value as string);
 
   // Check permissions - only creator can write, everyone can read if public
-  const isCreator = currentUser?.name === map.creator;
+  const isCreator = currentUser?.id === map.creator;
   const canView = map.public || isCreator;
 
   if (!canView) {

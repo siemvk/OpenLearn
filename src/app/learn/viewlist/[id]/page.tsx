@@ -1,16 +1,28 @@
 import { prisma } from "@/utils/prisma"
-import Tabs, { TabItem } from "@/components/Tabs";
-import Dropdown from "@/components/button/DropdownBtn";
-import { cookies } from "next/headers";
-import { getUserFromSession } from "@/utils/auth/auth";
-import { Badge } from "@/components/ui/badge";
-import UserListButtons from "@/components/learning/UserListButtons";
-import SessionButtons from "@/components/learning/SessionButtons";
-import CreatorLink from "@/components/CreatorLink";
-import { addToRecentLists } from "@/utils/actions/updateRecentLists";
-import { addToRecentSubjects } from "@/utils/actions/updateRecentSubjects";
+import { getSubjectIcon, getSubjectName } from "@/components/icons";
 import { Metadata } from "next";
-import { getSubjectName } from "@/components/icons";
+
+import ListTableComponent from "./listTableComponent";
+
+interface WordPair {
+    "1": string;  // term
+    "2": string;  // definition
+}
+
+// Helper function to validate if an object is a WordPair
+function isWordPair(obj: any): obj is WordPair {
+    return (
+        obj !== null &&
+        typeof obj === 'object' &&
+        typeof obj["1"] === 'string' &&
+        typeof obj["2"] === 'string'
+    );
+}
+
+// Helper function to check if array contains WordPair objects
+function isWordPairArray(arr: any[]): arr is WordPair[] {
+    return arr.every(item => isWordPair(item));
+}
 
 interface PageParams {
     params: Promise<{
@@ -104,7 +116,7 @@ export async function generateMetadata({
 }
 
 export default async function ViewListPage({ params }: PageParams) {
-    // This is the default route - redirect to the default tab
+    // This is the default route - just render the word list content
     const { id } = await params;
     const listData = await prisma.practice.findFirst({
         where: {
@@ -123,69 +135,6 @@ export default async function ViewListPage({ params }: PageParams) {
             updatedAt: true
         }
     });
-
-    // Add this list to user's recent lists
-    if (listData) {
-        await addToRecentLists(id);
-
-        // Also add the subject to recent subjects if available
-        if (listData.subject) {
-            await addToRecentSubjects(listData.subject);
-        }
-    }
-
-    // Check if current user is the creator to show edit button
-    const currentUser = await getUserFromSession((await cookies()).get('polarlearn.session-id')?.value as string);
-    // Check both name and id to ensure we match the creator correctly
-    const isCreator = (listData?.creator === currentUser?.name ||
-        listData?.creator === currentUser?.id ||
-        currentUser?.role === "admin");
-    const isUnpublished = listData?.published === false;
-
-    // Check for existing learn sessions for this user and list
-    let existingSessions: { mode: string; lastActiveAt: Date }[] = [];
-    if (currentUser && listData) {
-        try {
-            const sessions = await prisma.learnSession.findMany({
-                where: {
-                    userId: currentUser.id,
-                    listId: id,
-                    isCompleted: false
-                },
-                select: {
-                    mode: true,
-                    lastActiveAt: true
-                },
-                orderBy: {
-                    lastActiveAt: 'desc'
-                }
-            });
-            existingSessions = sessions;
-        } catch (error) {
-            console.error("Error fetching learn sessions:", error);
-        }
-    }
-
-    // Prefetch creator info to avoid CSR waterfall
-    let creatorName = listData?.creator || "";
-    let creatorUserId: string | null = null;
-    if (listData?.creator) {
-        try {
-            if (isUUID(listData.creator)) {
-                const info = await getUserNameById(listData.creator);
-                creatorName = info.name || listData.creator;
-                creatorUserId = listData.creator; // The creator field is already the UUID
-            } else {
-                creatorName = listData.creator;
-                // For name-based creators, we should fetch the ID
-                const { getUserIdByName } = await import("@/serverActions/getUserName");
-                const userInfo = await getUserIdByName(listData.creator);
-                creatorUserId = userInfo.id;
-            }
-        } catch (error) {
-            console.error("Error fetching creator info:", error);
-        }
-    }
 
     // Use the top-level subject field from the practice model
     const subject = listData?.subject || 'general';
@@ -228,144 +177,26 @@ export default async function ViewListPage({ params }: PageParams) {
         }
     }
 
-    // Define practice options for the dropdown with styled elements
-    const practiceOptions: [React.ReactNode, string][] = [
-        [
-            <div key="leren" className="flex items-center">
-                <Image src={learn} alt="leren plaatje" width={20} height={20} className="mr-2" />
-                <span className="font-medium">Leren</span>
-            </div>,
-            `/learn/learnlist/${id}`
-        ],
-        [
-            <div key="toets" className="flex items-center">
-                <Image src={test} alt="toets plaatje" width={20} height={20} className="mr-2" />
-                <span className="font-medium">Toets</span>
-            </div>,
-            `/learn/test/${id}`
-        ],
-        [
-            <div key="hints" className="flex items-center">
-                <Image src={hints} alt="hints plaatje" width={20} height={20} className="mr-2" />
-                <span className="font-medium">Hints</span>
-            </div>,
-            `/learn/hints/${id}`
-        ],
-        [
-            <div key="mind" className="flex items-center">
-                <Image src={mind} alt="mind plaatje" width={20} height={20} className="mr-2" />
-                <span className="font-medium">In gedachten</span>
-            </div>,
-            `/learn/mind/${id}`
-        ],
-        [
-            <div key="multichoice" className="flex items-center">
-                <Image src={livequiz} alt="Meerkeuze plaatje" width={20} height={20} className="mr-2" />
-                <span className="font-medium">Meerkeuze</span>
-            </div>,
-            `/learn/multichoice/${id}`
-        ],
-        [
-            <div key="livequiz" className="flex items-center">
-                <Image src={livequiz} alt="livequiz plaatje" width={20} height={20} className="mr-2" />
-                <span className="font-medium">LiveQuiz</span>
-            </div>,
-            `/learn/livequiz/${id}`
-        ]
-    ];
-
-    // Define tabs for this page
-    const tabs: TabItem[] = [
-        {
-            id: 'woorden',
-            label: 'Woorden',
-            content: (
-                <div className="mt-4">
-                    {wordPairs.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <ListTableComponent
-                                wordPairs={wordPairs}
-                                edit={false}
-                                fromLanguage={fromLanguage}
-                                toLanguage={toLanguage}
-                                fromLanguageIcon={fromLanguageIcon}
-                                toLanguageIcon={toLanguageIcon}
-                                isLanguageSubject={isLanguageSubject}
-                                listId={id}
-                            />
-                        </div>
-                    ) : (
-                        <p className="text-gray-500 text-center">
-                            Geen woorden gevonden in deze lijst :(
-                        </p>
-                    )}
-                </div>
-            )
-        },
-        {
-            id: 'resultaten',
-            label: 'Resultaten',
-            content: (
-                <div>
-                    {/* Resultaten content will go here */}
-                    <Image src={construction} alt="under construction!" width={500} height={100} />
-                </div>
-            )
-        }
-    ];
-
     return (
-        <div className="px-4">
-            <div className="h-4" />
-            <div className="px-4 py-4">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-4xl font-bold flex items-center gap-2">
-                        <Image src={getSubjectIcon(subject)} alt="vak icon" width={30} height={30} className={"h-8 w-8 inline-block mr-2"} />
-                        <span className="whitespace-normal break-words max-w-[40ch]">{listData?.name}</span>
-                        {isUnpublished && (
-                            <Badge
-                                variant="secondary"
-                                className="ml-2 bg-amber-600/20 text-amber-500 border border-amber-600/50"
-                            >
-                                Concept
-                            </Badge>
-                        )}
-                    </h1>
-
-                    {/* Creator actions - pass isCreator boolean from server-side permission check */}
-                    <UserListButtons listId={id} isCreator={isCreator} />
+        <div>
+            {wordPairs.length > 0 ? (
+                <div className="overflow-x-auto">
+                    <ListTableComponent
+                        wordPairs={wordPairs}
+                        edit={false}
+                        fromLanguage={fromLanguage}
+                        toLanguage={toLanguage}
+                        fromLanguageIcon={fromLanguageIcon}
+                        toLanguageIcon={toLanguageIcon}
+                        isLanguageSubject={isLanguageSubject}
+                        listId={id}
+                    />
                 </div>
-                <div className="h-4" />
-                <div className="flex flex-col gap-4">
-                    <div className="flex-row flex items-center">
-                        <p>Gemaakt door:</p>
-                        <div className="w-2" />
-                        <CreatorLink
-                            creator={listData?.creator || ""}
-                            userId={creatorUserId}
-                            displayName={creatorName}
-                        />
-                    </div>
-
-                    <div className="relative min-h-12">
-                        {existingSessions.length > 0 ? (
-                            <SessionButtons listId={id} sessions={existingSessions} />
-                        ) : (
-                            <Dropdown
-                                text="Oefenen"
-                                dropdownMatrix={practiceOptions}
-                                width={180}
-                                zIndex={10}
-                            />
-                        )}
-                    </div>
-                </div>
-            </div>
-            <br />
-            <div className="pl-4">
-                <Tabs tabs={tabs} defaultActiveTab="woorden" />
-            </div>
-            <div className="h-4" />
+            ) : (
+                <p className="text-gray-500 text-center">
+                    Geen woorden gevonden in deze lijst :(
+                </p>
+            )}
         </div>
     )
 }

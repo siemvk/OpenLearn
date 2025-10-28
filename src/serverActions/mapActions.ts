@@ -52,7 +52,7 @@ export async function getAvailableListsForMap(mapId: string) {
       where: { id: mapId }
     });
 
-    if (!map || map.creator !== session.name) {
+    if (!map || map.creator !== session.id) {
       return { success: false, error: "Not authorized", lists: [] };
     }
 
@@ -101,7 +101,7 @@ export async function getAvailableListsForMap(mapId: string) {
 
     // Always include user-created lists
     orConditions.push({
-      creator: session.name
+      creator: session.id
     });
 
     // Fetch user's lists, excluding those already in the map
@@ -168,7 +168,7 @@ export async function addListToMap(mapId: string, listId: string) {
       return { success: false, error: "Map not found" };
     }
 
-    if (map.creator !== session.name) {
+    if (map.creator !== session.id) {
       return { success: false, error: "Not authorized - only the creator can modify this map" };
     }
 
@@ -223,7 +223,7 @@ export async function addListsToMap(mapId: string, listIds: string[]) {
       return { success: false, error: "Map not found" };
     }
 
-    if (map.creator !== session.name) {
+    if (map.creator !== session.id) {
       return { success: false, error: "Not authorized - only the creator can modify this map" };
     }
 
@@ -271,7 +271,7 @@ export async function removeListFromMap(mapId: string, listId: string) {
       return { success: false, error: "Map not found" };
     }
 
-    if (map.creator !== session.name) {
+    if (map.creator !== session.id) {
       return { success: false, error: "Not authorized - only the creator can modify this map" };
     }
 
@@ -327,7 +327,7 @@ export async function updateMapSettings({
       return { success: false, error: "Map not found" };
     }
 
-    if (map.creator !== session.name) {
+    if (map.creator !== session.id) {
       return { success: false, error: "Not authorized - only the creator can modify this map" };
     }
 
@@ -376,7 +376,7 @@ export async function deleteMap(mapId: string) {
       return { success: false, error: "Map not found" };
     }
 
-    if (map.creator !== session.name) {
+    if (map.creator !== session.id) {
       return { success: false, error: "Not authorized - only the creator can delete this map" };
     }
 

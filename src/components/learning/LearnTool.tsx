@@ -489,7 +489,6 @@ export default function LearnTool() {
     ? learnListQueue.length === 0
     : (!currentList || !currentList.data?.length);
 
-  // When the list is completed, call handleListCompletion once to update the streak and show celebration if started
   const { handleListCompletion } = useStreakUpdate();
   const completedTriggeredRef = useRef(false);
   useEffect(() => {
@@ -498,14 +497,18 @@ export default function LearnTool() {
     completedTriggeredRef.current = true;
 
     (async () => {
+      // First, save the session as completed
+      await saveSession(false, true);
+
+      // Then update the streak
       const result = await handleListCompletion();
       setStreakUpdate(result as any);
     })();
   }, [isCompleted, showResult, handleListCompletion]);
 
-  // Delete session when list is finished
+  // Delete session when list is finished (after it's been saved as completed)
   useEffect(() => {
-    if (isCompleted && !showResult) {
+    if (isCompleted && !showResult && completedTriggeredRef.current) {
       deleteSession();
     }
   }, [isCompleted, showResult]);

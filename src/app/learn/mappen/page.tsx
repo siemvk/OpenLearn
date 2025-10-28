@@ -22,7 +22,7 @@ export default async function MappenPage() {
   // Get all maps created by the user
   const userMaps = await prisma.map.findMany({
     where: {
-      creator: user.name || user.id
+      creator: user.id
     },
     orderBy: { updatedAt: 'desc' }
   });

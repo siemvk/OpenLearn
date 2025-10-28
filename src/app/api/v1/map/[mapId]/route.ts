@@ -35,7 +35,7 @@ export async function POST(
       data: {
         id: newMapId,
         name: name.trim(),
-        creator: user.name,
+        creator: user.id,
         lists: [],
         public: isPublic || false,
         image: null
@@ -82,7 +82,7 @@ export async function DELETE(
     }
 
     // Check if user is the creator
-    if (map.creator !== user.name) {
+    if (map.creator !== user.id) {
       return NextResponse.json({ error: 'Alleen de maker van de map kan zijn/haar map verwijderen' }, { status: 403 });
     }
 
