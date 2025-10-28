@@ -421,8 +421,6 @@ export default function LearnTool() {
   };
   const displayWord = currentWord;
 
-  console.log(learnListQueue)
-
   // Check completion: if using learnListQueue, check if queue is empty; otherwise check currentList.data
   const isCompleted = learnListQueue
     ? learnListQueue.length === 0
