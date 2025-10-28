@@ -29,7 +29,7 @@ export default async function Footer() {
                 icon={faCodeCommit as IconProp}
                 className="size-5"
               />
-              <p>{process.env.GITINF}</p>
+              <p>{process.env.NEXT_PUBLIC_GITINF}</p>
             </div>
             <p>PolarLearn versie: {pkg.version}</p>
             {process.env.NODE_ENV === "development" && user && (
