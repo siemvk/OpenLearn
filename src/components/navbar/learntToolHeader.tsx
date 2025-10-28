@@ -34,7 +34,7 @@ const BackButton = memo(({ url }: { url: string }) => (
 BackButton.displayName = "BackButton";
 
 const ProgressBar = memo(({ progress }: { progress: number }) => (
-    <div className="flex-grow mr-4">
+    <div className="grow mr-4">
         <Progress value={progress} className="h-3 [&>div]:bg-sky-400" />
     </div>
 ));

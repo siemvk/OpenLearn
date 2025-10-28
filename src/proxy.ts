@@ -30,7 +30,7 @@ export async function proxy(request: NextRequest) {
     pathname.endsWith(".cgi") ||
     pathname.endsWith(".env") ||
     pathname.includes("/wp-") ||
-    ["curl", "wget", "httpie", "powershell"].some((bot) =>
+    ["curl", "wget", "httpie", "powershell", "go-http-client"].some((bot) =>
       userAgent.toLowerCase().includes(bot)
     )
   ) {

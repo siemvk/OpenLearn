@@ -72,11 +72,10 @@ export async function getStreakData(): Promise<StreakData> {
       console.log(`Auto-applied freeze for user ${user.id} on ${yesterdayStr}`);
     }
 
-    // Always recalculate streak count based on consecutive days from yesterday backwards
-    // This way, if today has no activity yet, it won't break the streak
+    // Always recalculate streak count based on consecutive days from today backwards
     let currentStreakCount = 0;
     const todayDate = new Date();
-    for (let i = 1; i <= 365; i++) { // Start from i=1 (yesterday) instead of i=0 (today)
+    for (let i = 0; i < 365; i++) { // Start from i=0 (today) to include today's activity
       const checkDate = new Date(todayDate);
       checkDate.setDate(checkDate.getDate() - i);
       const checkDateStr = checkDate.toISOString().split('T')[0];

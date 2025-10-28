@@ -43,11 +43,11 @@ export default function StreakNavbarThing() {
             </PopoverTrigger>
             <PopoverContent className={`w-80 navbar-popover z-110 drop-shadow-2xl min-h-40 flex flex-col space-y-3 justify-center`}>
                 <div className="flex flex-row space-x-3">
-                    <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full transition-all gap-y-3 text-white border-neutral-700 border-1 py-3">
+                    <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full transition-all gap-y-3 text-white border-neutral-700 border py-3">
                         <Flame className={`${hasPracticedToday ? "text-orange-400" : "text-white"}`} />
                         <>{streakCnt} {streakCnt === 1 ? "dag" : "dagen"} reeks</>
                     </div>
-                    <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full gap-y-3 text-white border-neutral-700 border-1 py-3 transition-all">
+                    <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full gap-y-3 text-white border-neutral-700 border py-3 transition-all">
                         <Snowflake className={`${freezeCnt >= 1 ? "text-sky-400" : "text-white"}`} />
                         <>{freezeCnt} {freezeCnt === 1 ? "bevriezer" : "bevriezers"}</>
                     </div>

@@ -12,11 +12,11 @@ export default async function Footer() {
     (await cookies()).get("polarlearn.session-id")?.value as string
   );
   return (
-    <footer className="w-screen bg-neutral-800 pt-4 pb-8 drop-shadow-xl font-[family-name:var(--font-geist-sans)] mt-auto flex flex-col md:flex-row px-4" >
+    <footer className="w-screen bg-neutral-800 pt-4 pb-8 drop-shadow-xl font-(family-name:--font-geist-sans) mt-auto flex flex-col md:flex-row px-4" >
       <div>
         <div className="flex flex-row items-center space-x-4 w-min">
           <Image src={pl500} width={50} height={50} alt="PolarLearn logo" />
-          <p className="text-3xl font-bold bg-gradient-to-r from-sky-400 to-sky-100 bg-clip-text text-transparent">
+          <p className="text-3xl font-bold bg-linear-to-r from-sky-400 to-sky-100 bg-clip-text text-transparent">
             PolarLearn
           </p>
         </div>
