@@ -45,8 +45,6 @@ function getCookie(cname: string) {
 
 export default function SignInForm({ googleEnabled = true, githubEnabled = true, turnstileEnabled = true }: { googleEnabled?: boolean; githubEnabled?: boolean; turnstileEnabled?: boolean }) {
   const router = useRouter();
-  // Debug: log the sitekey to verify if it's available in the client-side
-
   const params = useSearchParams();
   const formRef = useRef<HTMLFormElement>(null);
   const [captchaToken, setCaptchaToken] = useState("");
@@ -271,26 +269,18 @@ export default function SignInForm({ googleEnabled = true, githubEnabled = true,
                 const cookieGoto = getCookie('polarlearn.goto');
                 const gotoPath = getValidRedirectPath(serverGoto || cookieGoto) || '/home/start';
 
-                // Clear redirect cookie
                 clearRedirectCookie();
 
-                // Add a small delay to ensure session is established, then redirect
+                // Refresh server data to update providers with new init data, then redirect
+                router.refresh();
                 setTimeout(() => {
-                  // Try router first, fallback to window.location
-                  try {
-                    router.push(gotoPath);
-                  } catch (err) {
-                    console.warn("nextjs router redirect gefaald:", err);
-                    window.location.href = gotoPath;
-                  }
-                }, 200);
+                  router.push(gotoPath);
+                }, 300);
               } else {
-                // Check if error is related to email verification
                 if (data.error && data.error.includes("geverifieerd")) {
                   setShowResendActivation(true);
                 }
                 toast.error(data.error || "Er is een fout opgetreden");
-                // Reset captcha on login failure
                 if (window.turnstile && widgetId !== null && turnstileEnabled) {
                   window.turnstile.reset(widgetId);
                   setCaptchaToken("");
