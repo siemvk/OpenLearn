@@ -196,9 +196,19 @@ export default function SessionAnalysisView({ session, listName, listId }: Sessi
                   <Award className="h-8 w-8 text-yellow-500" />
                 </>
               ) : (
-                <div className="text-lg text-neutral-500">Geen cijfer</div>
+                <div className="text-lg text-neutral-500">Geen cijfer?? wat??</div>
               )}
             </div>
+            {session.grade !== null && (
+              <p className="text-s mt-2">
+                {session.grade >= 9 ? "De GOAT 🏅" :
+                  session.grade >= 8 ? "Absolute W 🎉" :
+                    session.grade >= 7 ? "Goed gedaan! ✨" :
+                      session.grade >= 6 ? "Voldoende 👍" :
+                        session.grade >= 5.5 ? "Een voldoende is een voldoende 🤷‍♂️" :
+                          "Blijf oefenen! 💪 Je kan dit!"}
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -347,8 +357,8 @@ export default function SessionAnalysisView({ session, listName, listId }: Sessi
           </CardHeader>
           <CardContent>
             <ul className="list-disc list-inside space-y-2 text-neutral-300">
-              <li>Focus op de {wrongWords.length} {wrongWords.length === 1 ? "woord" : "woorden"} die je fout had</li>
-              <li>Oefen deze woorden nog eens apart met de "Leren" modus</li>
+              <li>Focus op {wrongWords.length === 1 ? "het" : "de"} {wrongWords.length} {wrongWords.length === 1 ? "woord" : "woorden"} die je fout had</li>
+              <li>Oefen {wrongWords.length === 1 ? "dit" : "deze"} {wrongWords.length === 1 ? "woord" : "woorden"} nog eens apart met de knop onderin.</li>
               {percentage < 60 && (
                 <li>Probeer de lijst eerst door te nemen voordat je oefent</li>
               )}
@@ -360,10 +370,6 @@ export default function SessionAnalysisView({ session, listName, listId }: Sessi
         </Card>
       )}
 
-      {/* Practice Wrong Words Button */}
-
-
-      {/* Action buttons */}
       <div className="flex gap-4 justify-center pt-4">
         <Button1
           text="Terug naar resultaten"

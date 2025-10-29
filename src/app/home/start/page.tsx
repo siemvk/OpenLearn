@@ -8,6 +8,7 @@ import RecentGeoefend from './RecentGeoefend';
 import { subjectEmojiMap } from "@/components/icons";
 import { getAllSummaries } from "@/serverActions/summaryActions";
 import { prefetchCreatorInfo } from '@/utils/creator';
+import { isUUID } from '@/utils/uuid';
 
 async function getRecentSubjects() {
   const user = await getUserFromSession(
@@ -113,10 +114,44 @@ async function getRecentLists() {
   );
 }
 
+async function getRecentSessions() {
+  const user = await getUserFromSession(
+    (await cookies()).get("polarlearn.session-id")?.value as string
+  );
+  if (!user?.id) return [];
+
+  // Get non-finished (paused/incomplete) sessions for this user, ordered by last activity
+  const sessions = await prisma.learnSession.findMany({
+    where: {
+      userId: user.id,
+      isCompleted: false,
+    },
+    orderBy: {
+      lastActiveAt: 'desc',
+    },
+    take: 20, // Get the 20 most recent sessions
+    select: {
+      sessionId: true,
+      listId: true,
+      mode: true,
+      subject: true,
+      lang_from: true,
+      lang_to: true,
+      originalWords: true,
+      updatedAt: true,
+      grade: true,
+      score: true,
+    },
+  });
+
+  return sessions;
+}
+
 export default async function Start() {
   const recentSubjects = await getRecentSubjects();
   const recentLists = await getRecentLists();
   const allSummaries = await getAllSummaries(); // Fetch summaries
+  const recentSessions = await getRecentSessions(); // Fetch sessions
 
   const currentUser = await getUserFromSession(
     (await cookies()).get("polarlearn.session-id")?.value as string
@@ -136,6 +171,47 @@ export default async function Start() {
     type: 'summary' as const,
   })) : [];
 
+  // Process sessions - fetch list data for UUID listIds
+  const typedSessions = [];
+  for (const session of recentSessions) {
+    let sessionItem: any = {
+      ...session,
+      type: 'session' as const,
+      list_id: session.sessionId, // Use sessionId as the identifier
+    };
+
+    // Check if listId is a UUID (references a real list) or a custom session
+    if (isUUID(session.listId)) {
+      // Fetch the actual list data
+      const listData = await prisma.practice.findFirst({
+        where: { list_id: session.listId },
+        select: {
+          name: true,
+          data: true,
+          creator: true,
+        }
+      });
+
+      if (listData) {
+        sessionItem.name = listData.name;
+        sessionItem.data = listData.data;
+        sessionItem.creator = listData.creator;
+      } else {
+        // List was deleted, use session data
+        sessionItem.name = `Verwijderde lijst`;
+        sessionItem.data = session.originalWords || [];
+        sessionItem.creator = currentUserName || '';
+      }
+    } else {
+      // Custom session - use data from the session itself
+      sessionItem.name = session.listId; // Custom name stored in listId
+      sessionItem.data = session.originalWords || [];
+      sessionItem.creator = currentUserName || '';
+    }
+
+    typedSessions.push(sessionItem);
+  }
+
   const combinedItems = [...typedLists, ...typedSummaries];
 
   // Sort by updatedAt descending
@@ -145,8 +221,15 @@ export default async function Start() {
     return dateB - dateA;
   });
 
+  // Sort sessions separately
+  typedSessions.sort((a, b) => {
+    const dateA = new Date(a.updatedAt).getTime();
+    const dateB = new Date(b.updatedAt).getTime();
+    return dateB - dateA;
+  });
+
   // Prefetch creator displayName and jdenticonValue to avoid client waterfalls
-  const creators = combinedItems.map(item => item.creator);
+  const creators = [...combinedItems.map(item => item.creator), ...typedSessions.map(item => item.creator)];
   const creatorMap = await prefetchCreatorInfo(creators);
 
   // Enrich items with prefetched creator info
@@ -156,12 +239,20 @@ export default async function Start() {
     prefetchedJdenticonValue: creatorMap[item.creator].jdenticonValue,
     prefetchedUserId: creatorMap[item.creator].userId,
   }));
+
+  // Enrich sessions with prefetched creator info
+  const enrichedSessions = typedSessions.map(item => ({
+    ...item,
+    prefetchedName: creatorMap[item.creator].name,
+    prefetchedJdenticonValue: creatorMap[item.creator].jdenticonValue,
+    prefetchedUserId: creatorMap[item.creator].userId,
+  }));
   // waarom kan dit
   const slechtIdee = (
-    <div className="flex pt-5 pl-5 space-x-4 relative min-w-max min-h-[80px] pr-5">
+    <div className="flex pt-5 pl-5 space-x-4 relative min-w-max min-h-20 pr-5">
       {recentSubjects.length === 0 && (
         <>
-          <p className="absolute top-[80px] w-full pl-9 text-neutral-400 font-bold pr-4">
+          <p className="absolute top-20 w-full pl-9 text-neutral-400 font-bold pr-4">
             Je hebt nog geen vakken geoefend. Leer een lijst of een
             bepaalde vak, en de geoefende vak van de lijst komt hier.
           </p>
@@ -249,11 +340,8 @@ export default async function Start() {
           </div>
         </div>
         {/* Recent geoefend */}
-        <div className="recent-practiced mt-8">
+        <div className="recent-practiced mt-4">
           <div className="flex items-center text-center">
-            <h1 className="text-4xl pl-5 mb-2 font-extrabold">
-              Recent Geoefend:
-            </h1>
           </div>
           <div className="h-4" />
           <div className="space-y-4 relative">
@@ -269,6 +357,7 @@ export default async function Start() {
               <>
                 <RecentGeoefend
                   items={enrichedItems}
+                  sessions={enrichedSessions}
                   currentUserName={currentUserName as string}
                   isAdmin={currentUserRole === 'admin'}
                 />

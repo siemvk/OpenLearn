@@ -19,11 +19,22 @@ import mind from '@/app/img/mind.svg';
 
 interface RecentGeoefendProps {
   items: Array<any>;
+  sessions: Array<any>;
   currentUserName?: string;
   isAdmin?: boolean;
 }
 
-export default function RecentGeoefend({ items, currentUserName, isAdmin }: RecentGeoefendProps) {
+// Map mode names to Dutch display names
+const modeDisplayNames: Record<string, string> = {
+  'test': 'Toets',
+  'hints': 'Hints',
+  'learnlist': 'Leren',
+  'multichoice': 'Meerkeuze',
+  'mind': 'In gedachten',
+  'livequiz': 'LiveQuiz'
+};
+
+export default function RecentGeoefend({ items, sessions, currentUserName, isAdmin }: RecentGeoefendProps) {
   const [select, setSelect] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -163,6 +174,75 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
   const selectableItems = items.filter(item => item.type === 'list');
   return (
     <div className="recent-practiced">
+      {/* Recent Sessions Section */}
+      {sessions && sessions.length > 0 && (
+        <>
+          <div className="flex items-center text-center mt-8">
+            <h2 className="text-3xl pl-5 mb-2 font-extrabold">
+              Actieve Sessies:
+            </h2>
+          </div>
+          <div className="h-4" />
+          <div className="space-y-4 relative mb-5">
+            {sessions.map((item: any) => (
+              <div key={item.list_id} className="tile relative bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-bold py-2 px-6 mx-4 rounded-lg min-h-20 h-auto flex items-center justify-between">
+                <Link href={`/learn/viewlist/${item.listId}/resultaten/${item.sessionId}`} className="absolute inset-0 z-0" />
+                <div className="flex-1 flex items-center relative z-10 pointer-events-none">
+                  <div className="flex items-center">
+                    {item.subject && (
+                      <Image
+                        src={getSubjectIcon(item.subject)}
+                        alt={`${item.subject} icon`}
+                        width={24}
+                        height={24}
+                        className="mr-2"
+                      />
+                    )}
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg whitespace-normal wrap-break-word max-w-[40ch]">
+                          {item.name}
+                        </span>
+                        <span className="text-sm text-neutral-400">
+                          • {modeDisplayNames[item.mode] || item.mode}
+                        </span>
+                      </div>
+                      {item.grade !== null && item.grade !== undefined && (
+                        <span className="text-sm text-neutral-400">
+                          Cijfer: {item.grade.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grow" />
+                  {(!isMobile) && (
+                    <div className="flex items-center pr-2">
+                      {Array.isArray(item.data) && item.data.length === 1
+                        ? '1 woord'
+                        : `${Array.isArray(item.data) ? item.data.length : 0} woorden`}
+                    </div>
+                  )}
+                </div>
+
+                {item.creator && !isMobile && (
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center z-10">
+                    <div className="pointer-events-auto">
+                      <CreatorLink
+                        creator={item.creator}
+                        prefetchedName={item.prefetchedName}
+                        prefetchedJdenticonValue={item.prefetchedJdenticonValue}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      <h1 className="text-4xl pl-5 mb-2 font-extrabold">
+        Recent Geoefend:
+      </h1>
       <div className="space-y-4 relative">
         {/* Multi-selection controls */}
         {selectableItems.length >= 2 && (
@@ -294,7 +374,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                           className="mr-2"
                         />
                       )}
-                      <span className="text-lg whitespace-normal break-words max-w-[40ch]">
+                      <span className="text-lg whitespace-normal wrap-break-word max-w-[40ch]">
                         {item.name}
                         {item.published === false && (
                           <Badge variant="secondary" className="ml-2 bg-amber-600/20 text-amber-500 border border-amber-600/50 text-xs">
@@ -303,7 +383,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                         )}
                       </span>
                     </div>
-                    <div className="flex-grow" />
+                    <div className="grow" />
                     {(!isMobile) && (
                       <div className="flex items-center pr-2">
                         {Array.isArray(item.data) && item.data.length === 1
@@ -358,7 +438,7 @@ export default function RecentGeoefend({ items, currentUserName, isAdmin }: Rece
                           className="mr-2"
                         />
                       )}
-                      <span className="text-lg whitespace-normal break-words max-w-[40ch]">
+                      <span className="text-lg whitespace-normal wrap-break-word max-w-[40ch]">
                         {item.name}
                         {item.published === false && (
                           <Badge variant="secondary" className="ml-2 bg-amber-600/20 text-amber-500 border border-amber-600/50 text-xs">
