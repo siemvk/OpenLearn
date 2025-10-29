@@ -2,32 +2,45 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromSession } from '@/utils/auth/auth'
 import { prisma } from '@/utils/prisma'
 import { S3 } from '@/utils/s3'
-import { PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
+import { PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import sharp from 'sharp'
+
+// Disable body parsing for file uploads
+export const dynamic = 'force-dynamic'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
+  // Check if S3 is properly configured
+  if (!process.env.S3_BUCKET || !process.env.S3_ENDPOINT) {
+    console.error('S3 configuration missing. Required: S3_BUCKET, S3_ENDPOINT');
+    return NextResponse.json(
+      { success: false, message: 'Bestandsupload is momenteel niet beschikbaar. Contacteer de beheerder.' },
+      { status: 500 }
+    )
+  }
+
+  const user = await getUserFromSession()
+  if (!user) {
+    return NextResponse.json(
+      { success: false, message: 'Je moet ingelogd zijn om je profielfoto te wijzigen.' },
+      { status: 401 }
+    )
+  }
+
   try {
-    // Check if S3 is properly configured
-    if (!process.env.S3_BUCKET || !process.env.S3_ENDPOINT) {
-      console.error('S3 configuration missing. Required: S3_BUCKET, S3_ENDPOINT');
+    // Clone request to avoid body lock issues
+    let formData: FormData;
+    try {
+      formData = await req.formData()
+    } catch (e) {
+      console.error('Error parsing form data:', e);
       return NextResponse.json(
-        { success: false, message: 'Bestandsupload is momenteel niet beschikbaar. Contacteer de beheerder.' },
-        { status: 500 }
+        { success: false, message: 'Fout bij het lezen van de upload. Probeer het opnieuw.' },
+        { status: 400 }
       )
     }
-
-    const user = await getUserFromSession()
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: 'Je moet ingelogd zijn om je profielfoto te wijzigen.' },
-        { status: 401 }
-      )
-    }
-
-    const formData = await request.formData()
     const file = formData.get('profilePicture') as File
 
     if (!file) {
@@ -94,17 +107,21 @@ export async function POST(request: NextRequest) {
     }));
 
     if (listResponse.Contents) {
-      const objectsToDelete = listResponse.Contents.filter(obj => {
-        const key = obj.Key || '';
-        const base = `uploads/pfp/${user.id}`;
-        const remainder = key.substring(base.length);
-        return remainder.startsWith('.') || remainder.startsWith('_');
-      }).map(obj => ({ Key: obj.Key }));
+      const keysToDelete = listResponse.Contents
+        .filter(obj => {
+          const key = obj.Key || '';
+          const base = `uploads/pfp/${user.id}`;
+          const remainder = key.substring(base.length);
+          return remainder.startsWith('.') || remainder.startsWith('_');
+        })
+        .map(obj => obj.Key)
+        .filter((key): key is string => key !== undefined);
 
-      if (objectsToDelete.length > 0) {
-        await S3.send(new DeleteObjectsCommand({
+      // Delete objects individually to avoid Content-MD5 requirement
+      for (const key of keysToDelete) {
+        await S3.send(new DeleteObjectCommand({
           Bucket: process.env.S3_BUCKET,
-          Delete: { Objects: objectsToDelete },
+          Key: key,
         }));
       }
     }
@@ -172,27 +189,30 @@ export async function DELETE() {
       Prefix: `uploads/pfp/${user.id}`,
     }));
 
-    const objectsToDelete = (listResponse.Contents || [])
+    const keysToDelete = (listResponse.Contents || [])
       .filter(obj => {
         const key = obj.Key || '';
         const base = `uploads/pfp/${user.id}`;
         const remainder = key.substring(base.length);
         return remainder.startsWith('.') || remainder.startsWith('_');
       })
-      .map(obj => ({ Key: obj.Key }));
+      .map(obj => obj.Key)
+      .filter((key): key is string => key !== undefined);
 
-    if (objectsToDelete.length === 0) {
+    if (keysToDelete.length === 0) {
       return NextResponse.json(
         { success: false, message: 'Je hebt geen profielfoto om te verwijderen.' },
         { status: 400 }
       );
     }
 
-    // Delete all found profile pictures from S3
-    await S3.send(new DeleteObjectsCommand({
-      Bucket: process.env.S3_BUCKET,
-      Delete: { Objects: objectsToDelete },
-    }));
+    // Delete all found profile pictures from S3 individually to avoid Content-MD5 requirement
+    for (const key of keysToDelete) {
+      await S3.send(new DeleteObjectCommand({
+        Bucket: process.env.S3_BUCKET,
+        Key: key,
+      }));
+    }
 
     await prisma.user.update({
       where: { id: user.id },
