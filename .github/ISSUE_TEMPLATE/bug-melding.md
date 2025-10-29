@@ -4,6 +4,7 @@ about: Maak een bug-melding aan zodat wij het z.s.m kunnen oplossen.
 title: "[BUG]"
 labels: bug
 assignees: ''
+type: bug
 
 ---
 
@@ -17,12 +18,13 @@ Stappen om het gedrag te reproduceren:
 Een duidelijke beschrijving over wat het normaal zou doen
 
 **Schermfoto's (als van toepassing)**
-Als her van toepassing is, voeg enige schermfoto's of opnames toe.
+Als het van toepassing is, voeg enige schermfoto's of opnames toe.
 
 **Apparaat informatie:**
- - Besturingssysteem: (Bijv: Windows, MacOS, Linux)
+ - Besturingssysteem: [Bijv: Windows, MacOS, Linux]
  - Browser [Bijv: chrome, safari]
  - Versie [Bijv: 69]
+ - PolarLearn Versie [zie onderaan de pagina]
 
 **Extra uitleg**
 Voeg hier enige extra uitleg als het nodig is
