@@ -21,10 +21,10 @@ Een duidelijke beschrijving over wat het normaal zou doen
 Als het van toepassing is, voeg enige schermfoto's of opnames toe.
 
 **Apparaat informatie:**
- - Besturingssysteem: (Bijv: Windows, MacOS, Linux)
+ - Besturingssysteem: [Bijv: Windows, MacOS, Linux]
  - Browser [Bijv: chrome, safari]
  - Versie [Bijv: 69]
- - PolarLearn Versie (zie onderaan de pagina)
+ - PolarLearn Versie [zie onderaan de pagina]
 
 **Extra uitleg**
 Voeg hier enige extra uitleg als het nodig is
