@@ -228,7 +228,7 @@ const MobileMenu = memo(
     return (
       <div className="fixed inset-0 bg-neutral-900 z-[90] p-4 overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <Link href="/" className="flex-shrink-0">
+          <Link href="/home/start" className="flex-shrink-0">
             <Image src={pl500} alt="PolarLearn Logo" height={50} width={50} />
           </Link>
           {/* Modified middle container for StreakNavbarThing */}
@@ -479,7 +479,7 @@ export const TopNavBar = memo(function TopNavBar({
     <>
       <nav id="navbar" className="navbar fixed top-0 min-w-full shadow-md start-0 max-w-screen-xl z-[50] flex flex-wrap justify-between h-16 bg-neutral-900/70 backdrop-blur-sm items-center fade-in font-[family-name:var(--font-geist-sans)] font-bold">
         <div className="flex items-center space-x-4 w-full transition-all duration-300 ease-in-out pr-2">
-          <a href="/" className="w-12 h-12">
+          <a href="/home/start" className="w-12 h-12">
             <Image
               className="mx-2 w-full h-full"
               src={pl500}
