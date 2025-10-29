@@ -135,11 +135,18 @@ export async function getAllStreakData() {
             console.log(`Auto-applied freeze for user ${user.id} on ${yesterdayStr}`);
         }
 
-        // Always recalculate streak count based on consecutive days from today backwards
+        // Always recalculate streak count based on consecutive days from yesterday backwards
+        // Like Duolingo: the streak persists until you've completely missed a day (i.e., yesterday had no activity)
         let currentStreakCount = 0;
-        // Always start counting from today, regardless of today's activity status
         const todayDate = new Date();
-        for (let i = 0; i < 365; i++) { // Max reasonable streak length
+
+        // Check today's activity
+        const todayStr = todayDate.toISOString().split('T')[0];
+        const hasTodayActivity = streakDataObj[todayStr] === 'done';
+
+        // Start counting from yesterday (i=1), not today
+        // This way, if you haven't practiced today yet, you still see yesterday's streak
+        for (let i = (hasTodayActivity ? 0 : 1); i < 365; i++) {
             const checkDate = new Date(todayDate);
             checkDate.setDate(checkDate.getDate() - i);
             const checkDateStr = checkDate.toISOString().split('T')[0];

@@ -54,7 +54,7 @@ export async function updateDailyStreak(): Promise<StreakUpdateResult> {
         const yesterdayStr = yesterday.toISOString().split('T')[0]
 
         // Check streak continuity
-        const hadYesterdayActivity = streakData[yesterdayStr] === 'done' || streakData[yesterdayStr] === 'frozen'
+        let hadYesterdayActivity = streakData[yesterdayStr] === 'done' || streakData[yesterdayStr] === 'frozen'
 
         // Track if we need to use a freeze
         let freezeUsed = false
@@ -64,11 +64,12 @@ export async function updateDailyStreak(): Promise<StreakUpdateResult> {
             // Apply the freeze to yesterday
             streakData[yesterdayStr] = 'frozen'
             freezeUsed = true
+            hadYesterdayActivity = true // Update this after applying freeze
         }
 
-        // Rechecking continuity with potential freeze
-        const continuousStreak = freezeUsed || streakData[yesterdayStr] === 'done' || streakData[yesterdayStr] === 'frozen'
-        const isNewStreak = !user.lastActivity || !continuousStreak
+        // Determine if this is a new streak
+        // New streak if: no previous activity OR streak was broken (no yesterday activity even after freeze attempt)
+        const isNewStreak = !user.lastActivity || (user.streakCount === 0) || !hadYesterdayActivity
 
         // Update streak count
         let newStreakCount = user.streakCount || 0

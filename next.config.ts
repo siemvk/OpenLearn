@@ -1,16 +1,10 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from "next";
-const { version } = require('./package.json');
 
 const nextConfig: NextConfig = {
-  reactStrictMode: false, // Disable in development for faster builds
-  publicRuntimeConfig: {
-    appVersion: version,
-  },
+  reactStrictMode: false,
   experimental: {
-    // Optimize bundling
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    // Enable server source maps for better error debugging
     serverSourceMaps: true,
   },
   // Webpack configuration for banner injection

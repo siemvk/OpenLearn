@@ -213,7 +213,6 @@ pnpm i
 if [ ! -f .env ]; then
   echo "
 DATABASE_URL=\"mongodb://127.0.0.1:27017,127.0.0.1:27018,127.0.0.1:27019/$DB_NAME?replicaSet=rs0\"
-POLARLEARN_URL=\"http://localhost:3000\"
 
 GOOGLE_ID=\"Stop hier de Google OAuth2 Client ID die je hebt gekregen van de google cloud console\"
 GOOGLE_SECRET=\"Stop hier de Google OAuth2 Client Secret die je hebt gekregen van de google cloud console\"

@@ -22,7 +22,7 @@ export default async function MappenPage() {
   // Get all maps created by the user
   const userMaps = await prisma.map.findMany({
     where: {
-      creator: user.name || user.id
+      creator: user.id
     },
     orderBy: { updatedAt: 'desc' }
   });
@@ -65,7 +65,7 @@ export default async function MappenPage() {
                       ) : (
                         <Folder className="w-10 h-10 text-blue-500" />
                       )}
-                      <span className="text-lg whitespace-normal break-words max-w-[40ch] flex flex-row">
+                      <span className="text-lg whitespace-normal wrap-break-word max-w-[40ch] flex flex-row">
                         {map.name}
                         <div className="flex gap-2 mt-1 pl-2">
                           {map.public && (
@@ -76,7 +76,7 @@ export default async function MappenPage() {
                         </div>
                       </span>
                     </div>
-                    <div className="flex-grow"></div>
+                    <div className="grow"></div>
                     <div className="flex items-center pr-2">
                       <span className="text-sm text-neutral-400">
                         {map.listCount} {map.listCount === 1 ? "lijst" : "lijsten"}

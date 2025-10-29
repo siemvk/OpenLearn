@@ -4,7 +4,7 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
@@ -17,17 +17,17 @@ model config {
 }
 
 model User {
-  id            String    @id @map("_id") @db.String
-  name          String?   @unique
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String
-  salt          String
-  activationToken  String?
+  id              String    @id @map("_id") @db.String
+  name            String?   @unique
+  email           String?   @unique
+  emailVerified   DateTime?
+  image           String?
+  password        String
+  salt            String
+  activationToken String?
 
-  finishedTour  Boolean? @default(false)
-  theme         String?  @default("dark")
+  finishedTour Boolean? @default(false)
+  theme        String?  @default("dark")
 
   inGroups  Json?
   ownGroups Json?
@@ -35,13 +35,13 @@ model User {
   githubOAuthID String? @unique
   googleOAuthID String? @unique
 
-  list_data        Json?
-  role             String?
-  loginAllowed     Boolean?
-  banReason        String?
-  forumAllowed     Boolean?  @default(false)
-  forumBanReason   String?
-  forumBanEnd      DateTime?
+  list_data      Json?
+  role           String?
+  loginAllowed   Boolean?
+  banReason      String?
+  forumAllowed   Boolean?  @default(false)
+  forumBanReason String?
+  forumBanEnd    DateTime?
 
   notificationData Json?
 
@@ -55,12 +55,12 @@ model User {
    * }
    * }
    */
-  forumPoints      Int       @default(0)
-  streakCount      Int       @default(0)
-  lastActivity     DateTime?
-  streakData       Json? // key: YYYY-MM-DD, value: "done" | "frozen"
-  freezeCount      Int       @default(0)
-  lastExportedAt   DateTime?   // Timestamp of last data export for cooldown enforcement
+  forumPoints    Int       @default(0)
+  streakCount    Int       @default(0)
+  lastActivity   DateTime?
+  streakData     Json? // key: YYYY-MM-DD, value: "done" | "frozen"
+  freezeCount    Int       @default(0)
+  lastExportedAt DateTime? // Timestamp of last data export for cooldown enforcement
 
   scheduledDeletion DateTime? // TTL index for account deletion
 
@@ -104,11 +104,11 @@ model practice {
   data           Json?
   summaryContent String?
 
-  creator   String   @db.String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  published Boolean
-  scheduledDeletion DateTime?  // schedule for TTL deletion
+  creator           String    @db.String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  published         Boolean
+  scheduledDeletion DateTime? // schedule for TTL deletion
 }
 
 model forum {
@@ -128,9 +128,9 @@ model forum {
   votes      Int     @default(0) @db.Int
   votes_data Json?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  scheduledDeletion DateTime?  // schedule for TTL deletion
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
+  scheduledDeletion DateTime? // schedule for TTL deletion
 }
 
 model group {
@@ -148,21 +148,69 @@ model group {
   admins  String[]
 
   listsAdded  Json?
-  chatContent Json[] @default([]) 
+  chatContent Json[] @default([])
 
   scheduledDeletion DateTime? // schedule for TTL deletion or transfer
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
-model map {
-  id        String   @id @map("_id") @db.String
-  name      String
-  creator   String   @db.String
-  lists     String[]
-  image     String?
-  public    Boolean? @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model map {
+  id      String   @id @map("_id") @db.String
+  name    String
+  creator String   @db.String
+  lists   String[]
+  image   String?
+  public  Boolean? @default(false)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   scheduledDeletion DateTime? // schedule for TTL deletion
+}
+
+model learnSession {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId String @unique @default(uuid())
+  userId    String @db.String
+  listId    String
+
+  // Learning configuration
+  mode             String // learning mode: "learnlist", "hints", "test", "multikeuze", etc.
+  method           String? // current learning method
+  subject          String?
+  lang_from        String?
+  lang_to          String?
+  flipQuestionLang Boolean @default(false)
+
+  // Session state
+  currentWordIndex Int? // Index of current word being studied
+  remainingWords   Json? // Array of remaining words to study
+  originalWords    Json? // Original full word list (never changes)
+  learnListQueue   Json? // Queue for learnlist mode with modes and options
+
+  // Progress tracking
+  originalWordCount   Int   @default(0)
+  originalQueueLength Int   @default(0)
+  score               Json? // {correct: number, wrong: number}
+
+  // Answer history
+  answerLog          Json? // Array of AnswerLogEntry
+  incorrectAnswerLog Json? // Array of incorrect AnswerLogEntry
+
+  // Last activity
+  lastWord   Json? // Current word being studied
+  lastAnswer Json? // Last answer details
+
+  grade Float? // Overall grade or score
+
+  // Metadata
+  isPaused    Boolean @default(false)
+  isCompleted Boolean @default(false)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastActiveAt DateTime @default(now())
+
+  // Optional: Auto-delete old sessions
+  expiresAt DateTime?
 }

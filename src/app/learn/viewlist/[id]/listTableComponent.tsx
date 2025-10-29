@@ -1,7 +1,7 @@
 "use client"
 import Button1 from "@/components/button/Button1";
 import { List, MousePointerClick } from "lucide-react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -11,6 +11,24 @@ import test from '@/app/img/test.svg';
 import hints from '@/app/img/hint.svg';
 import mind from '@/app/img/mind.svg';
 
+interface WordPair {
+    "1": string;
+    "2": string;
+}
+
+interface ListTableComponentProps {
+    wordPairs: WordPair[];
+    edit: boolean;
+    fromLanguage: string;
+    toLanguage: string;
+    fromLanguageIcon: StaticImageData | null;
+    toLanguageIcon: StaticImageData | null;
+    isLanguageSubject: boolean;
+    listId: string;
+    subject: string;
+    listName?: string;
+}
+
 export default function ListTableComponent({
     wordPairs,
     fromLanguage,
@@ -18,17 +36,10 @@ export default function ListTableComponent({
     fromLanguageIcon,
     toLanguageIcon,
     isLanguageSubject,
-    listId,
-}: {
-    wordPairs: { "1": string; "2": string }[];
-    edit: boolean;
-    fromLanguage?: string;
-    toLanguage?: string;
-    fromLanguageIcon?: any;
-    toLanguageIcon?: any;
-    isLanguageSubject?: boolean;
-    listId: string;
-}) {
+    listId: _listId,
+    subject,
+    listName,
+}: ListTableComponentProps) {
     const [select, setSelect] = useState<boolean>(false);
     const [selectedPairs, setSelectedPairs] = useState<number[]>([]);
 
@@ -50,12 +61,50 @@ export default function ListTableComponent({
         }
     };
 
-    const handleLearn = (mode: string = 'test') => {
-        document.cookie = `selectedPairs=${JSON.stringify(selectedPairs)}; path=/;`;
-        document.cookie = `fromLanguage=${fromLanguage || ''}; path=/;`;
-        document.cookie = `toLanguage=${toLanguage || ''}; path=/;`;
-        document.cookie = `listId=${listId}; path=/;`;
-        router.push(`/learn/custom/${mode}`);
+    const handleLearn = async (mode: string = 'test') => {
+        if (selectedPairs.length === 0) return;
+
+        try {
+            // Get the selected word pairs
+            const selectedWords = selectedPairs.map(pairId => {
+                const pair = wordPairs[pairId];
+                return {
+                    "1": pair["1"],
+                    "2": pair["2"],
+                    id: pairId
+                };
+            });
+
+            // Create a custom session
+            const response = await fetch('/api/v1/lists/session/request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    words: selectedWords,
+                    subject: subject || 'CUSTOM',
+                    lang_from: fromLanguage || 'NL',
+                    lang_to: toLanguage || 'NL',
+                    mode,
+                    method: mode === 'leren' ? 'learnlist' : mode,
+                    flipQuestionLang: false,
+                    name: `Specifieke woorden van ${listName || 'lijst'}`
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create session');
+            }
+
+            const data = await response.json();
+
+            // Navigate to the custom session route (method is stored in the session)
+            router.push(`/learn/session/${data.sessionId}`);
+        } catch (error) {
+            console.error('Error creating custom session:', error);
+            alert('Er ging iets mis bij het aanmaken van de sessie. Probeer het opnieuw.');
+        }
     }
 
     return (

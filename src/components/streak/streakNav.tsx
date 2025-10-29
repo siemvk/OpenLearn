@@ -6,14 +6,17 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { Check, Flame, Snowflake, X } from "lucide-react"
-import { useStreak, useFreezes, useWeekActivity, useIsActiveStreak } from '@/store/streak/StreakProvider'
+import { useStreak, useFreezes, useWeekActivity } from '@/store/streak/StreakProvider'
 
 export default function StreakNavbarThing() {
     // Use the new streak store hooks - much simpler!
     const streakCnt = useStreak();
     const freezeCnt = useFreezes();
     const weekActivity = useWeekActivity();
-    const activeStreak = useIsActiveStreak();
+    const hasPracticedToday = weekActivity.some(day => {
+        const today = new Date().toISOString().split('T')[0];
+        return day.date === today && day.hasActivity;
+    });
 
     const getStatusIcon = (activity: { hasActivity: boolean; isFrozen: boolean }) => {
         if (activity.hasActivity) {
@@ -34,17 +37,17 @@ export default function StreakNavbarThing() {
         <Popover>
             <PopoverTrigger className="streak">
                 <div className="navbar-btn rounded-lg flex items-center justify-center min-w-40 min-h-10 hover:bg-neutral-700 transition-colors px-2">
-                    <Flame className={`mr-1 ${(streakCnt > 0 && activeStreak) ? "text-orange-400" : "text-white"}`} />
+                    <Flame className={`mr-1 ${hasPracticedToday ? "text-orange-400" : "text-white"}`} />
                     {streakCnt}
                 </div>
             </PopoverTrigger>
             <PopoverContent className={`w-80 navbar-popover z-110 drop-shadow-2xl min-h-40 flex flex-col space-y-3 justify-center`}>
                 <div className="flex flex-row space-x-3">
-                    <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full transition-all gap-y-3 text-white border-neutral-700 border-1 py-3">
-                        <Flame className={`${(streakCnt > 0 && activeStreak) ? "text-orange-400" : "text-white"}`} />
+                    <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full transition-all gap-y-3 text-white border-neutral-700 border py-3">
+                        <Flame className={`${hasPracticedToday ? "text-orange-400" : "text-white"}`} />
                         <>{streakCnt} {streakCnt === 1 ? "dag" : "dagen"} reeks</>
                     </div>
-                    <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full gap-y-3 text-white border-neutral-700 border-1 py-3 transition-all">
+                    <div className="flex flex-col items-center justify-center h-min-10 hover:bg-neutral-700 drop-shadow-2xl rounded-lg w-full gap-y-3 text-white border-neutral-700 border py-3 transition-all">
                         <Snowflake className={`${freezeCnt >= 1 ? "text-sky-400" : "text-white"}`} />
                         <>{freezeCnt} {freezeCnt === 1 ? "bevriezer" : "bevriezers"}</>
                     </div>

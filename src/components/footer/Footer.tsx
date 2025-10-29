@@ -1,6 +1,3 @@
-import { faCodeCommit } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import pkg from "@/../package.json";
 import { cookies } from "next/headers";
 import { getUserFromSession } from "@/utils/auth/auth";
@@ -8,28 +5,26 @@ import Image from "next/image";
 import pl500 from "@/app/img/pl-500.svg";
 import HCB from "@/app/img/HCB-logo.svg";
 import Link from "next/link";
+import { GitCommitHorizontal } from "lucide-react";
 
 export default async function Footer() {
   const user = await getUserFromSession(
     (await cookies()).get("polarlearn.session-id")?.value as string
   );
   return (
-    <footer className="w-screen bg-neutral-800 pt-4 pb-8 drop-shadow-xl font-[family-name:var(--font-geist-sans)] mt-auto flex flex-col md:flex-row px-4" >
+    <footer className="w-screen bg-neutral-800 pt-4 pb-8 drop-shadow-xl font-(family-name:--font-geist-sans) mt-auto flex flex-col md:flex-row px-4" >
       <div>
         <div className="flex flex-row items-center space-x-4 w-min">
           <Image src={pl500} width={50} height={50} alt="PolarLearn logo" />
-          <p className="text-3xl font-bold bg-gradient-to-r from-sky-400 to-sky-100 bg-clip-text text-transparent">
+          <p className="text-3xl font-bold bg-linear-to-r from-sky-400 to-sky-100 bg-clip-text text-transparent">
             PolarLearn
           </p>
         </div>
         <div className="mt-2 flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-8 w-full">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center space-x-2">
-              <FontAwesomeIcon
-                icon={faCodeCommit as IconProp}
-                className="size-5"
-              />
-              <p>{process.env.GITINF}</p>
+              <GitCommitHorizontal />
+              <p>{process.env.NEXT_PUBLIC_GITINF}</p>
             </div>
             <p>PolarLearn versie: {pkg.version}</p>
             {process.env.NODE_ENV === "development" && user && (
