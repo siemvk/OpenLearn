@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Award, BarChart3, CheckCircle2, XCircle, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Button1 from "@/components/button/Button1";
+import { createCustomSession } from "@/utils/createCustomSession";
+import { useState } from "react";
 
 interface Session {
   id: string;
@@ -17,6 +19,9 @@ interface Session {
   originalWordCount: number;
   createdAt: Date;
   updatedAt: Date;
+  subject?: string | null;
+  lang_from?: string | null;
+  lang_to?: string | null;
 }
 
 interface SessionAnalysisViewProps {
@@ -45,6 +50,7 @@ const modeDisplayNames: Record<string, string> = {
 
 export default function SessionAnalysisView({ session, listName, listId }: SessionAnalysisViewProps) {
   const router = useRouter();
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
 
   // Calculate basic statistics
   const correct = session.score?.correct || 0;
@@ -115,6 +121,39 @@ export default function SessionAnalysisView({ session, listName, listId }: Sessi
 
   const wrongWords = wordStats.filter(w => w.wrongCount > 0);
   const correctWords = wordStats.filter(w => w.correctCount > 0 && w.wrongCount === 0);
+
+  // Handler to create a custom session with wrong words
+  const handlePracticeWrongWords = async () => {
+    if (wrongWords.length === 0) return;
+
+    setIsCreatingSession(true);
+
+    try {
+      // Transform wrongWords back into the format needed for the session
+      const wordsToReview = wrongWords.map((stat, index) => ({
+        "1": stat.word,
+        "2": stat.answer,
+        id: index
+      }));
+
+      const response = await createCustomSession({
+        words: wordsToReview,
+        subject: session.subject || 'CUSTOM',
+        lang_from: session.lang_from || 'NL',
+        lang_to: session.lang_to || 'NL',
+        mode: 'learnlist', // Default to test mode
+        method: 'learnlist'
+      });
+
+      // Navigate to the custom session
+      router.push(`/learn/session/${response.sessionId}`);
+    } catch (error) {
+      console.error('Failed to create practice session:', error);
+      alert('Er ging iets mis bij het maken van de oefensessie. Probeer het opnieuw.');
+    } finally {
+      setIsCreatingSession(false);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-8">
@@ -308,7 +347,7 @@ export default function SessionAnalysisView({ session, listName, listId }: Sessi
           </CardHeader>
           <CardContent>
             <ul className="list-disc list-inside space-y-2 text-neutral-300">
-              <li>Focus op de {wrongWords.length} woorden die je fout had</li>
+              <li>Focus op de {wrongWords.length} {wrongWords.length === 1 ? "woord" : "woorden"} die je fout had</li>
               <li>Oefen deze woorden nog eens apart met de "Leren" modus</li>
               {percentage < 60 && (
                 <li>Probeer de lijst eerst door te nemen voordat je oefent</li>
@@ -321,6 +360,9 @@ export default function SessionAnalysisView({ session, listName, listId }: Sessi
         </Card>
       )}
 
+      {/* Practice Wrong Words Button */}
+
+
       {/* Action buttons */}
       <div className="flex gap-4 justify-center pt-4">
         <Button1
@@ -331,6 +373,13 @@ export default function SessionAnalysisView({ session, listName, listId }: Sessi
           text="Opnieuw oefenen"
           onClick={() => router.push(`/learn/${session.mode}/${listId}`)}
         />
+        {wrongWords.length > 0 && (
+          <Button1
+            text={isCreatingSession ? "Bezig..." : "Foute woorden herhalen"}
+            onClick={handlePracticeWrongWords}
+            disabled={isCreatingSession}
+          />
+        )}
       </div>
     </div>
   );

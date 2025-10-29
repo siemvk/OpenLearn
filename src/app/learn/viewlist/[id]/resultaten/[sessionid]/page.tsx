@@ -29,6 +29,21 @@ export default async function SessionDetailPage({ params }: PageParams) {
       userId: user.id,
       listId: listId,
       isCompleted: true
+    },
+    select: {
+      id: true,
+      sessionId: true,
+      mode: true,
+      score: true,
+      grade: true,
+      answerLog: true,
+      incorrectAnswerLog: true,
+      originalWordCount: true,
+      createdAt: true,
+      updatedAt: true,
+      subject: true,
+      lang_from: true,
+      lang_to: true
     }
   });
 
