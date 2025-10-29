@@ -8,6 +8,7 @@ import { PencilIcon, MousePointerClick, List } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import DeleteListButton from '@/components/learning/DeleteListButton';
 import DeleteSummaryButton from '@/components/learning/DeleteSummaryButton';
+import DeleteSessionButton from '@/components/learning/DeleteSessionButton';
 import { getSubjectIcon } from '@/components/icons';
 import Button1 from '@/components/button/Button1';
 
@@ -149,24 +150,6 @@ export default function RecentGeoefend({ items, sessions, currentUserName, isAdm
       router.push(`/learn/session/${data.sessionId}`);
     } catch (error) {
       console.error('Error creating combined list session:', error);
-
-      // Fallback to old sessionStorage method if API fails
-      const combinedListId = `combined-${selectedLists.map(l => l.list_id).join('-')}`;
-      const combinedListData = {
-        list_id: combinedListId,
-        name: `${selectedLists.length} gecombineerde lijsten`,
-        data: shuffledWordPairs,
-        lang_from: null,
-        lang_to: null,
-      };
-
-      sessionStorage.setItem('combinedListData', JSON.stringify(combinedListData));
-      const allPairIds = shuffledWordPairs.map(pair => pair.id);
-      document.cookie = `selectedPairs=${JSON.stringify(allPairIds)}; path=/;`;
-      document.cookie = `fromLanguage=; path=/;`;
-      document.cookie = `toLanguage=; path=/;`;
-      document.cookie = `listId=${combinedListId}; path=/;`;
-      router.push(`/learn/custom/${mode}`);
     }
   };
 
@@ -186,7 +169,7 @@ export default function RecentGeoefend({ items, sessions, currentUserName, isAdm
           <div className="space-y-4 relative mb-5">
             {sessions.map((item: any) => (
               <div key={item.list_id} className="tile relative bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-bold py-2 px-6 mx-4 rounded-lg min-h-20 h-auto flex items-center justify-between">
-                <Link href={`/learn/viewlist/${item.listId}/resultaten/${item.sessionId}`} className="absolute inset-0 z-0" />
+                <Link href={`/learn/session/${item.sessionId}`} className="absolute inset-0 z-0" />
                 <div className="flex-1 flex items-center relative z-10 pointer-events-none">
                   <div className="flex items-center">
                     {item.subject && (
@@ -235,6 +218,16 @@ export default function RecentGeoefend({ items, sessions, currentUserName, isAdm
                     </div>
                   </div>
                 )}
+
+                <div className="flex items-center gap-2 relative z-10">
+                  {!isMobile && (
+                    <DeleteSessionButton
+                      sessionId={item.sessionId}
+                      listId={item.listId}
+                      mode={item.mode}
+                    />
+                  )}
+                </div>
               </div>
             ))}
           </div>

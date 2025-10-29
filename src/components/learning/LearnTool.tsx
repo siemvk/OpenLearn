@@ -597,6 +597,12 @@ export default function LearnTool() {
                   router.push('/home/start')
                 }}
               />
+              <Button1
+                text="Naar statistieken"
+                onClick={() => {
+                  router.push(`/learn/viewlist/${currentList?.list_id}/resultaten`)
+                }}
+              />
             </div>
           </>
         </div>
