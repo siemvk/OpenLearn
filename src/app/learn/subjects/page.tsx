@@ -17,7 +17,7 @@ export default async function Page() {
                         href={`/learn/subject/${subject}`}
                         className="bg-neutral-800 hover:bg-neutral-700 transition-colors rounded-lg p-4 flex flex-col items-center justify-center min-h-20"
                     >
-                        <div className="text-md font-extrabold flex flex-row items-center text-center gap-2 w-full">
+                        <div className="text-md font-extrabold flex flex-col md:flex-row items-center text-center gap-2 w-full">
                             <Image
                                 src={getSubjectIcon(subject)}
                                 alt={`${subject} icon`}
