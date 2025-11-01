@@ -257,61 +257,65 @@ export default async function Page({
   }
 
   return (
-    <div className="px-4 py-4">
+    <div className="px-3 md:px-4 py-4">
       <div className="flex flex-col mb-6">
-        <div className="flex items-start sm:items-center mb-3">
-          <div className="mr-4">
-            {postcreator?.image ? (
-              <img
-                src={postcreator.image}
-                alt={`de profielfoto van ${postcreator.name || "iemand"}`}
-                width={48}
-                height={48}
-                className="rounded-full"
-              />
-            ) : (
-              <Jdenticon value={jdenticonPostValue} size={48} />
-            )}
-          </div>
-          <div className="flex-grow">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <div className="flex items-center">
-                <CreatorLink
-                  creator={postcreator?.name || post.creator}
-                  userId={postcreator?.id}
-                  displayName={postcreator?.name}
+        <div className="flex flex-col sm:flex-row items-start mb-3 gap-3">
+          <div className="flex items-start gap-3 w-full sm:w-auto">
+            <div className="flex-shrink-0">
+              {postcreator?.image ? (
+                <img
+                  src={postcreator.image}
+                  alt={`de profielfoto van ${postcreator.name || "iemand"}`}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full"
                 />
-                {postcreator?.role === "admin" && (
-                  <Badge className="bg-red-500 text-white ml-1 rounded-md">
-                    <ShieldUser />
-                    Administrator
-                  </Badge>
-                )}
-              </div>
-              {post.category && <PostBadge type={post.category} />}
-              {subjectIcon && subjectName && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-neutral-800 rounded-md">
-                  <Image
-                    src={subjectIcon}
-                    alt={subjectName}
-                    width={16}
-                    height={16}
-                  />
-                  <span className="text-sm">{subjectName}</span>
-                </div>
+              ) : (
+                <Jdenticon value={jdenticonPostValue} size={40} className="w-10 h-10 md:w-12 md:h-12" />
               )}
             </div>
-            <div className="text-sm text-gray-400 flex flex-wrap gap-2">
-              <span title={formattedDate}>{relativeTime}</span>
-              {post.updatedAt &&
-                post.createdAt &&
-                new Date(post.updatedAt).getTime() -
-                new Date(post.createdAt).getTime() >
-                1000 && <span>• Bewerkt</span>}
+            <div className="flex-grow min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <div className="flex items-center min-w-0">
+                  <div className="truncate">
+                    <CreatorLink
+                      creator={postcreator?.name || post.creator}
+                      userId={postcreator?.id}
+                      displayName={postcreator?.name}
+                    />
+                  </div>
+                  {postcreator?.role === "admin" && (
+                    <Badge className="bg-red-500 text-white ml-1 rounded-md text-xs flex-shrink-0">
+                      <ShieldUser className="w-3 h-3 md:w-4 md:h-4" />
+                      <span className="hidden sm:inline ml-1">Administrator</span>
+                    </Badge>
+                  )}
+                </div>
+                {post.category && <PostBadge type={post.category} />}
+                {subjectIcon && subjectName && (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-neutral-800 rounded-md">
+                    <Image
+                      src={subjectIcon}
+                      alt={subjectName}
+                      width={16}
+                      height={16}
+                    />
+                    <span className="text-xs md:text-sm">{subjectName}</span>
+                  </div>
+                )}
+              </div>
+              <div className="text-xs md:text-sm text-gray-400 flex flex-wrap gap-2">
+                <span title={formattedDate}>{relativeTime}</span>
+                {post.updatedAt &&
+                  post.createdAt &&
+                  new Date(post.updatedAt).getTime() -
+                  new Date(post.createdAt).getTime() >
+                  1000 && <span>• Bewerkt</span>}
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end sm:ml-auto">
+            <div className="flex gap-1 md:gap-2">
               {/* Edit and Delete buttons for post creator and admins */}
               {(isPostCreator || isAdmin) && (
                 <>
@@ -347,9 +351,11 @@ export default async function Page({
           </div>
         </div>
 
-        <h1 className="text-3xl mb-4 font-bold">{post.title}</h1>
+        <h1 className="text-2xl md:text-3xl mb-4 font-bold break-words">{post.title}</h1>
         <hr className="border-neutral-600 mb-4" />
-        <MarkdownRenderer content={post.content} />
+        <div className="prose prose-sm md:prose-base max-w-none">
+          <MarkdownRenderer content={post.content} />
+        </div>
       </div>
 
       <div className="mt-6">
