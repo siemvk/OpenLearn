@@ -22,6 +22,7 @@ import StreakNavbarThing from "../streak/streakNav";
 import NotificationNav from "../notification/notificiationNav";
 import PlusBtn from "@/components/button/plusbutton";
 import PlusBtnMb from "@/components/button/plusbuttonmobile";
+import { ChevronDown } from "lucide-react";
 
 // SearchBar component
 const SearchBar = memo(({ onExpand }: { onExpand: () => void }) => {
@@ -31,7 +32,7 @@ const SearchBar = memo(({ onExpand }: { onExpand: () => void }) => {
 
   return (
     <div
-      className="searchbar relative inline-block transition-transform rounded-4xl hover:bg-gradient-to-r from-sky-400 to-sky-100 hover:scale-101 scale-95 w-full mr-2 ml-1"
+      className="searchbar relative inline-block transition-transform rounded-4xl hover:bg-gradient-to-r from-sky-400 to-sky-100 scale-95 w-full mr-2 ml-1"
       onClick={handleSearchClick}
     >
       <div className="rounded-4xl border-4 border-neutral-700 duration-300 hover:border-transparent">
@@ -177,7 +178,7 @@ const MobileDropdown = memo(
               className="transition-transform duration-300"
               style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
             >
-              ▼
+              <ChevronDown />
             </span>
           </button>
 

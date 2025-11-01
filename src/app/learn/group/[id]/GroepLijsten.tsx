@@ -151,71 +151,74 @@ export default function GroepLijsten({
   const selectableLists = lists.filter(list => list.mode === "list");
 
   return (
-    <div className="px-4">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex-grow" />
-        {isMember && canAddLists && (
-          <AddListDialog groupId={groupId} initialLists={availableLists}>
+    <div className="px-2 md:px-4">
+      <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
+        {/* Multi-selection controls */}
+        {selectableLists.length >= 2 && (
+          <div className="flex flex-col gap-2">
             <Button1
-              text="Lijst toevoegen"
-              icon={<PlusIcon size={14} />}
+              text={select ? "Selectie uitzetten" : "Meerdere lijsten selecteren"}
+              icon={<MousePointerClick />}
+              onClick={toggleSelect}
             />
-          </AddListDialog>
+            {select && selectedItems.length > 0 && (
+              <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
+                <Button1
+                  text="Leren"
+                  icon={<Image src={learn} alt="leren" width={16} height={16} />}
+                  onClick={() => handleLearn('leren')}
+                  disabled={selectedItems.length < 2}
+                  wrapText={false}
+                />
+                <Button1
+                  text="Toets"
+                  icon={<Image src={test} alt="toets" width={16} height={16} />}
+                  onClick={() => handleLearn('test')}
+                  disabled={selectedItems.length < 2}
+                  wrapText={false}
+                />
+                <Button1
+                  text="Hints"
+                  icon={<Image src={hints} alt="hints" width={16} height={16} />}
+                  onClick={() => handleLearn('hints')}
+                  disabled={selectedItems.length < 2}
+                  wrapText={false}
+                />
+                <Button1
+                  text="Gedachten"
+                  icon={<Image src={mind} alt="gedachten" width={16} height={16} />}
+                  onClick={() => handleLearn('mind')}
+                  disabled={selectedItems.length < 2}
+                  wrapText={false}
+                />
+                <Button1
+                  text="Meerkeuze"
+                  icon={<List width={16} height={16} />}
+                  onClick={() => handleLearn('multichoice')}
+                  disabled={selectedItems.length < 2}
+                  wrapText={false}
+                />
+              </div>
+            )}
+          </div>
+        )}
+        {/* Add List button */}
+        {isMember && canAddLists && (
+          <div className="md:ml-auto">
+            <AddListDialog groupId={groupId} initialLists={availableLists}>
+              <Button1
+                text="Lijst toevoegen"
+                icon={<PlusIcon size={14} />}
+              />
+            </AddListDialog>
+          </div>
         )}
       </div>
 
-      {/* Multi-selection controls */}
-      {selectableLists.length >= 2 && (
-        <div className="pb-4 flex flex-row gap-4">
-          <Button1
-            text={select ? "Selectie uitzetten" : "Meerdere lijsten selecteren"}
-            icon={<MousePointerClick />}
-            onClick={toggleSelect}
-          />
-          {select && selectedItems.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              <Button1
-                text="Leren"
-                icon={<Image src={learn} alt="leren" width={16} height={16} />}
-                onClick={() => handleLearn('leren')}
-                disabled={selectedItems.length < 2}
-                wrapText={false}
-              />
-              <Button1
-                text="Toets"
-                icon={<Image src={test} alt="toets" width={16} height={16} />}
-                onClick={() => handleLearn('test')}
-                disabled={selectedItems.length < 2}
-                wrapText={false}
-              />
-              <Button1
-                text="Hints"
-                icon={<Image src={hints} alt="hints" width={16} height={16} />}
-                onClick={() => handleLearn('hints')}
-                disabled={selectedItems.length < 2}
-                wrapText={false}
-              />
-              <Button1
-                text="Gedachten"
-                icon={<Image src={mind} alt="gedachten" width={16} height={16} />}
-                onClick={() => handleLearn('mind')}
-                disabled={selectedItems.length < 2}
-                wrapText={false}
-              />
-              <Button1
-                text="Meerkeuze"
-                icon={<List width={16} height={16} />}
-                onClick={() => handleLearn('multichoice')}
-                disabled={selectedItems.length < 2}
-                wrapText={false}
-              />
-            </div>
-          )}
-        </div>
-      )}
+      
 
       {lists.length === 0 ? (
-        <div className="tile bg-neutral-800 text-neutral-400 text-xl font-bold py-2 px-4 mx-4 rounded-lg h-20 text-center place-items-center grid">
+        <div className="tile bg-neutral-800 text-neutral-400 text-base md:text-xl font-bold py-3 px-3 md:py-2 md:px-4 mx-2 md:mx-4 rounded-lg min-h-20 text-center place-items-center grid">
           {isMember
             ? canAddLists
               ? "Deze groep heeft nog geen lijsten. Voeg een lijst toe om te beginnen."
@@ -226,10 +229,10 @@ export default function GroepLijsten({
         <div className="space-y-4">
           {lists.map((list) => (
             <div key={list.list_id}>
-              <div className="tile relative bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-bold py-2 px-6 rounded-lg min-h-20 h-auto flex items-center justify-between cursor-pointer">
+              <div className="tile relative bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-bold py-3 px-3 md:py-2 md:px-6 rounded-lg min-h-20 h-auto flex items-center justify-between cursor-pointer">
                 {/* Selection checkbox */}
                 {select && list.mode === "list" && (
-                  <div className="relative inline-block mr-4">
+                  <div className="relative inline-block mr-2 md:mr-4 flex-shrink-0">
                     <input
                       type="checkbox"
                       id={`checkbox-${list.list_id}`}
@@ -280,18 +283,18 @@ export default function GroepLijsten({
                   </div>
                 )}
 
-                <Link href={`${list.mode === "list" ? `/learn/viewlist/${list.list_id}` : `/learn/summary/${list.list_id}`}`} className="flex-1 flex items-center">
-                  <div className="flex items-center">
+                <Link href={`${list.mode === "list" ? `/learn/viewlist/${list.list_id}` : `/learn/summary/${list.list_id}`}`} className="flex-1 flex items-center min-w-0">
+                  <div className="flex items-center min-w-0">
                     {list.subject && (
                       <Image
                         src={getSubjectIcon(list.subject)}
                         alt={`${list.subject} icon`}
                         width={24}
                         height={24}
-                        className="mr-2"
+                        className="mr-2 flex-shrink-0"
                       />
                     )}
-                    <span className="text-lg whitespace-normal break-words max-w-[40ch]">
+                    <span className="text-base md:text-lg whitespace-normal break-words max-w-[40ch]">
                       {list.name}
                       {list.published === false && (
                         <Badge
@@ -305,7 +308,7 @@ export default function GroepLijsten({
                   </div>
                 </Link>
 
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center pointer-events-auto">
+                <div className="hidden md:flex absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 items-center pointer-events-auto">
                   <CreatorLink
                     creator={list.creator}
                     prefetchedName={list.prefetchedName}
@@ -314,14 +317,14 @@ export default function GroepLijsten({
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                   {(isCreator || list.creator === currentUserName) && (
                     <Link
                       href={`/learn/editlist/${list.list_id}`}
-                      className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors"
+                      className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors"
                       title="Lijst bewerken"
                     >
-                      <PencilIcon className="h-5 w-5 text-white" />
+                      <PencilIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
                     </Link>
                   )}
                   {(isCreator || isAdmin || isPlatformAdmin) && (

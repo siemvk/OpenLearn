@@ -43,37 +43,39 @@ export default async function GroupsPage() {
     });
 
     return (
-        <div className="p-6">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-4xl font-extrabold">Groepen</h1>
+        <div className="p-4 md:p-6">
+            <div className="flex flex-row  justify-between items-start gap-4 mb-8">
+                <h1 className="text-3xl md:text-4xl font-extrabold">Groepen</h1>
                 <CreateGroupButton />
             </div>
 
             <section>
-                <h2 className="text-2xl font-bold mb-4">Mijn Groepen</h2>
+                <h2 className="text-xl md:text-2xl font-bold mb-4">Mijn Groepen</h2>
                 {userGroups.length === 0 ? (
-                    <div className="bg-neutral-800 text-neutral-400 rounded-lg p-6 text-center">
+                    <div className="bg-neutral-800 text-neutral-400 rounded-lg p-4 md:p-6 text-center">
                         <p>Je bent nog geen lid van een groep. Maak er zelf een aan of zoek bestaande groepen via de zoekfunctie.</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
                         {userGroups.map((group) => (
                             <div key={group.groupId}>
-                                <div className="tile relative bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-bold py-2 px-6 rounded-lg min-h-20 h-auto flex items-center justify-between cursor-pointer">
+                                <div className="tile relative bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-bold py-3 px-4 md:py-2 md:px-6 rounded-lg min-h-20 h-auto flex items-center justify-between cursor-pointer">
                                     <Link href={`/learn/group/${group.groupId}`} className="flex-1 flex items-center">
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3 min-w-0">
                                             {group.image ? (
                                                 <img
                                                     src={group.image}
                                                     alt={`Groepsfoto van ${group.name}`}
-                                                    className="w-10 h-10 rounded-lg object-cover"
+                                                    className="w-10 h-10 flex-shrink-0 rounded-lg object-cover"
                                                 />
                                             ) : (
-                                                <Jdenticon value={group.name} size={40} />
+                                                <div className="flex-shrink-0">
+                                                    <Jdenticon value={group.name} size={40} />
+                                                </div>
                                             )}
-                                            <span className="text-lg whitespace-normal break-words max-w-[40ch] flex flex-row">
-                                                {group.name}
-                                                <div className="flex gap-2 mt-1 pl-2">
+                                            <span className="text-base md:text-lg whitespace-normal break-words max-w-[40ch] flex flex-col md:flex-row md:items-center">
+                                                <span className="break-words">{group.name}</span>
+                                                <div className="flex gap-2 mt-1 md:mt-1 md:pl-2">
                                                     {group.creator === user.id && (
                                                         <Badge className="bg-amber-600/20 text-amber-500 border border-amber-600/50 text-xs">
                                                             Eigenaar
@@ -89,15 +91,19 @@ export default async function GroupsPage() {
                                         </div>
                                         <div className="flex-grow"></div>
                                         <div className="flex items-center pr-2">
-                                            <span className="text-sm text-neutral-400">
-                                                {Array.isArray(group.members) ? group.members.length : 0} {Array.isArray(group.members) && group.members.length === 1 ? "lid" : "leden"} •
-                                                {Array.isArray(group.listsAdded) ? group.listsAdded.length : 0} {Array.isArray(group.listsAdded) && group.listsAdded.length === 1 ? "lijst" : "lijsten"}
+                                            <span className="text-xs md:text-sm text-neutral-400 whitespace-nowrap">
+                                                <span className="hidden sm:inline">
+                                                    {Array.isArray(group.members) ? group.members.length : 0} {Array.isArray(group.members) && group.members.length === 1 ? "lid" : "leden"} • {Array.isArray(group.listsAdded) ? group.listsAdded.length : 0} {Array.isArray(group.listsAdded) && group.listsAdded.length === 1 ? "lijst" : "lijsten"}
+                                                </span>
+                                                <span className="sm:hidden">
+                                                    {Array.isArray(group.members) ? group.members.length : 0} • {Array.isArray(group.listsAdded) ? group.listsAdded.length : 0}
+                                                </span>
                                             </span>
                                         </div>
                                     </Link>
 
                                     {group.description && (
-                                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[150px] text-center">
+                                        <div className="hidden md:block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[150px] text-center">
                                             <p className="text-sm text-neutral-400 line-clamp-1">{group.description}</p>
                                         </div>
                                     )}
@@ -109,9 +115,11 @@ export default async function GroupsPage() {
             </section>
 
             <div className="mt-8 bg-neutral-800 p-4 rounded-lg text-center">
-                <p className="text-neutral-400">
-                    Zoek naar andere groepen via de zoekbalk bovenin.
-                </p>
+                <a href="/home/search">
+                    <p className="text-sm md:text-base text-neutral-400">
+                        Zoek naar andere groepen via de zoekbalk bovenin.
+                    </p>
+                </a>
             </div>
         </div>
     );
