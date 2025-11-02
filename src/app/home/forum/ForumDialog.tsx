@@ -35,11 +35,11 @@ const TitleField = memo(({ control }: { control: any }) => {
       name="title"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="text-xl">Titel:</FormLabel>
+          <FormLabel className="text-base sm:text-xl">Titel:</FormLabel>
           <FormControl>
             <Input
               placeholder="Titel van de post"
-              className="bg-neutral-800 border-neutral-700 h-10 text-xl text-center font-bold"
+              className="bg-neutral-800 border-neutral-700 h-10 text-base sm:text-xl text-center font-bold"
               {...field}
             />
           </FormControl>
@@ -58,7 +58,7 @@ const ContentField = memo(({ control, content }: { control: any; content: string
       name="content"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="text-xl">Postinhoud:</FormLabel>
+          <FormLabel className="text-base sm:text-xl">Postinhoud:</FormLabel>
           <Tabs tabs={[
             {
               id: "write",
@@ -68,11 +68,11 @@ const ContentField = memo(({ control, content }: { control: any; content: string
                   <FormControl>
                     <Textarea
                       placeholder="Inhoud van de post. Markdown wordt ondersteund."
-                      className="bg-neutral-800 border-neutral-700 h-40 text-xl p-3 resize-none"
+                      className="bg-neutral-800 border-neutral-700 h-40 text-sm sm:text-xl p-2 sm:p-3 resize-none"
                       {...field}
                     />
                   </FormControl>
-                  <div className="text-sm mt-2 text-gray-400">
+                  <div className="text-xs sm:text-sm mt-2 text-gray-400">
                     <p>Markdown tips:</p>
                     <p>**vetgedrukt**, *schuingedrukt*, [link](https://url.com)</p>
                     <p># Grote kop, ## Kleinere kop, ### Nog kleinere kop</p>
@@ -126,8 +126,8 @@ const SubjectField = memo(({
       render={({ field }) => (
         <FormItem>
           <FormControl>
-            <div className="flex items-center justify-between w-full">
-              <div className="w-60">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between w-full gap-3">
+              <div className="w-full sm:w-60">
                 {isSchoolCategory ? (
                   <Combobox
                     placeholder="Selecteer een vak"
@@ -161,7 +161,7 @@ const CategoryField = memo(({ control, isAdmin }: { control: any; isAdmin: boole
       name="category"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="text-xl">Categorie:</FormLabel>
+          <FormLabel className="text-base sm:text-xl">Categorie:</FormLabel>
           <FormControl>
             <SelectCategoryCombobox
               initialValue={field.value}
@@ -319,7 +319,7 @@ function ForumDialog({ banned, banreason, banEnd, forumDisabled }: { banned: boo
         onClick={handleForumBtnClick}
       />
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="z-[110] max-w-3xl">
+        <DialogContent className="z-[110] max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>Nieuwe forumpost</DialogTitle>
             <DialogDescription>
@@ -331,7 +331,7 @@ function ForumDialog({ banned, banreason, banEnd, forumDisabled }: { banned: boo
             <form onSubmit={(e) => {
               e.preventDefault();
               form.handleSubmit(onSubmit)(e);
-            }} className="space-y-6">
+            }} className="space-y-4 sm:space-y-6">
               <TitleField control={form.control} />
               <CategoryField control={form.control} isAdmin={isAdmin} />
               <ContentField control={form.control} content={content} />
