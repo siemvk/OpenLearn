@@ -179,7 +179,7 @@ const CategoryField = memo(({ control, isAdmin }: { control: any; isAdmin: boole
 });
 
 // ForumDialog component with memoization
-function ForumDialog({ banned, banreason, banEnd, forumDisabled }: { banned: boolean; banreason: string | null | undefined; banEnd: Date | null | undefined, forumDisabled: boolean }) {
+function ForumDialog({ banned, banreason, banEnd, forumDisabled, session }: { banned: boolean; banreason: string | null | undefined; banEnd: Date | null | undefined, forumDisabled: boolean, session?: any }) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userStore = useUserDataStore();
@@ -314,12 +314,19 @@ function ForumDialog({ banned, banreason, banEnd, forumDisabled }: { banned: boo
 
   return (
     <>
-      <Button1
-        text="Nieuwe forumpost"
-        onClick={handleForumBtnClick}
-      />
+      {session?.id ? (
+        <Button1
+          text="Nieuwe forumpost"
+          onClick={handleForumBtnClick}
+        />
+      ) : (
+          <Button1
+            text="Log in om forumposts te maken"
+            disabled={true}
+          />
+      )}
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="z-[110] max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
+        <DialogContent className="z-110 max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>Nieuwe forumpost</DialogTitle>
             <DialogDescription>

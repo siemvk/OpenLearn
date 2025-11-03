@@ -233,7 +233,7 @@ export default async function RootLayout({
       </Head>
       <body className="antialiased flex flex-col min-h-screen">
         <noscript>
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black text-white text-center p-4">
+          <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black text-white text-center p-4">
             <div className="flex flex-col items-center">
               <p className="text-6xl pb-4">❌</p>
               <p className="text-xl">
@@ -247,7 +247,7 @@ export default async function RootLayout({
           style={{ display: "none" }}
           dangerouslySetInnerHTML={{ __html: art }}
         />
-        <SessionWrapper>
+        <SessionWrapper session={userData}>
           <Providers
             userData={userData}
             streakData={streakData}

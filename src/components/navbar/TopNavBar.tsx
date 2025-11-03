@@ -23,6 +23,7 @@ import NotificationNav from "../notification/notificiationNav";
 import PlusBtn from "@/components/button/plusbutton";
 import PlusBtnMb from "@/components/button/plusbuttonmobile";
 import { ChevronDown } from "lucide-react";
+import { useUserDataStore } from "@/store/user/UserDataProvider";
 
 // SearchBar component
 const SearchBar = memo(({ onExpand }: { onExpand: () => void }) => {
@@ -218,7 +219,7 @@ const MobileMenu = memo(
     isOpen: boolean;
     onClose: () => void;
     pathname: string;
-    
+
     onExpandSearch: () => void;
   }) => {
     const [lerenOpen, setLerenOpen] = useState(false);
@@ -395,6 +396,9 @@ export const TopNavBar = memo(function TopNavBar({
 }: {
   isAdmin?: boolean;
 }) {
+  const userStore = useUserDataStore();
+  const isSignedIn = userStore.getState().id !== "";
+
   const pathname = usePathname();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -426,6 +430,7 @@ export const TopNavBar = memo(function TopNavBar({
         showOnGroups ||
         !(hideOnCreateList || !showOnHomeRoutes),
       showNavLinks:
+        isSignedIn &&
         !isSearchExpanded &&
         (pathname.startsWith("/home") ||
           showOnViewList ||
@@ -433,10 +438,10 @@ export const TopNavBar = memo(function TopNavBar({
           showOnSubjects ||
           showOnGroups) &&
         !isSearchRoute,
-      showLoginButton: pathname === "/",
+      showLoginButton: pathname === "/" || !isSignedIn,
       isSearchRoute,
     };
-  }, [pathname, isSearchExpanded]);
+  }, [pathname, isSearchExpanded, isSignedIn]);
 
   // Use router directly
   const router = useRouter();

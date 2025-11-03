@@ -79,7 +79,7 @@ Geprobeerde pad: ${pathname}
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.cloudflare.com https://*.sentry.io https://*.google.com;
     worker-src 'self' blob:;
-    ${process.env.TURNSTILE_SECRET_KEY && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? "frame-src 'self' https://challenges.cloudflare.com;" : ""}
+    ${process.env.TURNSTILE_SECRET_KEY && process.env.TURNSTILE_SITE_KEY ? "frame-src 'self' https://challenges.cloudflare.com;" : ""}
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: *;
     font-src 'self';
@@ -115,8 +115,8 @@ async function middlewareAuth(request: NextRequest): Promise<NextResponse | null
   }
 
   const path = request.nextUrl.pathname;
-  const isProtected = path.startsWith("/home") || path.startsWith("/learn");
-  if (!isProtected) return null;
+  const isUnauthenticatedAllowed = path === "/" || path === "/home/forum" || path.startsWith("/home/forum/");
+  if (isUnauthenticatedAllowed) return null;
 
   const sessionCookie = request.cookies.get("polarlearn.session-id");
   if (!sessionCookie?.value) {

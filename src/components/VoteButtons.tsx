@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { ArrowBigUp, ArrowBigDown } from "lucide-react"
 import { toast } from "react-toastify" // assuming you use toast for notifications
+import { useUserDataStore } from "@/store/user/UserDataProvider"
 
 type VoteStatus = "up" | "down" | null
 
@@ -10,7 +11,6 @@ type VoteStatus = "up" | "down" | null
 interface User {
   id: string;
   name: string | null;  // changed to allow null
-  // ...other user properties...
 }
 
 interface VoteButtonsProps {
@@ -20,10 +20,13 @@ interface VoteButtonsProps {
   user?: User | null   // new prop provided from server side
 }
 
-export default function VoteButtons({ postId, initialVotes, initialUserVote = null, user }: VoteButtonsProps) {
+export default function VoteButtons({ postId, initialVotes, initialUserVote = null }: VoteButtonsProps) {
   const [voteStatus, setVoteStatus] = useState<VoteStatus>(initialUserVote)
   const [votes, setVotes] = useState(initialVotes)
   const [isVoting, setIsVoting] = useState(false)
+  
+  const session = useUserDataStore()
+  const isSignedIn = session.getState().id !== ""
 
   const voteApi = async (postId: string, direction: VoteStatus) => {
     const response = await fetch('/api/v1/forum/vote', {
@@ -47,7 +50,7 @@ export default function VoteButtons({ postId, initialVotes, initialUserVote = nu
 
   const handleVote = async (direction: VoteStatus) => {
     // Check if user was provided from the server (i.e. is authenticated)
-    if (!user) {
+    if (!isSignedIn) {
       toast.error("Je moet ingelogd zijn om te kunnen stemmen!")
       return
     }
@@ -93,7 +96,6 @@ export default function VoteButtons({ postId, initialVotes, initialUserVote = nu
         className={`p-1 rounded-full hover:bg-neutral-700 transition-colors ${voteStatus === 'up' ? 'text-blue-500' : 'text-gray-400'
           }`}
         onClick={() => handleVote('up')}
-        disabled={!user}
         aria-label="Upvote"
       >
         <ArrowBigUp size={24} />
@@ -109,7 +111,6 @@ export default function VoteButtons({ postId, initialVotes, initialUserVote = nu
         className={`p-1 rounded-full hover:bg-neutral-700 transition-colors ${voteStatus === 'down' ? 'text-red-500' : 'text-gray-400'
           }`}
         onClick={() => handleVote('down')}
-        disabled={!user}
         aria-label="Downvote"
       >
         <ArrowBigDown size={24} />

@@ -8,6 +8,8 @@ import { toast } from "react-toastify"
 import { useRouter } from "next/navigation"
 import Tabs from "@/components/Tabs"
 import MarkdownRenderer from "@/components/md"
+import { useUniqueId } from "@dnd-kit/utilities"
+import { useUserDataStore } from "@/store/user/UserDataProvider"
 
 const MarkdownPreview = memo(({ content }: { content: string }) => (
   <div className="bg-neutral-800 border border-neutral-700 h-40 overflow-y-auto p-3 rounded-md prose prose-invert max-w-none whitespace-pre-line">
@@ -26,11 +28,14 @@ interface ForumReplyProps {
   userId: string
 }
 
-function ForumReply({ postId, userId, buttonText = "Beantwoorden" }: ForumReplyProps) {
+function ForumReply({ postId, userId }: ForumReplyProps) {
   const [open, setOpen] = useState(false)
   const [content, setContent] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
+
+  const session = useUserDataStore()
+  const isSignedIn = session.getState().id !== ""
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -76,8 +81,10 @@ function ForumReply({ postId, userId, buttonText = "Beantwoorden" }: ForumReplyP
 
   return (
     <>
-      <Button1 onClick={() => setOpen(true)} text={buttonText} />
-
+      <Button1 onClick={() => setOpen(true)}
+        text={isSignedIn ? "Beantwoorden" : "Log in om te beantwoorden"}
+        disabled={!isSignedIn}
+      />
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[500px] z-110">
           <DialogHeader>

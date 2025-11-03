@@ -23,13 +23,17 @@ export default async function ForumHome({
     params && params.tab && params.tab.length > 0 ? params.tab[0] : "questions";
 
   const session = await getUserFromSession(
-    (await cookies()).get("polarlearn.session-id")!.value
+    (await cookies()).get("polarlearn.session-id")?.value
   );
 
-  // Get the user's ID for queries
-  const userId = session?.id;
-  const userName = session?.name;
-  const userRole = session?.role;
+  let userId;
+  let userName;
+  let userRole;
+  if (session) {
+    userId = session.id;
+    userName = session.name;
+    userRole = session.role;
+  }
 
   // Initial data fetch for the first tab to be shown
   const initialData = await getPosts(
