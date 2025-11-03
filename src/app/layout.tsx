@@ -13,6 +13,7 @@ import { getStreakData } from "@/serverActions/getStreakData";
 import Providers from "@/components/providers";
 import DelWindowNext from "@/components/DelWindowNext";
 import EasterEgg from "@/components/EasterEgg";
+import Chatwoot from "@/components/Chatwoot";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -257,6 +258,7 @@ export default async function RootLayout({
             {children}
             <DelWindowNext />
             <EasterEgg />
+            <Chatwoot url={process.env.CHATWOOT_URL} token={process.env.CHATWOOT_TOKEN} />
           </Providers>
         </SessionWrapper>
       </body>
