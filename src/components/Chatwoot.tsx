@@ -18,52 +18,28 @@ export default function Chatwoot({
       return;
     }
 
-    // Set settings before loading the script
-    (window as any).chatwootSettings = {
-      locale: "nl",
-      darkMode: "auto",
-      type: "expanded_bubble",
-      baseDomain: process.env.NEXT_PUBLIC_URL 
-    };
-
-    const initializeChatwoot = () => {
-      if ((window as any).chatwootSDK) {
-        (window as any).chatwootSDK.run({
-          websiteToken: token,
-          baseUrl: url,
-          identifierHash: hmac,
-        });
-
-        if ((window as any).$chatwoot) {
-          console.log("Setting user with id:", user.id, "HMAC:", hmac);
-          (window as any).$chatwoot.setUser(user.id, {
-            name: user.name,
-            email: user.email,
-            avatar_url: user.image,
-          });
-        }
-      }
-    };
-
-    // Check if SDK is already loaded
-    if ((window as any).chatwootSDK) {
-      initializeChatwoot();
-      return;
+    const element = document.createElement("script");
+    element.src = `${url}/packs/js/sdk.js`;
+    element.async = true;
+    element.defer = true;
+    element.onload = () => {
+      (window as any).chatwootSDK.run({
+        websiteToken: token,
+        baseUrl: url,
+      })
     }
 
-    // Script not yet loaded, create and append it
-    const script = document.createElement("script");
-    script.src = `${url}/packs/js/sdk.js`;
-    script.async = true;
+    document.body.appendChild(element);
 
-    script.onload = () => {
-      if (typeof window !== "undefined") {
-        initializeChatwoot();
-      }
-    };
-
-    document.body.appendChild(script);
-  }, [url, token, hmac, user.email, user.name, user.image]);
+    window.addEventListener("chatwoot:ready", () => {
+      (window as any).$chatwoot.setUser(user.email, {
+        email: user.email,
+        name: user.name,
+        avatar_url: user.image,
+        identifier_hash: hmac,
+      })
+    })
+  });
 
   return null;
 }

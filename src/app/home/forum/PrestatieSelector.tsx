@@ -5,7 +5,9 @@ import { CalendarCog, ChartArea, Crown, Dna } from "lucide-react";
 
 export const prestatieMap = [
   {
-    points: 10, name: "placeholder", description: "placeholder", image: (
+    points: 10, name: "placeholder",
+    description: "placeholder",
+    image: (
       <>
         <CalendarCog className="w-30 h-30" />
       </>

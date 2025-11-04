@@ -179,14 +179,13 @@ const CategoryField = memo(({ control, isAdmin }: { control: any; isAdmin: boole
 });
 
 // ForumDialog component with memoization
-function ForumDialog({ banned, banreason, banEnd, forumDisabled, session }: { banned: boolean; banreason: string | null | undefined; banEnd: Date | null | undefined, forumDisabled: boolean, session?: any }) {
+function ForumDialog({ banned, banreason, banEnd, forumDisabled }: { banned: boolean; banreason: string | null | undefined; banEnd: Date | null | undefined, forumDisabled: boolean, session?: any }) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userStore = useUserDataStore();
   const isSignedIn = userStore.getState().id !== "";
   const isAdmin = userStore.getState().isAdmin;
   const router = useRouter();
-
 
   // Dynamic schema for admin bypass
   const getFormSchema = (isAdmin: boolean) => {
