@@ -411,23 +411,15 @@ export const TopNavBar = memo(function TopNavBar({
   const [isForumBeschikbaar, setIsForumBeschikbaar] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-    const fetchForumStatus = async () => {
-      try {
-        const response = await fetch('/api/forum/status');
-        const data = await response.json();
-        if (mounted) setIsForumBeschikbaar(data.isBeschikbaar);
-      } catch (error) {
+    fetch('/api/v1/forum/status')
+      .then(response => response.json())
+      .then(data => {
+        setIsForumBeschikbaar(data.isForumBeschikbaar);
+      })
+      .catch(error => {
         console.error('Error fetching forum status:', error);
-        if (mounted) setIsForumBeschikbaar(true); // Fallback to true in case of error
-      }
-    };
-
-    fetchForumStatus();
-
-    return () => {
-      mounted = false;
-    };
+        setIsForumBeschikbaar(true); // openfallback omdat je het forum niet makkelijk kan uitzetten
+      });
   }, []);
 
   // Use useMemo for display conditions to prevent recalculations on every render
