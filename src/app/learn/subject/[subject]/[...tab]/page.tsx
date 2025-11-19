@@ -140,43 +140,30 @@ export default async function SubjectTabPage({
     take: 10
   }) || [];
 
-  const replyCountMap: Record<string, number> = {};
 
-  if (forumPosts.length > 0) {
-    const postIds = forumPosts.map((post: { post_id: any; }) => post.post_id);
-    const replyCounts = await prisma.forum.groupBy({
-      by: ['replyTo'],
-      where: {
-        replyTo: { in: postIds },
-        type: "reply",
-      },
-      _count: {
-        replyTo: true,
-      },
-    });
-
-    replyCounts.forEach((item: { replyTo: string | number | null; _count: { replyTo: number; }; }) => {
-      if (item.replyTo) {
-        replyCountMap[String(item.replyTo)] = item._count.replyTo;
-      }
-    });
-  }
-
-  // Get user names for creators
-  const creatorIds = forumPosts.map((post: { creator: any; }) => post.creator);
-  const creators2 = creatorIds.length > 0 ?
-    await prisma.user.findMany({
-      where: { id: { in: creatorIds } },
-      select: { id: true, name: true }
-    }) : [];
-
-  // Create a map of user IDs to names
-  const creatorNameMap: Record<string, string> = {};
-  creators2.forEach((user: { id: string; name: string | null; }) => {
-    if (user.name) {
-      creatorNameMap[user.id] = user.name;
-    }
-  });
+  const supergreatcompleteforumpostlistwhichincludesalltheinfoyouwantbutthedatastructerwontgiveit = await Promise.all(
+    forumPosts.map(async (post) => {
+      const replies = await prisma.forum.count({
+        where: {
+          replyTo: post.post_id
+        }
+      });
+      const maker = await prisma.user.findUnique({
+        where: {
+          id: post.creator
+        },
+        select: {
+          name: true,
+          id: true
+        }
+      });
+      return {
+        ...post,
+        replyCount: replies,
+        creatorName: maker?.name || 'Onbekend',
+      };
+    })
+  );
 
   // Render content based on selected tab
   if (selectedTab === "practiced-lists") {
@@ -396,9 +383,9 @@ export default async function SubjectTabPage({
   if (selectedTab === "forum") {
     return (
       <div className="mt-4 px-6">
-        {forumPosts.length > 0 ? (
+        {supergreatcompleteforumpostlistwhichincludesalltheinfoyouwantbutthedatastructerwontgiveit.length > 0 ? (
           <div className="space-y-4">
-            {forumPosts.map((post) => (
+            {supergreatcompleteforumpostlistwhichincludesalltheinfoyouwantbutthedatastructerwontgiveit.map((post) => (
               <Link key={post.post_id} href={`/home/forum/${post.post_id}`}>
                 <div className="tile bg-neutral-800 hover:bg-neutral-700 transition-colors text-white py-3 px-6 mx-4 rounded-lg">
                   <div className="flex items-center mb-1">
@@ -412,9 +399,9 @@ export default async function SubjectTabPage({
                     {post.content}
                   </p>
                   <div className="flex items-center mt-2 text-sm text-gray-400">
-                    <span>Door: {creatorNameMap[post.creator as string] || 'Onbekend'}</span>
+                    <span>Door: {post.creatorName}</span>
                     <span className="mx-2">•</span>
-                    <span>{replyCountMap[String(post.post_id)] || 0} antwoorden</span>
+                    <span>{post.replyCount} antwoorden</span>
                     <span className="mx-2">•</span>
                     <span>{post.votes} stemmen</span>
                   </div>
