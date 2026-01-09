@@ -1,0 +1,557 @@
+/* Syntax highlighting for code blocks using highlight.js GitHub dark theme */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css");
+/* GitHub-like Markdown table styling */
+.prose table {
+  background-color: #181a20;
+  border-radius: 8px;
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.prose th,
+.prose td {
+  background-color: #181a20;
+  border: 1px solid #2d2f36;
+  padding: 0.5em 1em;
+}
+.prose th {
+  font-weight: 600;
+}
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+@layer components {
+  .prose ul,
+  .prose ol {
+    padding-left: 1.5em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+  .prose ul {
+    list-style-type: disc;
+  }
+  .prose ol {
+    list-style-type: decimal;
+  }
+  .prose li {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+  }
+}
+
+:root {
+  /* Light theme */
+  --background: oklch(95.213% 0.00011 271.152);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.145 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.746 0.16 232.661);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(1 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.145 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.746 0.16 232.661);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Light theme neutral colors - better contrast for containers */
+  --neutral-50: oklch(0.985 0 0); /* Very light gray */
+  --neutral-100: oklch(91.357% 0.00106 11.782); /* Light gray */
+  --neutral-200: oklch(75.328% 0.0034 15.848); /* Light gray */
+  --neutral-300: oklch(69.358% 0.00114 13.388); /* Medium light gray */
+  --neutral-400: oklch(0.556 0 0); /* Medium gray (for muted text) */
+  --neutral-500: oklch(0.439 0 0); /* Medium dark gray */
+  --neutral-600: oklch(86.378% 0.0001 271.152); /* Lighter gray for better hover contrast in light theme */
+  --neutral-700: oklch(81.093% 0.00009 271.152); /* Much lighter gray for proper hover visibility in light theme */
+  --neutral-800: oklch(90.975% 0.0001 271.152); /* Much brighter gray for better navbar visibility in light theme */
+  --neutral-900: oklch(89.449% 0.0001 271.152); /* Much brighter for navbar background in light theme */
+  --neutral-950: oklch(0.145 0 0); /* Black */
+}
+
+.dark {
+  /* Dark theme */
+  --background: oklch(0.2 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.145 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.439 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.746 0.16 232.661);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+
+  /* Dark theme neutral colors - subtle adjustments for dark backgrounds */
+  --neutral-50: oklch(0.985 0 0); /* Very light (for bright text on dark bg) */
+  --neutral-100: oklch(0.97 0 0); /* Light */
+  --neutral-200: oklch(0.922 0 0); /* Light */
+  --neutral-300: oklch(0.878 0 0); /* Medium light */
+  --neutral-400: oklch(0.708 0 0); /* Medium (muted text - good on dark) */
+  --neutral-500: oklch(0.556 0 0); /* Medium */
+  --neutral-600: oklch(0.439 0 0); /* Medium dark */
+  --neutral-700: oklch(0.369 0 0); /* Dark */
+  --neutral-800: oklch(
+    0.269 0 0
+  ); /* Dark containers (slightly lighter than bg) */
+  --neutral-900: oklch(0.205 0 0); /* Very dark */
+  --neutral-950: oklch(0.169 0 0); /* Almost black */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Override Tailwind's neutral colors to use our CSS variables */
+@layer utilities {
+  /* Background colors */
+  .bg-neutral-50 {
+    background-color: var(--neutral-50) !important;
+  }
+  .bg-neutral-100 {
+    background-color: var(--neutral-100) !important;
+  }
+  .bg-neutral-200 {
+    background-color: var(--neutral-200) !important;
+  }
+  .bg-neutral-300 {
+    background-color: var(--neutral-300) !important;
+  }
+  .bg-neutral-400 {
+    background-color: var(--neutral-400) !important;
+  }
+  .bg-neutral-500 {
+    background-color: var(--neutral-500) !important;
+  }
+  .bg-neutral-600 {
+    background-color: var(--neutral-600) !important;
+  }
+  .bg-neutral-700 {
+    background-color: var(--neutral-700) !important;
+  }
+  .bg-neutral-800 {
+    background-color: var(--neutral-800) !important;
+  }
+  .bg-neutral-900 {
+    background-color: var(--neutral-900) !important;
+  }
+  .bg-neutral-950 {
+    background-color: var(--neutral-950) !important;
+  }
+
+  /* Text colors */
+  .text-neutral-50 {
+    color: var(--neutral-50) !important;
+  }
+  .text-neutral-100 {
+    color: var(--neutral-100) !important;
+  }
+  .text-neutral-200 {
+    color: var(--neutral-200) !important;
+  }
+  .text-neutral-300 {
+    color: var(--neutral-300) !important;
+  }
+  .text-neutral-400 {
+    color: var(--neutral-400) !important;
+  }
+  .text-neutral-500 {
+    color: var(--neutral-500) !important;
+  }
+  .text-neutral-600 {
+    color: var(--neutral-600) !important;
+  }
+  .text-neutral-700 {
+    color: var(--neutral-700) !important;
+  }
+  .text-neutral-800 {
+    color: var(--neutral-800) !important;
+  }
+  .text-neutral-900 {
+    color: var(--neutral-900) !important;
+  }
+  .text-neutral-950 {
+    color: var(--neutral-950) !important;
+  }
+
+  /* Border colors */
+  .border-neutral-50 {
+    border-color: var(--neutral-50) !important;
+  }
+  .border-neutral-100 {
+    border-color: var(--neutral-100) !important;
+  }
+  .border-neutral-200 {
+    border-color: var(--neutral-200) !important;
+  }
+  .border-neutral-300 {
+    border-color: var(--neutral-300) !important;
+  }
+  .border-neutral-400 {
+    border-color: var(--neutral-400) !important;
+  }
+  .border-neutral-500 {
+    border-color: var(--neutral-500) !important;
+  }
+  .border-neutral-600 {
+    border-color: var(--neutral-600) !important;
+  }
+  .border-neutral-700 {
+    border-color: var(--neutral-700) !important;
+  }
+  .border-neutral-800 {
+    border-color: var(--neutral-800) !important;
+  }
+  .border-neutral-900 {
+    border-color: var(--neutral-900) !important;
+  }
+  .border-neutral-950 {
+    border-color: var(--neutral-950) !important;
+  }
+
+  /* Hover states for backgrounds */
+  .hover\:bg-neutral-50:hover {
+    background-color: var(--neutral-50) !important;
+  }
+  .hover\:bg-neutral-100:hover {
+    background-color: var(--neutral-100) !important;
+  }
+  .hover\:bg-neutral-200:hover {
+    background-color: var(--neutral-200) !important;
+  }
+  .hover\:bg-neutral-300:hover {
+    background-color: var(--neutral-300) !important;
+  }
+  .hover\:bg-neutral-400:hover {
+    background-color: var(--neutral-400) !important;
+  }
+  .hover\:bg-neutral-500:hover {
+    background-color: var(--neutral-500) !important;
+  }
+  .hover\:bg-neutral-600:hover {
+    background-color: var(--neutral-600) !important;
+  }
+  .hover\:bg-neutral-700:hover {
+    background-color: var(--neutral-700) !important;
+  }
+  .hover\:bg-neutral-800:hover {
+    background-color: var(--neutral-800) !important;
+  }
+  .hover\:bg-neutral-900:hover {
+    background-color: var(--neutral-900) !important;
+  }
+  .hover\:bg-neutral-950:hover {
+    background-color: var(--neutral-950) !important;
+  }
+
+  /* Add some common text colors that should be theme-aware */
+  .text-white {
+    color: var(--foreground) !important;
+  }
+  .text-black {
+    color: var(--background) !important;
+  }
+
+  /* Make .hover:text-white:hover darker in light mode */
+  /* Force tab text to black on hover in light mode, using high specificity */
+  :root .hover\:text-white:hover,
+  body:not(.dark) .hover\:text-white:hover {
+    color: #000 !important;
+  }
+  .dark .hover\:text-white:hover {
+    color: var(--foreground) !important;
+  }
+
+  /* Navbar button helper: in light mode use a slightly darker bg to contrast
+     with the (almost white) navbar; in dark mode preserve the existing dark bg. */
+  :root {
+    --navbar-button-bg: var(--neutral-700);
+    --navbar-button-fg: var(--neutral-950);
+    --navbar-button-bg-hover: var(--neutral-600);
+  }
+
+  .dark {
+    --navbar-button-bg: var(--neutral-800);
+    --navbar-button-fg: var(--neutral-50);
+    --navbar-button-bg-hover: var(--neutral-700);
+  }
+
+  .navbar-btn {
+    background-color: var(--navbar-button-bg) !important;
+    color: var(--navbar-button-fg) !important;
+  }
+
+  .navbar-btn:hover {
+    background-color: var(--navbar-button-bg-hover) !important;
+  }
+  .navbar-popover {
+    background-color: var(--neutral-800) !important;
+    color: var(--navbar-button-fg) !important;
+  }
+
+  /* Light-mode only: make text-gray-300 inside navbar popovers pure black for legibility.
+     Use html:not(.dark) to detect light mode when the dark class is placed on <html>. */
+  html:not(.dark) .navbar-popover .text-gray-300 {
+    color: #000 !important;
+  }
+
+  /* Explicit dark-mode override to ensure dark mode uses the intended muted color. */
+  .dark .navbar-popover .text-gray-300 {
+    color: var(--neutral-300) !important;
+  }
+
+  /* Fix hover gradients and borders */
+  .hover\:bg-gradient-to-r:hover {
+    background: linear-gradient(
+      to right,
+      rgb(56 189 248),
+      rgb(186 230 253)
+    ) !important;
+  }
+
+  .hover\:border-transparent:hover {
+    border-color: transparent !important;
+  }
+
+  /* Fix specific border colors that aren't theme-aware */
+  .border-neutral-700 {
+    border-color: var(--neutral-700) !important;
+  }
+
+  /* Hover states for borders */
+  .hover\:border-neutral-700:hover {
+    border-color: var(--neutral-700) !important;
+  }
+
+  /* Hover states for text colors */
+  .hover\:text-neutral-50:hover {
+    color: var(--neutral-50) !important;
+  }
+  .hover\:text-neutral-100:hover {
+    color: var(--neutral-100) !important;
+  }
+  .hover\:text-neutral-200:hover {
+    color: var(--neutral-200) !important;
+  }
+  .hover\:text-neutral-300:hover {
+    color: var(--neutral-300) !important;
+  }
+  .hover\:text-neutral-400:hover {
+    color: var(--neutral-400) !important;
+  }
+  .hover\:text-neutral-500:hover {
+    color: var(--neutral-500) !important;
+  }
+  .hover\:text-neutral-600:hover {
+    color: var(--neutral-600) !important;
+  }
+  .hover\:text-neutral-700:hover {
+    color: var(--neutral-700) !important;
+  }
+  .hover\:text-neutral-800:hover {
+    color: var(--neutral-800) !important;
+  }
+  .hover\:text-neutral-900:hover {
+    color: var(--neutral-900) !important;
+  }
+  .hover\:text-neutral-950:hover {
+    color: var(--neutral-950) !important;
+  }
+
+  /* Hover states for border colors */
+  .hover\:border-neutral-50:hover {
+    border-color: var(--neutral-50) !important;
+  }
+  .hover\:border-neutral-100:hover {
+    border-color: var(--neutral-100) !important;
+  }
+  .hover\:border-neutral-200:hover {
+    border-color: var(--neutral-200) !important;
+  }
+  .hover\:border-neutral-300:hover {
+    border-color: var(--neutral-300) !important;
+  }
+  .hover\:border-neutral-400:hover {
+    border-color: var(--neutral-400) !important;
+  }
+  .hover\:border-neutral-500:hover {
+    border-color: var(--neutral-500) !important;
+  }
+  .hover\:border-neutral-600:hover {
+    border-color: var(--neutral-600) !important;
+  }
+  .hover\:border-neutral-800:hover {
+    border-color: var(--neutral-800) !important;
+  }
+  .hover\:border-neutral-900:hover {
+    border-color: var(--neutral-900) !important;
+  }
+  .hover\:border-neutral-950:hover {
+    border-color: var(--neutral-950) !important;
+  }
+
+  /* Common gray aliases */
+  .bg-gray-50 {
+    background-color: var(--neutral-50) !important;
+  }
+  .bg-gray-100 {
+    background-color: var(--neutral-100) !important;
+  }
+  .bg-gray-200 {
+    background-color: var(--neutral-200) !important;
+  }
+  .bg-gray-300 {
+    background-color: var(--neutral-300) !important;
+  }
+  .bg-gray-400 {
+    background-color: var(--neutral-400) !important;
+  }
+  .bg-gray-500 {
+    background-color: var(--neutral-500) !important;
+  }
+  .bg-gray-600 {
+    background-color: var(--neutral-600) !important;
+  }
+  .bg-gray-700 {
+    background-color: var(--neutral-700) !important;
+  }
+  .bg-gray-800 {
+    background-color: var(--neutral-800) !important;
+  }
+  .bg-gray-900 {
+    background-color: var(--neutral-900) !important;
+  }
+
+  /* Handle opacity variants for neutral colors */
+  .bg-neutral-900\/70 {
+    background-color: rgb(from var(--neutral-900) r g b / 0.7) !important;
+  }
+  .bg-neutral-800\/70 {
+    background-color: rgb(from var(--neutral-800) r g b / 0.7) !important;
+  }
+  .bg-neutral-700\/70 {
+    background-color: rgb(from var(--neutral-700) r g b / 0.7) !important;
+  }
+}
+
+@layer components {
+  .prose :where(h1, h2, h3, h4, h5, h6) {
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose h1 {
+    font-size: 2rem;
+  }
+
+  .prose h2 {
+    font-size: 1.5rem;
+  }
+
+  .prose h3 {
+    font-size: 1.25rem;
+  }
+
+  .prose h4 {
+    font-size: 1.125rem;
+  }
+
+  .prose h5,
+  .prose h6 {
+    font-size: 1rem;
+  }
+}

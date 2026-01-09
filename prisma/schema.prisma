@@ -1,0 +1,216 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+model config {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id              String    @id @map("_id") @db.String
+  name            String?   @unique
+  email           String?   @unique
+  emailVerified   DateTime?
+  image           String?
+  password        String
+  salt            String
+  activationToken String?
+
+  finishedTour Boolean? @default(false)
+  theme        String?  @default("dark")
+
+  inGroups  Json?
+  ownGroups Json?
+
+  githubOAuthID String? @unique
+  googleOAuthID String? @unique
+
+  list_data      Json?
+  role           String?
+  loginAllowed   Boolean?
+  banReason      String?
+  forumAllowed   Boolean?  @default(false)
+  forumBanReason String?
+  forumBanEnd    DateTime?
+
+  notificationData Json?
+
+  /**
+   * Notification JSON Example:
+   * {
+   * "0": {
+   * "icon": [lucide icoon hier],
+   * "content": "Lorem Ipsum",
+   * "read": bool,
+   * }
+   * }
+   */
+  forumPoints    Int       @default(0)
+  streakCount    Int       @default(0)
+  lastActivity   DateTime?
+  streakData     Json? // key: YYYY-MM-DD, value: "done" | "frozen"
+  freezeCount    Int       @default(0)
+  lastExportedAt DateTime? // Timestamp of last data export for cooldown enforcement
+
+  scheduledDeletion DateTime? // TTL index for account deletion
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Bot {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  image      String?
+  name       String
+  creatorId  String   @unique @db.String
+  key        String   @unique @default(uuid())
+  token      String   @unique
+  limit      Int      @default(100) // Number of requests per day
+  createdAt  DateTime @default(now())
+  resetToken DateTime @default(now()) // Date when the limit resets
+  resetLimit DateTime @default(now()) // Date when the limit resets
+}
+
+model Session {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionID String   @unique
+  userId    String   @db.String
+  expires   DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model practice {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  list_id   String
+  name      String
+  mode      String
+  subject   String
+  lang_from String?
+  lang_to   String?
+
+  data           Json?
+  summaryContent String?
+
+  creator           String    @db.String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  published         Boolean
+  scheduledDeletion DateTime? // schedule for TTL deletion
+}
+
+model forum {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  post_id  String  @unique @db.String
+  type     String
+  replyTo  String?
+  title    String
+  subject  String?
+  content  String
+  category String?
+
+  creator String @db.String
+
+  locked     Boolean @default(false)
+  pinned     Boolean @default(false)
+  votes      Int     @default(0) @db.Int
+  votes_data Json?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
+  scheduledDeletion DateTime? // schedule for TTL deletion
+}
+
+model group {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  groupId             String   @unique
+  name                String
+  description         String?
+  requiresApproval    Boolean? @default(false)
+  toBeApproved        Json?
+  everyoneCanAddLists Boolean? @default(true)
+  image               String?
+
+  creator String   @db.String
+  members Json?
+  admins  String[]
+
+  listsAdded  Json?
+  chatContent Json[] @default([])
+
+  scheduledDeletion DateTime? // schedule for TTL deletion or transfer
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model map {
+  id      String   @id @map("_id") @db.String
+  name    String
+  creator String   @db.String
+  lists   String[]
+  image   String?
+  public  Boolean? @default(false)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  scheduledDeletion DateTime? // schedule for TTL deletion
+}
+
+model learnSession {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId String @unique @default(uuid())
+  userId    String @db.String
+  listId    String
+
+  // Learning configuration
+  mode             String // learning mode: "learnlist", "hints", "test", "multikeuze", etc.
+  method           String? // current learning method
+  subject          String?
+  lang_from        String?
+  lang_to          String?
+  flipQuestionLang Boolean @default(false)
+
+  // Session state
+  currentWordIndex Int? // Index of current word being studied
+  remainingWords   Json? // Array of remaining words to study
+  originalWords    Json? // Original full word list (never changes)
+  learnListQueue   Json? // Queue for learnlist mode with modes and options
+
+  // Progress tracking
+  originalWordCount   Int   @default(0)
+  originalQueueLength Int   @default(0)
+  score               Json? // {correct: number, wrong: number}
+
+  // Answer history
+  answerLog          Json? // Array of AnswerLogEntry
+  incorrectAnswerLog Json? // Array of incorrect AnswerLogEntry
+
+  // Last activity
+  lastWord   Json? // Current word being studied
+  lastAnswer Json? // Last answer details
+
+  grade Float? // Overall grade or score
+
+  // Metadata
+  isPaused    Boolean @default(false)
+  isCompleted Boolean @default(false)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastActiveAt DateTime @default(now())
+
+  // Optional: Auto-delete old sessions
+  expiresAt DateTime?
+}

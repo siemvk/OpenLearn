@@ -1,0 +1,201 @@
+export const dynamic = "force-dynamic";
+
+import { getUserFromSession } from "@/utils/auth/auth";
+import { getPosts } from "./getPosts";
+import ForumPostList from "./ForumPostList";
+import MarkdownRenderer from "@/components/md";
+import { cookies } from "next/headers";
+import { Metadata } from "next";
+import { PrestatieSelector } from "./PrestatieSelector";
+
+export const metadata: Metadata = {
+  title: "PolarLearn | Forum",
+  description: "Dit is het PolarLearn forum, hier kan je allerlei vragen stellen en beantwoorden, zondar dat je vragen voor geen reden verwijderd worden"
+}
+
+export default async function ForumHome({
+  params,
+}: {
+  searchParams: Promise<{ page?: string }>;
+  params?: { tab?: string[] };
+}) {
+  const defaultActiveTab =
+    params && params.tab && params.tab.length > 0 ? params.tab[0] : "questions";
+
+  const session = await getUserFromSession(
+    (await cookies()).get("polarlearn.session-id")?.value
+  );
+
+  let userId;
+  let userName;
+  let userRole;
+  if (session) {
+    userId = session.id;
+    userName = session.name;
+    userRole = session.role;
+  }
+
+  // Initial data fetch for the first tab to be shown
+  const initialData = await getPosts(
+    defaultActiveTab as "questions" | "my-questions" | "my-answers",
+    0,
+    20
+  );
+
+  // Define tabs for the forum page
+  const tabs = [
+    {
+      id: "questions",
+      label: "Alle vragen",
+      content: (
+        <ForumPostList
+          initialPosts={initialData.posts}
+          initialTotal={initialData.total}
+          initialUserMapById={initialData.userMapById}
+          initialUserMapByName={initialData.userMapByName}
+          tab="questions"
+          currentUsername={userName ?? null}
+          currentUserId={userId ?? null}
+          userRole={userRole ?? null}
+        />
+      ),
+    },
+    {
+      id: "my-questions",
+      label: "Mijn vragen",
+      content: (
+        <ForumPostList
+          initialPosts={
+            defaultActiveTab === "my-questions" ? initialData.posts : []
+          }
+          initialTotal={
+            defaultActiveTab === "my-questions" ? initialData.total : 0
+          }
+          initialUserMapById={
+            defaultActiveTab === "my-questions" ? initialData.userMapById : {}
+          }
+          initialUserMapByName={
+            defaultActiveTab === "my-questions" ? initialData.userMapByName : {}
+          }
+          tab="my-questions"
+          currentUsername={userName ?? null}
+          currentUserId={userId ?? null}
+          userRole={userRole ?? null}
+        />
+      ),
+    },
+    {
+      id: "my-answers",
+      label: "Mijn antwoorden",
+      content: (
+        <ForumPostList
+          initialPosts={
+            defaultActiveTab === "my-answers" ? initialData.posts : []
+          }
+          initialTotal={
+            defaultActiveTab === "my-answers" ? initialData.total : 0
+          }
+          initialUserMapById={
+            defaultActiveTab === "my-answers" ? initialData.userMapById : {}
+          }
+          initialUserMapByName={
+            defaultActiveTab === "my-answers" ? initialData.userMapByName : {}
+          }
+          tab="my-answers"
+          currentUsername={userName ?? null}
+          currentUserId={userId ?? null}
+          userRole={userRole ?? null}
+        />
+      ),
+    },
+    {
+      id: "advancements",
+      label: "Prestaties",
+      content: (
+        <>
+          <h1 className="text-4xl font-bold">Prestaties</h1>
+          <p className="mb-2">Hier kan je zien welke forumprestaties je hebt behaald en kan uitlichten op je profiel</p>
+          <PrestatieSelector points={session?.forumPoints as number} />
+        </>
+      )
+    },
+    {
+      id: "how-the-forum-works",
+      label: "Hoe werkt het forum?",
+      content: (
+        <MarkdownRenderer
+          content={`
+# Hoe werkt het forum?
+
+---
+
+Welkom op ons (leer)forum! Hier kun je vragen stellen, antwoorden geven en punten verdienen terwijl je leert en anderen helpt, of gewoon chatten.
+
+### 🔍 Zoeken naar antwoorden
+
+Voordat je een nieuwe vraag stelt, gebruik de zoekbalk om te kijken of jouw vraag al eerder is beantwoord.<br />
+Dit bespaart tijd en helpt om dubbele vragen te voorkomen.
+
+### ❓ Vragen stellen
+
+Heb je een vraag? Plaats deze in de juiste categorie en wees zo duidelijk mogelijk.<br />
+Hoe specifieker je vraag, hoe sneller en beter de antwoorden zullen zijn!
+
+Bij het stellen van een vraag kun je categorieën toevoegen om aan te geven of je vraag over school gaat of niet.<br />
+Zo kunnen anderen makkelijker de juiste vragen vinden.
+
+De categoriën zijn:
+* 🟦 School gerelateerd
+   
+   Gebruik dit voor vragen over een school vak zoals wat de oplossing is, hoe iets werkt. etc.
+* 🟩 Niet school-gerelateerd
+   
+   Gebruik dit voor alles wat je maar wilt, zoals games, huisdieren, etc. Alles mag behalve ongepaste dingen.
+* 🟨 Hulp
+   
+   Gebruik dit als je wilt weten hoe iets werkt in PolarLearn.
+* 🟥 Aankondiging
+   
+   Dit is een speciale categorie, administrators kunnen met deze categorie een nieuwe functie of iets anders in PolarLearn aankondigen.
+
+
+### 💬 Antwoorden geven
+
+Help anderen door antwoorden te geven op vragen.<br />
+Zorg ervoor dat je uitleg helder en behulpzaam is.
+
+⭐ **Punten verdienen**
+
+Je verdient punten door actief bij te dragen:
+* ✅ Een goedgekeurd antwoord geven: +50 punten (nog niet geïmplementeerd)
+* 👍 Een upvote ontvangen op jouw antwoord of post: +1 punt
+* 👎 Een downvote ontvangen op jouw antwoord of post: -1 punt
+* ❓ Een vraag stellen: +0 punten
+* 🗣️ Antwoord geven op een vraag: +10 punten
+* 🗑️ Een antwoord verwijderen: -10 punten (Dit is gedaan om te voorkomen dat je antwoorden kan spammen en onrechtvaardig punten krijgt)
+
+Met punten verdien je prestaties die je als titel in kan stellen naast je naam! En het ziet er gewoon cool uit.
+
+### 🚨 Moderatie
+
+Alleen vragen die ongepast, spam of beledigend zijn, worden verwijderd.
+
+Je mag hier dus ook vragen stellen die niet over school gaan, en er zullen geen mensen zijn die alles verwijderen!
+
+### Meerdere keren een verwijderde post kan leiden tot een (permanente) verbanning. Dit kan ook meteen gebeuren als je iets heel ongepast zegt.
+---
+
+Veel leerplezier! 🚀
+    `}
+        ></MarkdownRenderer>
+      ),
+    },
+  ];
+
+  // Render only the active tab's content; header and tabs handled in layout
+  return (
+    <div className="px-6">
+      {tabs.find((tab) => tab.id === defaultActiveTab)?.content}
+    </div>
+  );
+}

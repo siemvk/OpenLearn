@@ -1,0 +1,386 @@
+import { prisma } from "@/utils/prisma";
+import Image from "next/image";
+import Jdenticon from "@/components/Jdenticon";
+import { formatRelativeTime } from "@/utils/formatRelativeTime";
+import VoteButtons from "@/components/VoteButtons";
+import { getUserFromSession } from "@/utils/auth/auth";
+import ForumReply from "@/components/ForumReply";
+import DeletePostButton from "@/components/DeletePostButton";
+import PinPostButton from "@/components/PinPostButton";
+import MarkdownRenderer from "@/components/md";
+import { cookies } from "next/headers";
+import CreatorLink from "@/components/CreatorLink";
+import ForumHome from "../page";
+import { getUserNameById } from "@/serverActions/getUserName";
+import EditPostBtn from "./editPostBtn";
+import { icons, getSubjectName } from "@/components/icons";
+import { Badge } from "@/components/ui/badge";
+import {
+  ShieldUser,
+} from "lucide-react";
+import ForumRepliesList from "../ForumRepliesList";
+import { Metadata } from "next";
+import { PostBadge } from "../PostBadge";
+
+// UUID validation regex pattern
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Define the structure for vote data
+interface VoteData {
+  users: Record<string, "up" | "down" | null>;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ postId: string }>;
+}): Promise<Metadata> {
+  const { postId } = await params;
+
+  // If postId is actually a tab identifier, return default metadata
+  if (
+    [
+      "questions",
+      "my-questions",
+      "my-answers",
+      "how-the-forum-works",
+      "advancements",
+    ].includes(postId)
+  ) {
+    return {
+      title: "PolarLearn | Forum",
+      description:
+        "Dit is het PolarLearn forum, hier kan je allerlei vragen stellen en beantwoorden, zondar dat je vragen voor geen reden verwijderd worden",
+    };
+  }
+
+  try {
+    const post = await prisma.forum.findUnique({
+      where: {
+        post_id: postId,
+      },
+    });
+
+    if (!post) {
+      return {
+        title: "Post niet gevonden | PolarLearn Forum",
+        description: "De gevraagde forumpost kon niet worden gevonden.",
+      };
+    }
+
+    // Clean the content for description (remove markdown and limit length)
+    const cleanContent = post.content
+      .replace(/[#*`_~[\]()]/g, "") // Remove markdown characters
+      .replace(/\n+/g, " ") // Replace newlines with spaces
+      .trim()
+      .substring(0, 160); // Limit to 160 characters for SEO
+
+    return {
+      title: `PolarLearn Forum | ${post.title}`,
+      description:
+        cleanContent || "Bekijk deze discussie op het PolarLearn forum",
+    };
+  } catch {
+    return {
+      title: "PolarLearn | Forum",
+      description:
+        "Dit is het PolarLearn forum, hier kan je allerlei vragen stellen en beantwoorden, zondar dat je vragen voor geen reden verwijderd worden",
+    };
+  }
+}
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ postId: string }>;
+}) {
+  const { postId } = await params;
+  // If postId is actually a tab identifier, delegate to ForumHome
+  if (
+    [
+      "questions",
+      "my-questions",
+      "my-answers",
+      "how-the-forum-works",
+      "advancements",
+    ].includes(postId)
+  ) {
+    return (
+      <ForumHome
+        searchParams={Promise.resolve({})}
+        params={{ tab: [postId] }}
+      />
+    );
+  }
+
+  const no_forum_access = await prisma.config.findFirst({
+    where: { key: 'no_forum_access' },
+  })
+
+  if (no_forum_access) {
+    return <div>De goden van deze polarlearn hebben het forum uitgezet.</div>;
+  }
+
+
+  const session = await getUserFromSession(
+    (await cookies()).get("polarlearn.session-id")?.value as string
+  );
+  const currentUsername = session?.name || null;
+
+  const post = await prisma.forum.findUnique({
+    where: {
+      post_id: postId,
+    },
+  });
+
+  if (!post) {
+    return <div>Post not found</div>;
+  }
+
+  // Check if user is admin
+  const isAdmin = session?.role === "admin";
+
+  // Check if post creator is a UUID and get the proper display name if needed
+  let jdenticonPostValue = post.creator;
+  if (UUID_REGEX.test(post.creator)) {
+    const userInfo = await getUserNameById(post.creator);
+    if (userInfo.jdenticonValue) {
+      jdenticonPostValue = userInfo.jdenticonValue;
+    }
+  }
+
+  // Fetch initial set of replies (first page)
+  const initialRepliesData = await prisma.forum.findMany({
+    where: {
+      type: "reply",
+      replyTo: postId,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    take: 10, // Initial page size
+  });
+
+  // Count total replies
+  const totalReplies = await prisma.forum.count({
+    where: {
+      type: "reply",
+      replyTo: postId,
+    },
+  });
+
+  // Process replies to get Jdenticon values
+  const initialRepliesWithJdenticon = await Promise.all(
+    initialRepliesData.map(async (reply) => {
+      let jdenticonValue = reply.creator;
+      if (UUID_REGEX.test(reply.creator)) {
+        const userInfo = await getUserNameById(reply.creator);
+        if (userInfo.jdenticonValue) {
+          jdenticonValue = userInfo.jdenticonValue;
+        }
+      }
+      return { ...reply, jdenticonValue };
+    })
+  );
+
+  // Get list of creator identifiers (may be usernames or IDs)
+  const creatorIdentifiers = [
+    post.creator,
+    ...initialRepliesData.map((reply: { creator: any }) => reply.creator),
+  ];
+
+  // Try to fetch users by ID first
+  const usersById = await prisma.user.findMany({
+    where: {
+      id: { in: creatorIdentifiers as string[] },
+    },
+  });
+
+  // If users weren't found by ID, try by name (in case creator stores username)
+  const usersByName = await prisma.user.findMany({
+    where: {
+      name: { in: creatorIdentifiers as string[] },
+    },
+  });
+
+  // Create a combined map using both id and name as keys
+  const userMap: Record<string, any> = {};
+
+  // Map users by ID
+  usersById.forEach((user: { id: string | number }) => {
+    if (user.id) userMap[user.id] = user;
+  });
+
+  // Map users by name
+  usersByName.forEach((user: { name: string | null }) => {
+    if (user.name) userMap[user.name] = user;
+  });
+
+  // Get post creator - try direct lookup or find by name
+  const postcreator =
+    userMap[post.creator] ||
+    usersById.find((u: { id: any }) => u.id === post.creator) ||
+    usersByName.find((u: { name: any }) => u.name === post.creator);
+
+  // Check if current user is the post creator, using multiple checks
+  const isPostCreator =
+    currentUsername === post.creator ||
+    (postcreator?.name && currentUsername === postcreator.name);
+
+  // Get user's current vote if logged in
+  let userVote: "up" | "down" | null = null;
+
+  if (session?.name && post.votes_data) {
+    // Safely access vote data
+    const votesData = post.votes_data as unknown;
+
+    // Check if it's an object with a users property
+    if (
+      votesData &&
+      typeof votesData === "object" &&
+      "users" in votesData &&
+      votesData.users &&
+      typeof votesData.users === "object"
+    ) {
+      const typedVotesData = votesData as VoteData;
+      userVote = typedVotesData.users[session.name] || null;
+    }
+  }
+
+  const relativeTime = formatRelativeTime(post.createdAt);
+  const formattedDate = new Date(post.createdAt).toLocaleDateString("nl-NL", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  // Get subject info if available
+  let subjectIcon = null;
+  let subjectName = null;
+  if (post.category === "school" && post.subject) {
+    subjectIcon = icons[post.subject as keyof typeof icons];
+    subjectName = getSubjectName(post.subject) || post.subject;
+  }
+
+  return (
+    <div className="px-3 md:px-4 py-4">
+      <div className="flex flex-col mb-6">
+        <div className="flex flex-col sm:flex-row items-start mb-3 gap-3">
+          <div className="flex items-start gap-3 w-full sm:w-auto">
+            <div className="shrink-0">
+              {postcreator?.image ? (
+                <img
+                  src={postcreator.image}
+                  alt={`de profielfoto van ${postcreator.name || "iemand"}`}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full"
+                />
+              ) : (
+                <Jdenticon value={jdenticonPostValue} size={40} className="w-10 h-10 md:w-12 md:h-12" />
+              )}
+            </div>
+            <div className="grow min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <div className="flex items-center min-w-0">
+                  <div className="truncate">
+                    <CreatorLink
+                      creator={postcreator?.name || post.creator}
+                      userId={postcreator?.id}
+                      displayName={postcreator?.name}
+                    />
+                  </div>
+                  {postcreator?.role === "admin" && (
+                    <Badge className="bg-red-500 text-white ml-1 rounded-md text-xs shrink-0">
+                      <ShieldUser className="w-3 h-3 md:w-4 md:h-4" />
+                      <span className="hidden sm:inline ml-1">Administrator</span>
+                    </Badge>
+                  )}
+                </div>
+                {post.category && <PostBadge type={post.category} />}
+                {subjectIcon && subjectName && (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-neutral-800 rounded-md">
+                    <Image
+                      src={subjectIcon}
+                      alt={subjectName}
+                      width={16}
+                      height={16}
+                    />
+                    <span className="text-xs md:text-sm">{subjectName}</span>
+                  </div>
+                )}
+              </div>
+              <div className="text-xs md:text-sm text-gray-400 flex flex-wrap gap-2">
+                <span title={formattedDate}>{relativeTime}</span>
+                {post.updatedAt &&
+                  post.createdAt &&
+                  new Date(post.updatedAt).getTime() -
+                  new Date(post.createdAt).getTime() >
+                  1000 && <span>• Bewerkt</span>}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end sm:ml-auto">
+            <div className="flex gap-1 md:gap-2">
+              {/* Edit and Delete buttons for post creator and admins */}
+              {(isPostCreator || isAdmin) && (
+                <>
+                  <EditPostBtn
+                    postId={post.post_id}
+                    isCreator={isPostCreator}
+                  />
+                  <DeletePostButton
+                    postId={post.post_id}
+                    title={post.title}
+                    creatorId={post.creator}
+                    isCreator={isPostCreator}
+                    isAdmin={isAdmin}
+                    isMainPost={true}
+                  />
+                </>
+              )}
+              {/* Pin button for admin */}
+              {isAdmin && (
+                <PinPostButton
+                  postId={post.post_id}
+                  isAdmin={isAdmin}
+                  initialPinned={post.pinned || false}
+                />
+              )}
+            </div>
+            <VoteButtons
+              postId={post.post_id}
+              initialVotes={post.votes}
+              initialUserVote={userVote}
+              user={session}
+            />
+          </div>
+        </div>
+
+        <h1 className="text-2xl md:text-3xl mb-4 font-bold wrap-break-word">{post.title}</h1>
+        <hr className="border-neutral-600 mb-4" />
+        <div className="prose prose-sm md:prose-base max-w-none">
+          <MarkdownRenderer content={post.content} />
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <ForumReply postId={post.post_id} userId={post.creator} />
+      </div>
+
+      {totalReplies > 0 && (
+        <ForumRepliesList
+          postId={postId}
+          initialReplies={initialRepliesWithJdenticon}
+          initialTotal={totalReplies}
+          initialUserMap={userMap}
+          currentUser={session}
+          mainPostTitle={post.title}
+        />
+      )}
+    </div>
+  );
+}
