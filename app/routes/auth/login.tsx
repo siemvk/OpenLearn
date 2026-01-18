@@ -5,7 +5,7 @@ export default function SignIn() {
     const signIn = async (provider: string) => {
         await authClient.signIn.social({
             provider: provider,
-            callbackURL: '/app/home',
+            callbackURL: '/app',
         })
     }
 

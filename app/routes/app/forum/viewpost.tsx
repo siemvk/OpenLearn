@@ -4,6 +4,8 @@ import { redirect, Form } from 'react-router'
 import { Button } from '@polarnl/polarui-react'
 import { useNavigate } from "react-router";
 import { useState } from "react";
+// prisma types importen is zo lelijk
+import type { forumVoteModel } from "~/../generated/prisma/models"
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const api = await caller(loaderArgs)
@@ -20,36 +22,67 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
 
 export async function action(actionArgs: Route.ActionArgs) {
     const formData = await actionArgs.request.formData();
-    const content = formData.get('content') as string;
+    const intent = formData.get('intent') as string;
     const postId = actionArgs.params.postId as string;
 
     const api = await caller(actionArgs);
-    await api.forum.replyToPost({ postId, content });
+
+    if (intent === 'reply') {
+        const content = formData.get('content') as string;
+        await api.forum.replyToPost({ postId, content });
+    } else if (intent === 'upvote' || intent === 'downvote') {
+        const vote = intent === 'upvote' ? 'UPVOTE' : 'DOWNVOTE';
+        await api.forum.votePost({ postId, vote });
+    }
+
     return redirect(`/app/forum/${postId}`);
 }
-
-export default function Home({ loaderData: user }: Route.ComponentProps) {
+function countVotes(votes: forumVoteModel[]) {
+    let count = 0;
+    votes.forEach((vote) => {
+        if (vote.vote === 'UPVOTE') {
+            count += 1;
+        } else if (vote.vote === 'DOWNVOTE') {
+            count -= 1;
+        } else {
+            console.warn('wat de hell');
+        }
+    });
+    return count;
+}
+export default function Home({ loaderData: forumpost }: Route.ComponentProps) {
     const navigate = useNavigate();
     const [replyview, setReplyview] = useState(false);
+    const [votes, setVotes] = useState(countVotes(forumpost?.votes || []));
     return (
         <div className='flex flex-col items-center justify-center min-h-screen min-w-screen'>
             <div className={replyview ? 'visible' : 'hidden'}>
                 <Form method="post" className="flex flex-col space-y-4" onSubmit={() => { setReplyview(false) }}>
+                    <input type="hidden" name="intent" value="reply" />
                     <label>
                         Reply:
                         <textarea name="content" className="border p-2 w-96 h-32" required />
                     </label>
+                    <p>Current Votes: {votes}</p>
                     <Button type="submit">Submit Reply</Button>
                     <a onClick={() => { setReplyview(false) }}>nope</a>
                 </Form>
             </div>
-            <h1 className="text-2xl font-bold">{user?.title}</h1>
-            <p className="text-gray-600">By {user?.author.name} on {new Date(user?.createdAt).toLocaleDateString()}</p>
-            <p className="mt-4">{user?.content}</p>
+            <h1 className="text-2xl font-bold">{forumpost?.title}</h1>
+            <p className="text-gray-600">By {forumpost?.author.name} on {new Date(forumpost?.createdAt).toLocaleDateString()}</p>
+            <p className="mt-4">{forumpost?.content}</p>
+            <Form method="post" className="inline visible">
+                <input type="hidden" name="intent" value="upvote" />
+                <Button type="submit" onClick={() => { setVotes(votes + 1) }}>upvote</Button>
+            </Form>
+            <Form method="post" className="inline visible">
+                <input type="hidden" name="intent" value="downvote" />
+                <Button type="submit" onClick={() => { setVotes(votes - 1) }}>downvote</Button>
+            </Form>
             <Button onClick={() => { navigate('/app/forum') }}>Back to Forum</Button>
             <Button onClick={() => { setReplyview(true) }}>reply</Button>
             <h2>replies</h2>
-            {user?.replies.map((reply) => (
+            {forumpost?.replies.map((reply) => (
                 <div key={reply.id} className="border p-4 m-2 w-96">
                     <p className="text-gray-600">By {reply.author.name} on {new Date(reply.createdAt).toLocaleDateString()}</p>
                     <p className="mt-2">{reply.content}</p>
