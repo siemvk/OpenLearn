@@ -1,31 +1,28 @@
 import type { Route } from "./+types/user";
-import { caller } from '~/utils/trpc/server'
-import { redirect } from 'react-router'
+import { authClient } from "~/utils/auth/client"
 import { Button } from '@polarnl/polarui-react'
-import { authClient } from '~/utils/auth/client'
+import { auth } from '~/utils/auth/server'
+import { redirect, useNavigate } from "react-router";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
-    const api = await caller(loaderArgs)
-    try {
-        const user = await api.greeting.user()
-        if (!user) {
-            return redirect('/')
-        }
-        return user
-    } catch (error) {
-        return redirect('/')
+    const headers = new Headers(loaderArgs.request.headers)
+    const result = await auth.api.getSession({ headers })
+    const user = result?.user
+    if (!user) {
+        return redirect('/auth/login')
     }
+    return user
 }
 
 export default function Home({ loaderData: user }: Route.ComponentProps) {
+    const navigate = useNavigate()
     const signOut = async () => {
-        await authClient.signOut({
-        })
+        await authClient.signOut({}, { onSuccess: () => { navigate('/auth/login') } })
     }
     return (
         <div className='flex flex-col items-center justify-center min-h-screen min-w-screen'>
-            Hello! {user?.name}
-            <Button onClick={signOut}>log uit</Button>
+            Hallo, {user?.name}, Welkom bij PolarLearn!
+            <Button onClick={signOut}>Log uit</Button>
         </div>
     )
 }
