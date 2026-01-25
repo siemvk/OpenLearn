@@ -90,6 +90,14 @@ export const forumRouter = {
                     postId: input.postId
                 }
             })
+            const post = await ctx.prisma.forumPost.findUnique({
+                where:{
+                    id: input.postId
+                }
+            })
+            if (!post){
+                return undefined
+            }
 
             if (existingVote) {
                 // update existing vote
