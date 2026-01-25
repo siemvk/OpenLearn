@@ -7,6 +7,10 @@ import pl_book from "~/assets/pl_book.svg";
 // Copypasted from https://craftedbylunar.netlify.app/app/bottom-nav
 // Adapted to have types and use TailwindCSS
 
+// ngl dit ziet er echt niet uit de nieuwe ui is van alles het langzaamst aan het gaan...
+// en hij is niet eens heel nodig imo
+// - siem
+
 export default function NavBar({ items, className = "" }: { items: { label: string; to: string }[]; children?: React.ReactNode; className?: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);

@@ -48,6 +48,7 @@ export const publicProcedure = t.procedure
 // Create a utility function for protected tRPC procedures that require an authenticated user.
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     if (!ctx.user?.id) {
+        // we vangen dit op in de client en sturen de user naar de login pagina
         throw new TRPCError({ code: 'UNAUTHORIZED' })
     }
     return next({
