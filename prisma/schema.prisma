@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -13,25 +7,24 @@ datasource db {
   provider = "postgresql"
 }
 
-// dit is de echte user model
 model User {
-  id            String    @id @unique @default(uuid())
-  name          String
-  email         String
-  emailVerified Boolean
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  Session       Session[]
-  Account       Account[]
-
-  role       String?
-  banned     Boolean?
-  banReason  String?
-  banExpires DateTime?
-
-  firstName String?
-  lastName  String?
+  id              String       @id
+  name            String
+  email           String
+  emailVerified   Boolean      @default(false)
+  image           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  role            String?
+  banned          Boolean?     @default(false)
+  banReason       String?
+  banExpires      DateTime?
+  username        String?
+  displayUsername String?
+  sessions        Session[]
+  accounts        Account[]
+  members         Member[]
+  invitations     Invitation[]
 
   // forum relations
   forumPosts       forumPost[]
@@ -39,29 +32,30 @@ model User {
   forumVotes       forumVote[]
 
   @@unique([email])
+  @@unique([username])
   @@map("user")
 }
 
 model Session {
-  id        String    @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime?
-  updatedAt DateTime?
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  impersonatedBy String?
+  id                   String   @id
+  expiresAt            DateTime
+  token                String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+  impersonatedBy       String?
 
   @@unique([token])
+  @@index([userId])
   @@map("session")
 }
 
-// dit heeft te maken met oauth accounts
 model Account {
-  id                    String    @id @unique @default(uuid())
+  id                    String    @id
   accountId             String
   providerId            String
   userId                String
@@ -76,17 +70,19 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
+  @@index([userId])
   @@map("account")
 }
 
 model Verification {
-  id         String   @id @unique @default(uuid())
+  id         String   @id
   identifier String
   value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  @@index([identifier])
   @@map("verification")
 }
 
@@ -129,4 +125,49 @@ model forumVote {
 enum vote {
   UPVOTE
   DOWNVOTE
+}
+
+model Organization {
+  id          String       @id
+  name        String
+  slug        String
+  logo        String?
+  createdAt   DateTime
+  metadata    String?
+  members     Member[]
+  invitations Invitation[]
+
+  @@unique([slug])
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  createdAt      DateTime
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
 }

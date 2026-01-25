@@ -1,6 +1,4 @@
-
-// niet aanzitten aub
-
+// Niet aanraken plz
 import { auth } from '~/utils/auth/server'
 import type { LoaderFunctionArgs, ActionFunctionArgs } from 'react-router'
 

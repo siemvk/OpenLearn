@@ -10,6 +10,7 @@ import {
 import { initI18n } from "./i18n";
 
 import { TRPCReactProvider } from "~/utils/trpc/react";
+import NavBar from "./components/NavBar";
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -56,7 +57,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="h-full w-full">
-        {children}
+        <header className="w-full px-6 py-4">
+          <NavBar items={[{ label: "Log in", to: "/auth/login" }]}
+          />
+        </header>
+
+        <main className="w-full pt-24">
+          {children}
+        </main>
+
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -65,7 +74,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <TRPCReactProvider><Outlet /></TRPCReactProvider>;
+  return (
+    <TRPCReactProvider>
+      <Outlet />
+    </TRPCReactProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
