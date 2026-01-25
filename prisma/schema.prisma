@@ -27,9 +27,9 @@ model User {
   invitations     Invitation[]
 
   // forum relations
-  forumPosts       forumPost[]
-  forumPostReplies forumPostReply[]
-  forumVotes       forumVote[]
+  forumPosts       ForumPost[]
+  forumPostReplies ForumPostReply[]
+  forumVotes       ForumVote[]
 
   @@unique([email])
   @@unique([username])
@@ -86,7 +86,7 @@ model Verification {
   @@map("verification")
 }
 
-model forumPost {
+model ForumPost {
   id        String           @id @unique @default(uuid())
   title     String
   content   String
@@ -94,35 +94,35 @@ model forumPost {
   authorId  String
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
-  replies   forumPostReply[]
+  replies   ForumPostReply[]
   subject   String
-  votes     forumVote[]
+  votes     ForumVote[]
 }
 
 // forum replys hebben geen votes meer omdat ik geen zin heb om dat te implementeren
-model forumPostReply {
+model ForumPostReply {
   id        String    @id @unique @default(uuid())
   content   String
   author    User      @relation(fields: [authorId], references: [id])
   authorId  String
-  post      forumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
 
-model forumVote {
+model ForumVote {
   id        String    @id @unique @default(uuid())
-  vote      vote
+  vote      Vote
   user      User      @relation(fields: [userId], references: [id])
   userId    String
-  post      forumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
 
-enum vote {
+enum Vote {
   UPVOTE
   DOWNVOTE
 }
