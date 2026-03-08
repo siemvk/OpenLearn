@@ -10,7 +10,6 @@ import {
 import { initI18n } from "./i18n";
 
 import { TRPCReactProvider } from "~/utils/trpc/react";
-import NavBar from "./components/NavBar";
 import type { Route } from "./+types/root";
 import "./app.css";
 
