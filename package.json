@@ -1,6 +1,5 @@
 {
-  "name": "polarlearn",
-  "private": true,
+  "name": "openlearn",
   "type": "module",
   "scripts": {
     "build": "react-router build",
@@ -10,7 +9,6 @@
   },
   "dependencies": {
     "@better-auth/oauth-provider": "^1.4.15",
-    "@polarnl/polarui-react": "^0.0.8",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@react-router/fs-routes": "^7.12.0",

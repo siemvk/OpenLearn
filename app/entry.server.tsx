@@ -25,8 +25,7 @@ export default async function handleRequest(
 
   responseHeaders.set("Content-Type", "text/html");
   responseHeaders.set("Content-Language", lang);
-  const comment = `<!--
-  Powered by PolarLearn | Rendered at ${new Date().toISOString()}\n  We are open-source: https://github.com/polarnl/polarlearn\n-->\n`;
+  const comment = `<!--Tf ben je hier aan het doen. Opensource: github/supersiem/openlearn-->\n`;
   const commentStream = new ReadableStream({
     start(controller) {
       controller.enqueue(new TextEncoder().encode(comment));

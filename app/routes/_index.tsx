@@ -1,5 +1,4 @@
 import i18n from "i18next";
-import { Button } from '@polarnl/polarui-react'
 import { useNavigate } from "react-router";
 
 export default function Home() {

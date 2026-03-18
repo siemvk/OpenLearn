@@ -4,7 +4,7 @@ import { prisma } from '~/utils/prisma'
 import { admin, genericOAuth, organization, username } from "better-auth/plugins"
 
 export const auth = betterAuth({
-    appName: "PolarLearn",
+    appName: "OpenLearn",
     secret: process.env.AUTH_SECRET,
 
     emailAndPassword: {
@@ -24,13 +24,12 @@ export const auth = betterAuth({
     plugins: [
         genericOAuth({
             config: [
-                ...(process.env.HOSTED_BY_POLARNL_CLOUD === 'true') ? [{
-                    providerId: "PolarNL-StaffAuth",
-                    discoveryUrl: "https://sso.polarnl.org/application/o/polar-learn-medewerkers-inlog/.well-known/openid-configuration",
-                    clientId: process.env.POLARNL_STAFFAUTH_CLIENT_ID || "",
-                    clientSecret: process.env.POLARNL_STAFFAUTH_CLIENT_SECRET || "",
-                    scopes: ["openid", "email", "profile"],
-                    disableSignUp: true
+                ...(process.env.HACKCLUBAUTH_CLIENT_ID && process.env.HACKCLUBAUTH_CLIENT_SECRET) ? [{
+                    providerId: "Hackclub",
+                    discoveryUrl: "https://auth.hackclub.com/.well-known/openid-configuration",
+                    clientId: process.env.HACKCLUBAUTH_CLIENT_ID || "",
+                    clientSecret: process.env.HACKCLUBAUTH_CLIENT_SECRET || "",
+                    scopes: ["openid", "email", "name"],
                 }] : []
             ],
         }),

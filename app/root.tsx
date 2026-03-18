@@ -36,8 +36,8 @@ export async function loader() {
 
 export function meta({ }: Route.MetaArgs) {
   return [
-    { title: "PolarLearn" },
-    { name: "description", content: "PolarLearn is een gratis en open-source leerplatform." },
+    { title: "Openlearn" },
+    { name: "description", content: "Openlearn is een opensource alternative voor WRTS." },
   ];
 }
 
@@ -57,8 +57,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="h-full w-full">
         <header className="w-full px-6 py-4">
-          <NavBar items={[{ label: "Log in", to: "/auth/login" }]}
-          />
         </header>
 
         <main className="w-full pt-24">
