@@ -1,11 +1,17 @@
 @import "tailwindcss";
-@import "@polarnl/polarui-react/styles.css";
+@config "../tailwind.config.ts";
 
 html,
 body {
   font-family: "Geist", sans-serif;
-  @apply bg-neutral-900 text-neutral-100;
+  @apply bg-openlearn-900 text-neutral-100;
 }
+
 .light body {
   @apply bg-neutral-100 text-neutral-900;
+}
+
+.dark body {
+  font-family: "Geist", sans-serif;
+  @apply bg-openlearn-900 text-neutral-100;
 }

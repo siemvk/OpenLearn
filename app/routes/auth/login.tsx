@@ -1,5 +1,5 @@
 import { authClient } from '~/utils/auth/client'
-import { Button, Input } from '@polarnl/polarui-react'
+// import { Button, Input } from '@polarnl/polarui-react'
 import { KeyRound, LogIn, User } from 'lucide-react'
 import i18next from 'i18next'
 import zod from 'zod'
@@ -69,17 +69,6 @@ export default function SignIn() {
         className="absolute top-6 w-30"
       />
 
-      <Button
-        onClick={async () => {
-          await authClient.signIn.social({
-            provider: 'PolarNL-StaffAuth',
-            callbackURL: '/user',
-            errorCallbackURL: '/auth/login',
-          })
-        }}
-      >
-        Medewerkers inlog
-      </Button>
 
       <form
         onSubmit={async (event) => {
@@ -121,24 +110,6 @@ export default function SignIn() {
           }
         }}
       >
-        <Input
-          placeholder={i18next.t('auth:emailOrUsername')}
-          name="emailOrUsername"
-          className="mb-2"
-          icon={<User />}
-          scheme="dark"
-        />
-        <Input
-          type="password"
-          placeholder={i18next.t('auth:password')}
-          name="password"
-          className="mb-4"
-          scheme="dark"
-          icon={<KeyRound />}
-        />
-        <Button type="submit" icon={<LogIn />}>
-          {i18next.t('auth:login')}
-        </Button>
       </form>
       <Link to="/auth/signup" className="mt-4 underline">
         {i18next.t('auth:noAccountSignUp')}

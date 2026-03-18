@@ -1,7 +1,6 @@
 import type { Route } from "./+types/viewpost";
 import { caller } from '~/utils/trpc/server'
 import { redirect, Form } from 'react-router'
-import { Button } from '@polarnl/polarui-react'
 import { useNavigate } from "react-router";
 import { useState } from "react";
 // prisma types importen is zo lelijk
@@ -64,7 +63,7 @@ export default function Home({ loaderData: forumpost }: Route.ComponentProps) {
                         <textarea name="content" className="border p-2 w-96 h-32" required />
                     </label>
                     <p>Current Votes: {votes}</p>
-                    <Button type="submit">Submit Reply</Button>
+
                     <a onClick={() => { setReplyview(false) }}>nope</a>
                 </Form>
             </div>
@@ -73,14 +72,12 @@ export default function Home({ loaderData: forumpost }: Route.ComponentProps) {
             <p className="mt-4">{forumpost?.content}</p>
             <Form method="post" className="inline visible">
                 <input type="hidden" name="intent" value="upvote" />
-                <Button type="submit" onClick={() => { setVotes(votes + 1) }}>upvote</Button>
+
             </Form>
             <Form method="post" className="inline visible">
                 <input type="hidden" name="intent" value="downvote" />
-                <Button type="submit" onClick={() => { setVotes(votes - 1) }}>downvote</Button>
+
             </Form>
-            <Button onClick={() => { navigate('/app/forum') }}>Back to Forum</Button>
-            <Button onClick={() => { setReplyview(true) }}>reply</Button>
             <h2>replies</h2>
             {forumpost?.replies.map((reply) => (
                 <div key={reply.id} className="border p-4 m-2 w-96">

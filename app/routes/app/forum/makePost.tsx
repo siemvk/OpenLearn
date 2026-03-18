@@ -1,7 +1,6 @@
 import type { Route } from "./+types/list";
 import { caller } from '~/utils/trpc/server'
 import { redirect, Form } from 'react-router'
-import { Button } from '@polarnl/polarui-react'
 import { auth } from '~/utils/auth/server'
 
 export async function action(actionArgs: Route.ActionArgs) {
@@ -49,7 +48,6 @@ export default function ForumHome() {
           rows={6}
           className='border rounded px-4 py-2'
         />
-        <Button type='submit'>Submit Post</Button>
       </Form>
     </div>
   )

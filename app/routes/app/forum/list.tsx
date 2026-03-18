@@ -1,6 +1,5 @@
 import type { Route } from "./+types/list";
 import { caller } from '~/utils/trpc/server'
-import { Button } from '@polarnl/polarui-react'
 import { useNavigate } from "react-router";
 import { auth } from '~/utils/auth/server'
 
@@ -18,8 +17,6 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen min-w-screen'>
       <h1>Forum</h1>
-      {user ? (<Button onClick={() => { navigate('/app/forum/make') }}>Make forum post</Button>) : ''}
-      <Button onClick={() => { navigate('/app') }}>terug</Button>
       <div>
         {forumPosts?.map((post) => (
           <a key={post.id} href={`/app/forum/${post.id}`}>

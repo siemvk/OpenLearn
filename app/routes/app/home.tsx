@@ -1,6 +1,5 @@
 import type { Route } from "./+types/home";
 import { authClient } from "~/utils/auth/client"
-import { Button } from '@polarnl/polarui-react'
 import { auth } from '~/utils/auth/server'
 import { redirect, useNavigate } from "react-router";
 import { Image } from "@unpic/react";
@@ -28,11 +27,10 @@ export default function Home({ loaderData: user }: Route.ComponentProps) {
             <div className="flex flex-col items-center">
                 <div className="flex flex-col items-center gap-1">
                     <strong>Hallo, {user?.name}!</strong>
-                    <p>Welkom bij PolarLearn</p>
+                    <p>Welkom bij Openlearn</p>
                 </div>
 
                 <div className="mt-6">
-                    <Button onClick={signOut}>Log uit</Button>
                 </div>
             </div>
 
