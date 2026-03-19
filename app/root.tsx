@@ -56,10 +56,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="h-full w-full">
-        <header className="w-full px-6 py-4">
-        </header>
 
-        <main className="w-full pt-24">
+        <main className="w-full">
           {children}
         </main>
 

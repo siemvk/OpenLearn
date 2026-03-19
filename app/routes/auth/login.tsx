@@ -1,5 +1,5 @@
 import { authClient } from '~/utils/auth/client'
-// import { Button, Input } from '@polarnl/polarui-react'
+import { Button } from '~/components/button/button'
 import { KeyRound, LogIn, User } from 'lucide-react'
 import i18next from 'i18next'
 import zod from 'zod'
@@ -63,57 +63,15 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 gap-4 relative">
-      <img
-        src="https://polarlearn.nl/_next/static/media/pl-500.2015881e.svg"
-        alt="PolarLearn Logo"
-        className="absolute top-6 w-30"
-      />
-
-
-      <form
-        onSubmit={async (event) => {
-          event.preventDefault()
-          const formData = new FormData(event.currentTarget)
-          const emailOrUsername = formData.get('emailOrUsername') as string
-          const password = formData.get('password') as string
-
-          if (zod.email().safeParse(emailOrUsername).success) {
-            await authClient.signIn.email(
-              {
-                email: emailOrUsername,
-                password,
-              },
-              {
-                onError(context) {
-                  alert(geti18nAuthMessageByCode(context.error.code))
-                },
-                onSuccess(context) {
-                  navigate('app')
-                },
-              }
-            )
-          } else {
-            await authClient.signIn.username(
-              {
-                username: emailOrUsername,
-                password,
-              },
-              {
-                onError(context) {
-                  alert(geti18nAuthMessageByCode(context.error.code))
-                },
-                onSuccess(context) {
-                  navigate('app')
-                },
-              }
-            )
-          }
+      <Button
+        onClick={async () => {
+          await authClient.signIn.social({
+            provider: 'Hackclub',
+            callbackURL: '/app',
+            errorCallbackURL: '/auth/login',
+          })
         }}
-      >
-      </form>
-      <Link to="/auth/signup" className="mt-4 underline">
-        {i18next.t('auth:noAccountSignUp')}
-      </Link>
+      >{i18next.t('auth:loginHC')}</Button>
     </div>
   )
 

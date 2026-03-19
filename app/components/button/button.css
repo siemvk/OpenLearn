@@ -22,6 +22,34 @@
 }
 
 .button1:active {
-    transform: translate(0px, 9px);
+    transform: translate(0px, 10px);
     box-shadow: 0px 0px var(--color-openlearn-800);
+}
+
+.button2 {
+    background-color: var(--color-openlearn-700);
+    margin: 0.25rem;
+    border-radius: 9999px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    color: white;
+    transition-duration: 150ms;
+    /* box-shadow: 0px 9px var(--color-openlearn-800); */
+}
+
+.button2:hover {
+    background-color: var(--color-openlearn-600);
+    /* we maken de knop groter */
+    transform: scale(1.1)
+}
+
+.button2:disabled {
+    background-color: var(--color-openlearn-800);
+}
+
+.button2:active {
+    /* we maken de knop kleiner */
+    transform: scale(0.8);
 }

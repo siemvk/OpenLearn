@@ -2,6 +2,7 @@ import type { Route } from "./+types/list";
 import { caller } from '~/utils/trpc/server'
 import { useNavigate } from "react-router";
 import { auth } from '~/utils/auth/server'
+import { Button } from "~/components/button/button";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
   const api = await caller(loaderArgs);
@@ -17,6 +18,9 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen min-w-screen'>
       <h1>Forum</h1>
+      <Button onClick={() => navigate('/app/forum/make')}>
+        Create New Post
+      </Button>
       <div>
         {forumPosts?.map((post) => (
           <a key={post.id} href={`/app/forum/${post.id}`}>

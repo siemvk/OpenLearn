@@ -8,7 +8,7 @@ export const auth = betterAuth({
     secret: process.env.AUTH_SECRET,
 
     emailAndPassword: {
-        enabled: true,
+        enabled: false, // voor nu. 
         requireEmailVerification: !!process.env.SMTP_HOST,
     },
     advanced: {
@@ -19,7 +19,6 @@ export const auth = betterAuth({
         }
     },
     socialProviders: {
-        // idk
     },
     plugins: [
         genericOAuth({
@@ -29,7 +28,7 @@ export const auth = betterAuth({
                     discoveryUrl: "https://auth.hackclub.com/.well-known/openid-configuration",
                     clientId: process.env.HACKCLUBAUTH_CLIENT_ID || "",
                     clientSecret: process.env.HACKCLUBAUTH_CLIENT_SECRET || "",
-                    scopes: ["openid", "email", "name"],
+                    scopes: ["openid", "email", "profile"],
                 }] : []
             ],
         }),

@@ -5,6 +5,7 @@ interface ButtonProps {
     disabled?: boolean;
     variant?: 'primary' | 'secondary';
     children?: React.ReactNode;
+    [x: string]: any; // Hiermee kunnen we extra props accepteren, zoals 'type' of 'formMethod'
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -12,14 +13,29 @@ export const Button: React.FC<ButtonProps> = ({
     disabled = false,
     variant = 'primary',
     children,
+    ...rest
 }) => {
-    return (
-        <button
-            onClick={onClick}
-            disabled={disabled}
-            className='button1'
-        >
-            {children}
-        </button>
-    );
+    if (variant === 'primary') {
+        return (
+            <button
+                onClick={onClick}
+                disabled={disabled}
+                className={'button1'}
+                {...rest}
+            >
+                {children}
+            </button>
+        );
+    } else {
+        return (
+            <button
+                onClick={onClick}
+                disabled={disabled}
+                className='button2'
+                {...rest}
+            >
+                {children}
+            </button>
+        );
+    }
 };
