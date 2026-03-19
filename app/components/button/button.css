@@ -51,5 +51,5 @@
 
 .button2:active {
     /* we maken de knop kleiner */
-    transform: scale(0.8);
+    transform: scale(0.9);
 }

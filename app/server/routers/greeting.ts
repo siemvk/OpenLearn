@@ -14,5 +14,8 @@ export const greetingRouter = {
         })
 
         return user
+    }),
+    checkSession: protectedProcedure.query(async ({ ctx }) => {
+        return ctx.user
     })
 } satisfies TRPCRouterRecord
