@@ -3,7 +3,7 @@ import { caller } from '~/utils/trpc/server'
 import { useNavigate } from "react-router";
 import { auth } from '~/utils/auth/server'
 import { Button } from "~/components/button/button";
-
+import "./forum.css"
 export async function loader(loaderArgs: Route.LoaderArgs) {
   const api = await caller(loaderArgs);
   const headers = new Headers(loaderArgs.request.headers)
@@ -17,16 +17,16 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
   const navigate = useNavigate();
   return (
     <div className='flex flex-col items-center justify-center min-h-screen min-w-screen'>
-      <h1>Forum</h1>
+      <h1>Forum</h1> {/* deze h1 wil volgens mij echt geen h1 zijn en ziet er meer uit als een paragraph. */}
       <Button onClick={() => navigate('/app/forum/make')}>
         Create New Post
       </Button>
       <div>
         {forumPosts?.map((post) => (
           <a key={post.id} href={`/app/forum/${post.id}`}>
-            <div className="border p-4 m-2 w-96">
-              <h2 className="text-xl font-bold">{post.title}</h2>
-              <p className="text-gray-600">By {post.author.name} on {new Date(post.createdAt).toLocaleDateString()}</p>
+            <div className="post">
+              <h2 className="text-xl font-bold text-center">{post.title}</h2>
+              <p className="text-openlearn-400 font-extralight">{post.author.name} op {new Date(post.createdAt).toLocaleDateString()}</p>
               <p className="mt-2">{post.content}</p>
             </div>
           </a>

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { useState } from "react";
 // prisma types importen is zo lelijk
 import type { forumVoteModel } from "~/../generated/prisma/models"
+// bestaat deze forumVoteModel uberhaupt nog in openlearn?? :sob:
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const api = await caller(loaderArgs)
