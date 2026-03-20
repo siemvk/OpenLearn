@@ -1,0 +1,12 @@
+.navbar {
+    background-color: var(--color-openlearn-900);
+    margin: 0.25rem;
+    border-radius: 9999px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    color: white;
+    transition-duration: 150ms;
+    box-shadow: var(--color-openlearn-800) 0px 0px 24px;
+}

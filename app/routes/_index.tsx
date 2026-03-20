@@ -10,7 +10,7 @@ export default function Home() {
     <>
       <MouseTrail />
       <div className="flex flex-col items-center justify-center">
-        <div className="flex flex-row rounded-2xl w-full md:w-auto px-6 py-4 items-center justify-center gap-4">
+        <div className="flex flex-row rounded-2xl w-full md:w-auto px-6 py-4 items-center justify-center">
           <h1 className="text-3xl md:text-3xl font-bold text-center">OpenLearn</h1>
           <img src={logo} alt="Logo" className="ml-4 w-32" />
         </div>

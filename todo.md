@@ -3,6 +3,7 @@ design:
 
 mixed:
 [ ] tief alle polarnl dingen eruit (maak het openlearn)
+[X] navbar
 
 backend:
 [ ] auth

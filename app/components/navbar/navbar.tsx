@@ -1,6 +1,8 @@
 import { Button } from "../button/button";
 import { useNavigate } from "react-router";
-import { motion } from "motion/react"
+import { motion } from "motion/react";
+import "./navbar.css";
+
 export const Navbar = () => {
     const navigate = useNavigate()
     return <nav>
@@ -11,8 +13,10 @@ export const Navbar = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
         >
-            <Button variant='secondary' onClick={() => { navigate('/app') }}>Home</Button>
-            <Button variant='secondary' onClick={() => { navigate('/app/forum') }}>Forum</Button>
+            <div className={'navbar'}>
+                <Button variant='secondary' onClick={() => { navigate('/app') }}>Home</Button>
+                <Button variant='secondary' onClick={() => { navigate('/app/forum') }}>Forum</Button>
+            </div>
         </motion.div>
     </nav>;
 }
