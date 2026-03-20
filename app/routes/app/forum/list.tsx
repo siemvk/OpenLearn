@@ -24,14 +24,7 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
       </Button>
       <ListContainer>
         {forumPosts?.map((post) => (
-          <ListItem key={post.id}>
-            <a key={post.id} href={`/app/forum/${post.id}`}>
-              <div className="border p-4 m-2 w-96">
-                <h2 className="text-xl font-bold">{post.title}</h2>
-                <p className="text-gray-600">By {post.author.name} on {new Date(post.createdAt).toLocaleDateString()}</p>
-                <p className="mt-2">{post.content}</p>
-              </div>
-            </a>
+          <ListItem key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>
           </ListItem>
         ))}
       </ListContainer>
