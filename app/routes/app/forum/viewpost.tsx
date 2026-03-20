@@ -4,8 +4,7 @@ import { redirect, Form } from 'react-router'
 import { useNavigate } from "react-router";
 import { useState } from "react";
 // prisma types importen is zo lelijk
-import type { forumVoteModel } from "~/../generated/prisma/models"
-// bestaat deze forumVoteModel uberhaupt nog in openlearn?? :sob:
+import type { ForumVoteModel } from "~/../generated/prisma/models"
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const api = await caller(loaderArgs)
@@ -37,7 +36,7 @@ export async function action(actionArgs: Route.ActionArgs) {
 
     return redirect(`/app/forum/${postId}`);
 }
-function countVotes(votes: forumVoteModel[]) {
+function countVotes(votes: ForumVoteModel[]) {
     let count = 0;
     votes.forEach((vote) => {
         if (vote.vote === 'UPVOTE') {
