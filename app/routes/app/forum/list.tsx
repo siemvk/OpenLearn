@@ -17,8 +17,8 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
 export default function ForumHome({ loaderData: { forum: forumPosts, user: user } }: Route.ComponentProps) {
   const navigate = useNavigate();
   return (
-    <div className='flex flex-col items-center justify-center min-h-screen min-w-screen'>
-      <h1>Forum</h1>
+    <div className='flex flex-col items-center justify-center min-h-screen min-w-screen gap-4'>
+      <h1 className="scale-150 text-xl font-bold">Forum</h1>
       <Button onClick={() => navigate('/app/forum/make')}>
         Create New Post
       </Button>

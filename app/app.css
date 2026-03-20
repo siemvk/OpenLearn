@@ -16,3 +16,6 @@ body {
   @apply bg-openlearn-900 text-neutral-100;
 }
 
+.glow-shadow {
+  box-shadow: var(--color-openlearn-700) 0px 0px 24px;
+}

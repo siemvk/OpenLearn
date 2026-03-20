@@ -14,7 +14,7 @@ export const Navbar = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
         >
-            <img src={logo} alt="Logo" className="logo" onClick={() => navigate('/')}/>
+            <img src={logo} alt="Logo" className="logo" onClick={() => navigate('/app')}/>
             <div className={'navbar'}>
                 <Button variant='secondary' onClick={() => { navigate('/app') }}>Home</Button>
                 <Button variant='secondary' onClick={() => { navigate('/app/forum') }}>Forum</Button>
