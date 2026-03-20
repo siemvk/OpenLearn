@@ -4,8 +4,7 @@ import { motion } from "motion/react"
 export const Navbar = () => {
     const navigate = useNavigate()
     return <nav>
-        {/* kunnen wij deze keer misschien voor een centered layout gaan :idk:*/}
-        {/* oh ja en ik vind animations leuk. */}
+        {/* oh ja ik vind animations leuk. */}
         <motion.div
             className="flex flex-row justify-center items-center gap-3 pt-5"
             initial={{ opacity: 0, y: -50 }}
