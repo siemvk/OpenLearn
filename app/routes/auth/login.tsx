@@ -6,7 +6,7 @@ import zod from 'zod'
 import { Link, redirect, useNavigate, useSearchParams } from 'react-router'
 import { useEffect } from 'react'
 import { auth } from '~/utils/auth/server'
-import type { Route } from '~/+types/login';
+import type { Route } from "./+types/login";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
   const headers = new Headers(loaderArgs.request.headers)
