@@ -1,7 +1,7 @@
 import i18n from "i18next";
 import { useNavigate } from "react-router";
 import { Button } from "~/components/button/button";
-import logo from "~/../public/logo.svg";
+import logo from "~/../public/logo_outline.svg";
 import MouseTrail from "~/components/mouse-trail"
 
 export default function Home() {
