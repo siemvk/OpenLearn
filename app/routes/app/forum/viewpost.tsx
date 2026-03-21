@@ -56,7 +56,7 @@ export default function Home({ loaderData: forumpost }: Route.ComponentProps) {
     const [votes, setVotes] = useState(countVotes(forumpost?.votes || []));
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
-            <div className='flex flex-col items-center justify-center w-150 gap-3 bg-openlearn-800 rounded-2xl p-6'>
+            <div className='flex flex-col items-center justify-center w-150 gap-3 bg-openlearn-600 rounded-2xl p-6'>
                 <div className={replyview ? 'visible' : 'hidden'}>
                     <Form method="post" className="flex flex-col space-y-4" onSubmit={() => { setReplyview(false) }}>
                         <input type="hidden" name="intent" value="reply" />
