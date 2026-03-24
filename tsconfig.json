@@ -7,7 +7,7 @@
   ],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "types": ["node", "vite/client"],
+    "types": ["node", "vite/client", "bun-types"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
