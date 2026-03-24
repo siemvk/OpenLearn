@@ -172,6 +172,109 @@ describe("tRPC endpoints (integration)", () => {
         })
       ).rejects.toBeInstanceOf(TRPCError);
     });
+
+    it("Check that we can get posts without authentication", async () => {
+      const user = await createTestUser();
+      const createdPost = await prisma.forumPost.create({
+        data: {
+          title: `post-${Date.now()}`,
+          content: "Body",
+          subject: "js",
+          authorId: user.id,
+        },
+        include: { author: true },
+      });
+      createdPostIds.add(createdPost.id);
+
+      const { caller } = makeCaller();
+      const result = await caller.forum.getPosts({
+        subject: "js",
+        take: 10,
+        skip: 0,
+      });
+
+      expect(result.some((post) => post.id === createdPost.id)).toBe(true);
+    });
+
+    describe("voting", () => {
+      it("allows authenticated user to vote on a post using votePost", async () => {
+        const user = await createTestUser();
+        const createdPost = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: user.id,
+          },
+        });
+        createdPostIds.add(createdPost.id);
+
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        const vote = await caller.forum.votePost({
+          postId: createdPost.id,
+          vote: "UPVOTE",
+        });
+
+        expect(vote.postId).toBe(createdPost.id);
+        expect(vote.userId).toBe(user.id);
+        expect(vote.vote).toBe("UPVOTE");
+      });
+
+      it("prevents unauthenticated user from voting on a post using votePost", async () => {
+        const user = await createTestUser();
+        const createdPost = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: user.id,
+          },
+        });
+        createdPostIds.add(createdPost.id);
+
+        const { caller } = makeCaller();
+        await expect(
+          caller.forum.votePost({
+            postId: createdPost.id,
+            vote: "UPVOTE",
+          })
+        ).rejects.toBeInstanceOf(TRPCError);
+      });
+
+      it("Check that we cant vote 2 times on one post", async () => {
+        const user = await createTestUser();
+        const createdPost = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: user.id,
+          },
+        });
+        createdPostIds.add(createdPost.id);
+
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        await caller.forum.votePost({
+          postId: createdPost.id,
+          vote: "UPVOTE",
+        });
+
+        await caller.forum.votePost({
+          postId: createdPost.id,
+          vote: "UPVOTE",
+        });
+
+        const votes = await prisma.forumVote.findMany({
+          where: {
+            postId: createdPost.id,
+            userId: user.id,
+          },
+        });
+
+        expect(votes.length).toBe(1);
+        expect(votes[0].vote).toBe("UPVOTE");
+      });
+    });
   });
 
   describe("learn", () => {

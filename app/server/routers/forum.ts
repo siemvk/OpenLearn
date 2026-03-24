@@ -91,14 +91,13 @@ export const forumRouter = {
                 }
             })
             const post = await ctx.prisma.forumPost.findUnique({
-                where:{
+                where: {
                     id: input.postId
                 }
             })
-            if (!post){
-                return undefined
+            if (!post) {
+                throw new Error("Post does not exist")
             }
-
             if (existingVote) {
                 // update existing vote
                 const updatedVote = await ctx.prisma.forumVote.update({
@@ -107,7 +106,7 @@ export const forumRouter = {
                     },
                     data: {
                         vote: input.vote
-                    }
+                    },
                 })
                 return updatedVote
             } else {
@@ -117,7 +116,7 @@ export const forumRouter = {
                         vote: input.vote,
                         userId: ctx.user.id,
                         postId: input.postId
-                    }
+                    },
                 })
                 return newVote
             }
