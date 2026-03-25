@@ -119,6 +119,91 @@ describe("tRPC endpoints (integration)", () => {
       const { caller } = makeCaller();
       await expect(caller.user.checkSession()).rejects.toBeInstanceOf(TRPCError);
     });
+    describe("getUserForumPosts", () => {
+      it("returns user's forum posts with user.getUserForumPosts", async () => {
+        const user = await createTestUser();
+        for (let i = 0; i < 10; i++) {
+          const post = await prisma.forumPost.create({
+            data: {
+              title: `post-${Date.now()}-${i}`,
+              content: "Body",
+              subject: "js",
+              authorId: user.id,
+            },
+          });
+          createdPostIds.add(post.id);
+        }
+
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        const result = await caller.user.getUserForumPosts({ take: 10, skip: 0 });
+
+        expect(result.some((post) => post.authorId === user.id)).toBe(true);
+        expect(result.length).toBe(10);
+      });
+      it("prevents access to user.getUserForumPosts without authentication", async () => {
+        const { caller } = makeCaller();
+        await expect(caller.user.getUserForumPosts({ take: 10, skip: 0 })).rejects.toBeInstanceOf(
+          TRPCError
+        );
+      });
+      it("checks pagination of user.getUserForumPosts", async () => {
+        const user = await createTestUser();
+        const firstPost = await prisma.forumPost.create({
+          data: {
+            title: `fist-post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: user.id,
+          },
+        });
+        createdPostIds.add(firstPost.id);
+        for (let i = 0; i < 14; i++) {
+          const post = await prisma.forumPost.create({
+            data: {
+              title: `post-${Date.now()}-${i}`,
+              content: "Body",
+              subject: "js",
+              authorId: user.id,
+            },
+          });
+          createdPostIds.add(post.id);
+        }
+
+
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        const result = await caller.user.getUserForumPosts({ take: 10, skip: 5 });
+
+        expect(result.length).toBe(10);
+        expect(result[9].id).toBe(firstPost!.id);
+      });
+      it("returns empty array when user has no posts with user.getUserForumPosts", async () => {
+        const user = await createTestUser();
+
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        const result = await caller.user.getUserForumPosts({ take: 10, skip: 0 });
+
+        expect(result.length).toBe(0);
+      });
+      it("prevent asking for to many posts by limiting to 20 with user.getUserForumPosts when not specified", async () => {
+        const user = await createTestUser();
+        for (let i = 0; i < 30; i++) {
+          const post = await prisma.forumPost.create({
+            data: {
+              title: `post-${Date.now()}-${i}`,
+              content: "Body",
+              subject: "js",
+              authorId: user.id,
+            },
+          });
+          createdPostIds.add(post.id);
+        }
+
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        const result = await caller.user.getUserForumPosts({});
+
+        expect(result.length).toBe(20);
+      });
+    });
   });
 
   describe("forum", () => {
