@@ -152,7 +152,7 @@ describe("tRPC endpoints (integration)", () => {
           data: {
             title: `fist-post-${Date.now()}`,
             content: "Body",
-            subject: "js",
+            subject: "nl",
             authorId: user.id,
           },
         });
@@ -162,7 +162,7 @@ describe("tRPC endpoints (integration)", () => {
             data: {
               title: `post-${Date.now()}-${i}`,
               content: "Body",
-              subject: "js",
+              subject: "nl",
               authorId: user.id,
             },
           });
@@ -237,7 +237,7 @@ describe("tRPC endpoints (integration)", () => {
       const created = await caller.forum.makePost({
         title: "Integration title",
         content: "Integration content",
-        subject: "js",
+        subject: 'nl',
       });
       createdPostIds.add(created.id);
 
@@ -245,6 +245,17 @@ describe("tRPC endpoints (integration)", () => {
 
       const persisted = await prisma.forumPost.findUnique({ where: { id: created.id } });
       expect(persisted?.id).toBe(created.id);
+    });
+
+    it("Disallow forum posts for non existent subjects", async () => {
+      const user = await createTestUser();
+
+      const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+      await expect(caller.forum.makePost({
+        title: "Integration title",
+        content: "Integration content",
+        subject: "js",
+      })).rejects.toBeInstanceOf(TRPCError);
     });
 
     it("prevents creating forum post for unauthenticated user", async () => {

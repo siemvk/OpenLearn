@@ -35,5 +35,14 @@
       "message": "Er is een fout opgetreden aan onze kant. Probeer het later opnieuw."
     },
     "unknown": "Er is een onbekende fout opgetreden. Probeer het later opnieuw."
+  },
+  "icons": {
+    "nederlands": "Nederlands",
+    "engels": "Engels",
+    "frans": "Frans",
+    "duits": "Duits",
+    "wiskunde": "Wiskunde",
+    "natuurkunde": "Natuurkunde",
+    "scheikunde": "Scheikunde"
   }
 }

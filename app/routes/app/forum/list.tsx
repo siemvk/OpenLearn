@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { auth } from '~/utils/auth/server'
 import { Button } from "~/components/button/button";
 import { ListContainer, ListItem } from "~/components/list/list";
+import { getSubjectBySlug, TaalSlugEnum } from "~/components/Icons";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
   const api = await caller(loaderArgs);
@@ -24,7 +25,7 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
       </Button>
       <ListContainer className="w-full max-w">
         {forumPosts?.map((post) => (
-          <ListItem key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>
+          <ListItem image={getSubjectBySlug(post.subject as TaalSlugEnum)?.icon} key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>
           </ListItem>
         ))}
       </ListContainer>

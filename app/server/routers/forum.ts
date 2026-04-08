@@ -1,6 +1,7 @@
 import type { TRPCRouterRecord } from '@trpc/server'
 import { z } from 'zod'
 import { protectedProcedure, publicProcedure } from '~/server/trpc'
+import { TaalSlugEnum } from '~/components/Icons'
 
 export const forumRouter = {
     getPosts: publicProcedure
@@ -41,6 +42,9 @@ export const forumRouter = {
             })
         )
         .mutation(async ({ input, ctx }) => {
+            if (!Object.values(TaalSlugEnum).includes(input.subject as TaalSlugEnum)) {
+                throw new Error("Invalid subject")
+            }
             const newPost = await ctx.prisma.forumPost.create({
                 data: {
                     title: input.title,

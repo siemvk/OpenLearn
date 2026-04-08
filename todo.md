@@ -1,13 +1,6 @@
-design:
-[ ] rebrand alle design assets naar openlearn kleuren
+# TODO voor v1 flavortown YSWS ship
 
-mixed:
-[ ] tief alle polarnl dingen eruit (maak het openlearn)
-[X] navbar
-
-backend:
-[ ] auth
-[ ] db
-
-(maximaal 3 dingen tegelijk op todo list per categorie!!)
-(ivm niet overzichtelijk)
+- [ ] basic forum afmaken
+- [ ] forum posts kunnen bewerken
+- [ ] forum posts kunnen verwijderen
+- [ ] goede admin tools voor forum
