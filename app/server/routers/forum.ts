@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from '@trpc/server'
 import { z } from 'zod'
-import { protectedProcedure, publicProcedure } from '~/server/trpc'
+import { protectedProcedure, publicProcedure, veryProtectedProcedure } from '~/server/trpc'
 import { TaalSlugEnum } from '~/components/Icons'
 
 export const forumRouter = {
@@ -141,7 +141,81 @@ export const forumRouter = {
                 }
             })
             return newReply
+        }),
+    delete: protectedProcedure
+        .input(
+            z.object({
+                type: z.enum(['POST', 'REPLY']),
+                id: z.uuid()
+            })
+        )
+        .mutation(async ({ input, ctx }) => {
+            const isUserAdmin = (ctx.user.role ?? "user").includes('admin')
+            if (input.type === 'POST') {
+                // maker/admin check!
+                const vraag = await ctx.prisma.forumPost.findUniqueOrThrow({
+                    where: {
+                        id: input.id
+                    }
+                })
+                if (vraag.authorId !== ctx.user.id && !isUserAdmin) {
+                    throw new Error("Not authorized to delete this post")
+                }
+
+                await ctx.prisma.forumVote.deleteMany({
+                    where: {
+                        postId: input.id
+                    }
+                })
+                await ctx.prisma.forumPostReply.deleteMany({
+                    where: {
+                        postId: input.id
+                    }
+                })
+                await ctx.prisma.forumPost.delete({
+                    where: {
+                        id: input.id
+                    }
+                })
+            } else if (input.type === 'REPLY') {
+                const vraag = await ctx.prisma.forumPostReply.findUniqueOrThrow({
+                    where: {
+                        id: input.id
+                    }
+                })
+                if (vraag.authorId !== ctx.user.id) {
+                    if (!isUserAdmin) {
+                        throw new Error("Not authorized to delete this post")
+                    }
+                }
+
+                await ctx.prisma.forumPostReply.delete({
+                    where: {
+                        id: input.id
+                    }
+                })
+            }
+        }),
+    forumReviewQueue: veryProtectedProcedure.query(async ({ ctx }) => {
+        const pendingPosts = await ctx.prisma.forumPost.findMany({
+            where: {
+                hasBeenAdminChecked: false
+            },
+            orderBy: {
+                createdAt: 'asc'
+            },
         })
-
-
-} satisfies TRPCRouterRecord
+        const pendingReplies = await ctx.prisma.forumPostReply.findMany({
+            where: {
+                hasBeenAdminChecked: false
+            },
+            orderBy: {
+                createdAt: 'asc'
+            },
+        })
+        // combine and sort by date
+        const combined = [...pendingPosts.map(post => ({ type: 'post', data: post })), ...pendingReplies.map(reply => ({ type: 'reply', data: reply }))];
+        combined.sort((a, b) => new Date(a.data.createdAt).getTime() - new Date(b.data.createdAt).getTime());
+        return combined
+    })
+}

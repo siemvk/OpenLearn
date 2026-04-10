@@ -101,6 +101,8 @@ model ForumPost {
   replies   ForumPostReply[]
   subject   String
   votes     ForumVote[]
+
+  hasBeenAdminChecked Boolean @default(false)
 }
 
 // forum replys hebben geen votes meer omdat ik geen zin heb om dat te implementeren
@@ -113,6 +115,8 @@ model ForumPostReply {
   postId    String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  hasBeenAdminChecked Boolean @default(false)
 }
 
 model ForumVote {

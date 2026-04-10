@@ -19,4 +19,10 @@ export default [
     ...prefix("auth", [
         route("login", "routes/auth/login.tsx"),
     ]),
+
+    route("/admin", "routes/admin/layout.tsx", [
+        route("", "routes/admin/index.tsx"),
+        route("forum", "routes/admin/forum.tsx"),
+    ]),
+    route("/nee", "routes/admin/nee.tsx"),
 ] satisfies RouteConfig;

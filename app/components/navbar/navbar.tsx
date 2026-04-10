@@ -4,7 +4,21 @@ import { motion } from "motion/react";
 import logo from "~/../public/logo_outline.svg";
 import "./navbar.css";
 
-export const Navbar = () => {
+type knop = {
+    title: string,
+    linkTo: string
+}
+
+type NavbarProps = {
+    knoppen?: knop[]
+}
+
+export const Navbar = ({ knoppen }: NavbarProps = {}) => {
+    const buttons = knoppen ?? [
+        { title: "Home", linkTo: "/app" },
+        { title: "Forum", linkTo: "/app/forum" }
+    ]
+
     const navigate = useNavigate()
     return <nav>
         {/* oh ja ik vind animations leuk. */}
@@ -16,8 +30,9 @@ export const Navbar = () => {
         >
             <div className={'navbar'}>
                 <img src={logo} alt="Logo" className="logo" onClick={() => navigate('/app')} />
-                <Button variant='secondary' onClick={() => { navigate('/app') }}>Home</Button>
-                <Button variant='secondary' onClick={() => { navigate('/app/forum') }}>Forum</Button>
+                {buttons.map((knop) => (
+                    <Button variant='secondary' onClick={() => { navigate(knop.linkTo) }}>{knop.title}</Button>
+                ))}
             </div>
         </motion.div>
     </nav>;

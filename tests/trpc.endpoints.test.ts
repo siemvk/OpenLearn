@@ -34,7 +34,7 @@ function makeCaller(user?: { id: string; email?: string; name?: string }) {
   return { caller };
 }
 
-async function createTestUser() {
+async function createTestUser(admin?: boolean) {
   const userId = crypto.randomUUID();
   const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const user = await prisma.user.create({
@@ -43,6 +43,7 @@ async function createTestUser() {
       name: `Test User ${unique}`,
       email: `test-${unique}@example.com`,
       emailVerified: true,
+      role: admin ? "admin" : "user",
     },
   });
   createdUserIds.add(user.id);
@@ -204,92 +205,286 @@ describe("tRPC endpoints (integration)", () => {
         expect(result.length).toBe(20);
       });
     });
+
+    it("allows admin to log with user.adminLog", async () => {
+      const user1 = await createTestUser();
+      const user2 = await createTestUser(true);
+
+      const caller1 = makeCaller({ id: user1.id, email: user1.email, name: user1.name }).caller;
+      await expect(caller1.user.adminLog({ message: "This is a test log from user1 (not admin)" })).rejects.toBeInstanceOf(TRPCError);
+
+      const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
+      const call = await caller2.user.adminLog({ message: "This is a test log from user2 (admin)" });
+      expect(call.success).toBe(true);
+
+    });
   });
-
   describe("forum", () => {
-    it("queries forum posts with filters", async () => {
-      const user = await createTestUser();
-      const createdPost = await prisma.forumPost.create({
-        data: {
-          title: `post-${Date.now()}`,
-          content: "Body",
+
+    describe("Posts", () => {
+      it("queries forum posts with filters", async () => {
+        const user = await createTestUser();
+        const createdPost = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: user.id,
+          },
+          include: { author: true },
+        });
+        createdPostIds.add(createdPost.id);
+
+        const { caller } = makeCaller();
+        const result = await caller.forum.getPosts({
           subject: "js",
-          authorId: user.id,
-        },
-        include: { author: true },
-      });
-      createdPostIds.add(createdPost.id);
+          take: 10,
+          skip: 0,
+        });
 
-      const { caller } = makeCaller();
-      const result = await caller.forum.getPosts({
-        subject: "js",
-        take: 10,
-        skip: 0,
+        expect(result.some((post) => post.id === createdPost.id)).toBe(true);
       });
 
-      expect(result.some((post) => post.id === createdPost.id)).toBe(true);
-    });
+      it("creates a forum post for authenticated user", async () => {
+        const user = await createTestUser();
 
-    it("creates a forum post for authenticated user", async () => {
-      const user = await createTestUser();
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        const created = await caller.forum.makePost({
+          title: "Integration title",
+          content: "Integration content",
+          subject: 'nl',
+        });
+        createdPostIds.add(created.id);
 
-      const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
-      const created = await caller.forum.makePost({
-        title: "Integration title",
-        content: "Integration content",
-        subject: 'nl',
+        expect(created.authorId).toBe(user.id);
+
+        const persisted = await prisma.forumPost.findUnique({ where: { id: created.id } });
+        expect(persisted?.id).toBe(created.id);
       });
-      createdPostIds.add(created.id);
 
-      expect(created.authorId).toBe(user.id);
+      it("Disallow forum posts for non existent subjects", async () => {
+        const user = await createTestUser();
 
-      const persisted = await prisma.forumPost.findUnique({ where: { id: created.id } });
-      expect(persisted?.id).toBe(created.id);
-    });
-
-    it("Disallow forum posts for non existent subjects", async () => {
-      const user = await createTestUser();
-
-      const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
-      await expect(caller.forum.makePost({
-        title: "Integration title",
-        content: "Integration content",
-        subject: "js",
-      })).rejects.toBeInstanceOf(TRPCError);
-    });
-
-    it("prevents creating forum post for unauthenticated user", async () => {
-      const { caller } = makeCaller();
-      await expect(
-        caller.forum.makePost({
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        await expect(caller.forum.makePost({
           title: "Integration title",
           content: "Integration content",
           subject: "js",
-        })
-      ).rejects.toBeInstanceOf(TRPCError);
+        })).rejects.toBeInstanceOf(TRPCError);
+      });
+
+      it("prevents creating forum post for unauthenticated user", async () => {
+        const { caller } = makeCaller();
+        await expect(
+          caller.forum.makePost({
+            title: "Integration title",
+            content: "Integration content",
+            subject: "js",
+          })
+        ).rejects.toBeInstanceOf(TRPCError);
+      });
+
+      it("Check that we can get posts without authentication", async () => {
+        const user = await createTestUser();
+        const createdPost = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: user.id,
+          },
+          include: { author: true },
+        });
+        createdPostIds.add(createdPost.id);
+
+        const { caller } = makeCaller();
+        const result = await caller.forum.getPosts({
+          subject: "js",
+          take: 10,
+          skip: 0,
+        });
+
+        expect(result.some((post) => post.id === createdPost.id)).toBe(true);
+      });
     });
 
-    it("Check that we can get posts without authentication", async () => {
-      const user = await createTestUser();
-      const createdPost = await prisma.forumPost.create({
-        data: {
-          title: `post-${Date.now()}`,
-          content: "Body",
-          subject: "js",
-          authorId: user.id,
-        },
-        include: { author: true },
-      });
-      createdPostIds.add(createdPost.id);
+    describe("deletion", () => {
+      describe("deletion of posts", () => {
+        it("Check that we can delete posts that we made", async () => {
+          const user = await createTestUser();
+          const createdPost = await prisma.forumPost.create({
+            data: {
+              title: `post-${Date.now()}`,
+              content: "Body",
+              subject: "nl",
+              authorId: user.id,
+            },
+            include: { author: true },
+          });
+          createdPostIds.add(createdPost.id);
 
-      const { caller } = makeCaller();
-      const result = await caller.forum.getPosts({
-        subject: "js",
-        take: 10,
-        skip: 0,
-      });
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+          await caller.forum.delete({
+            type: 'POST',
+            id: createdPost.id,
+          });
 
-      expect(result.some((post) => post.id === createdPost.id)).toBe(true);
+          const deleted = await prisma.forumPost.findUnique({ where: { id: createdPost.id } });
+          expect(deleted).toBeNull();
+        });
+
+        it("Check that we cannot delete posts that we did not make", async () => {
+          const user1 = await createTestUser();
+          const user2 = await createTestUser();
+          const createdPost = await prisma.forumPost.create({
+            data: {
+              title: `post-${Date.now()}`,
+              content: "Body",
+              subject: "nl",
+              authorId: user1.id,
+            },
+            include: { author: true },
+          });
+          createdPostIds.add(createdPost.id);
+
+          const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
+          await expect(
+            caller2.forum.delete({
+              type: 'POST',
+              id: createdPost.id,
+            })
+          ).rejects.toBeInstanceOf(TRPCError);
+
+          const notDeleted = await prisma.forumPost.findUnique({ where: { id: createdPost.id } });
+          expect(notDeleted).not.toBeNull();
+        });
+
+        it("Check that we can delete a post thats not is our own if we are admin", async () => {
+          const user1 = await createTestUser();
+          const user2 = await createTestUser();
+          // make user2 admin
+          await prisma.user.update({
+            where: { id: user2.id },
+            data: { role: "admin" },
+          });
+          const createdPost = await prisma.forumPost.create({
+            data: {
+              title: `post-${Date.now()}`,
+              content: "Body",
+              subject: "nl",
+              authorId: user1.id,
+            },
+            include: { author: true },
+          });
+          createdPostIds.add(createdPost.id);
+
+          const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
+          await caller2.forum.delete({
+            type: 'POST',
+            id: createdPost.id,
+          });
+
+          const deleted = await prisma.forumPost.findUnique({ where: { id: createdPost.id } });
+          expect(deleted).toBeNull();
+        });
+      })
+
+      describe("deletion of replies", () => {
+        it("Check that we can delete replies that we made", async () => {
+          const user = await createTestUser();
+          const createdPost = await prisma.forumPost.create({
+            data: {
+              title: `post-${Date.now()}`,
+              content: "Body",
+              subject: "nl",
+              authorId: user.id,
+            },
+            include: { author: true },
+          });
+          createdPostIds.add(createdPost.id);
+
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+          const createdReply = await caller.forum.replyToPost({
+            postId: createdPost.id,
+            content: "This is a reply",
+          });
+
+          await caller.forum.delete({
+            type: 'REPLY',
+            id: createdReply.id,
+          });
+
+          const deleted = await prisma.forumPostReply.findUnique({ where: { id: createdReply.id } });
+          expect(deleted).toBeNull();
+        });
+        it("Check that we cannot delete replies that we did not make", async () => {
+          const user1 = await createTestUser();
+          const user2 = await createTestUser();
+          const createdPost = await prisma.forumPost.create({
+            data: {
+              title: `post-${Date.now()}`,
+              content: "Body",
+              subject: "nl",
+              authorId: user1.id,
+            },
+            include: { author: true },
+          });
+          createdPostIds.add(createdPost.id);
+
+          const caller1 = makeCaller({ id: user1.id, email: user1.email, name: user1.name }).caller;
+          const createdReply = await caller1.forum.replyToPost({
+            postId: createdPost.id,
+            content: "This is a reply",
+          });
+
+          const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
+          await expect(
+            caller2.forum.delete({
+              type: 'REPLY',
+              id: createdReply.id,
+            })
+          ).rejects.toBeInstanceOf(TRPCError);
+
+          const notDeleted = await prisma.forumPostReply.findUnique({ where: { id: createdReply.id } });
+          expect(notDeleted).not.toBeNull();
+        });
+
+        it("Check that we can delete a reply thats not is our own if we are admin", async () => {
+          const user1 = await createTestUser();
+          const user2 = await createTestUser();
+          // make user2 admin
+          await prisma.user.update({
+            where: { id: user2.id },
+            data: { role: "admin" },
+          });
+
+          const createdPost = await prisma.forumPost.create({
+            data: {
+              title: `post-${Date.now()}`,
+              content: "Body",
+              subject: "nl",
+              authorId: user1.id,
+            },
+            include: { author: true },
+          });
+          createdPostIds.add(createdPost.id);
+
+          const caller1 = makeCaller({ id: user1.id, email: user1.email, name: user1.name }).caller;
+          const createdReply = await caller1.forum.replyToPost({
+            postId: createdPost.id,
+            content: "This is a reply",
+          });
+
+          const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
+          await caller2.forum.delete({
+            type: 'REPLY',
+            id: createdReply.id,
+          });
+
+          const deleted = await prisma.forumPostReply.findUnique({ where: { id: createdReply.id } });
+          expect(deleted).toBeNull();
+        })
+      });
     });
 
     describe("voting", () => {
@@ -371,6 +566,36 @@ describe("tRPC endpoints (integration)", () => {
         expect(votes[0].vote).toBe("UPVOTE");
       });
     });
+
+    describe("the admin queue", () => {
+      it("allow admins to see the forum queue with forum.getAdminQueue", async () => {
+        const user = await createTestUser();
+        const admin = await createTestUser(true);
+
+        const createdPost = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: user.id,
+          },
+        });
+        createdPostIds.add(createdPost.id);
+
+        const { caller: adminCaller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+        const queue = await adminCaller.forum.forumReviewQueue();
+
+        expect(queue.some((post) => post.data.id === createdPost.id)).toBe(true);
+      });
+
+      it("prevents non-admins from seeing the forum queue with forum.getAdminQueue", async () => {
+        const user = await createTestUser();
+
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        await expect(caller.forum.forumReviewQueue()).rejects.toBeInstanceOf(TRPCError);
+      });
+    })
+
   });
 
   describe("learn", () => {

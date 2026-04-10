@@ -45,15 +45,61 @@ export const createTRPCRouter = t.router
 // Utility for a public procedure (doesn't require an autheticated user)
 export const publicProcedure = t.procedure
 
-// Create a utility function for protected tRPC procedures that require an authenticated user.
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
     if (!ctx.user?.id) {
         // we vangen dit op in de client en sturen de user naar de login pagina
         throw new TRPCError({ code: 'UNAUTHORIZED' })
     }
+
+    const dbUser = await ctx.prisma.user.findUnique({
+        where: { id: ctx.user.id },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+        }
+    })
+
+    if (!dbUser) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' })
+    }
+
     return next({
         ctx: {
-            user: ctx.user
+            user: dbUser
+        }
+    })
+})
+
+// een admin only procedure
+export const veryProtectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+    if (!ctx.user?.id) {
+        // we vangen dit op in de client en sturen de user naar de login pagina
+        throw new TRPCError({ code: 'UNAUTHORIZED' })
+    }
+
+    const dbUser = await ctx.prisma.user.findUnique({
+        where: { id: ctx.user.id },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+        }
+    })
+
+    if (!dbUser) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' })
+    }
+
+    if (dbUser.role !== 'admin') {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not have access to this resource' })
+    }
+
+    return next({
+        ctx: {
+            user: dbUser
         }
     })
 })
