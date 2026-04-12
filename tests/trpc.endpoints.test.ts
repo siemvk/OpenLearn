@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { TRPCError } from "@trpc/server";
 import type { AppRouter } from "~/server/main";
 import { prisma } from "~/utils/prisma";
@@ -6,6 +6,7 @@ import { prisma } from "~/utils/prisma";
 type CallerContext = Parameters<AppRouter["createCaller"]>[0];
 
 let appRouter: AppRouter;
+const TEST_AUTH_SECRET = "12345678901234567890123456789012_test_secret_value";
 
 const createdUserIds = new Set<string>();
 const createdPostIds = new Set<string>();
@@ -13,10 +14,16 @@ const createdListIds = new Set<string>();
 
 beforeAll(async () => {
   if (!process.env.AUTH_SECRET) {
-    process.env.AUTH_SECRET = "12345678901234567890123456789012_test_secret_value";
+    process.env.AUTH_SECRET = TEST_AUTH_SECRET;
   }
 
   ({ appRouter } = await import("~/server/main"));
+});
+
+beforeEach(async () => {
+  // Ensure every test starts from a clean DB and deterministic auth config.
+  await cleanupArtifacts();
+  process.env.AUTH_SECRET = TEST_AUTH_SECRET;
 });
 
 afterEach(async () => {
@@ -54,6 +61,14 @@ async function cleanupArtifacts() {
   const postIds = [...createdPostIds];
   const listIds = [...createdListIds];
   const userIds = [...createdUserIds];
+
+  prisma.config.deleteMany(
+    {
+      where: {
+        isConfig: true,
+      }
+    }
+  );
 
   if (listIds.length > 0) {
     await prisma.listSessionItemAnswerHistory.deleteMany({
@@ -585,7 +600,7 @@ describe("tRPC endpoints (integration)", () => {
         const { caller: adminCaller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
         const queue = await adminCaller.forum.forumReviewQueue();
 
-        expect(queue.some((post) => post.data.id === createdPost.id)).toBe(true);
+        expect(queue.some((post) => post.id === createdPost.id)).toBe(true);
       });
 
       it("prevents non-admins from seeing the forum queue with forum.getAdminQueue", async () => {
@@ -593,6 +608,56 @@ describe("tRPC endpoints (integration)", () => {
 
         const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
         await expect(caller.forum.forumReviewQueue()).rejects.toBeInstanceOf(TRPCError);
+      });
+
+      it("allow admins to approve post so it no longer appears in the queue with forum.approvePost", async () => {
+        const user = await createTestUser();
+        const admin = await createTestUser(true);
+
+        const createdPost = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: user.id,
+          },
+        });
+        createdPostIds.add(createdPost.id);
+
+
+
+        const { caller: adminCaller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+        await expect(adminCaller.forum.forumReviewApprove({ postId: createdPost.id })).resolves.toBeUndefined();
+
+        const queue = await adminCaller.forum.forumReviewQueue();
+        expect(queue.some((post) => post.id === createdPost.id)).toBe(false);
+
+
+      });
+      it("prevents non-admins from approveing posts", async () => {
+        const user = await createTestUser();
+        const admin = await createTestUser(true);
+
+        const createdPost = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: user.id,
+          },
+        });
+        createdPostIds.add(createdPost.id);
+
+
+
+        const { caller: nonAdminCaller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        expect(nonAdminCaller.forum.forumReviewApprove({ postId: createdPost.id })).rejects.toBeInstanceOf(TRPCError);
+
+        const { caller: adminCaller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+        const queue = await adminCaller.forum.forumReviewQueue();
+        expect(queue.some((post) => post.id === createdPost.id)).not.toBe(false);
+
+
       });
     })
 

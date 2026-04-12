@@ -5,6 +5,30 @@ import { redirect } from "react-router";
 import type { Route } from "./+types/layout";
 import { caller } from '~/utils/trpc/server'
 
+export async function action(actionArgs: Route.ActionArgs) {
+    const headers = new Headers(actionArgs.request.headers)
+    const result = await auth.api.getSession({ headers })
+    const user = result?.user
+    if (!user) {
+        return redirect('/auth/login')
+    }
+    if (!user.role || !user.role.includes('admin')) {
+        return redirect('/nee')
+    }
+
+    const formData = await actionArgs.request.formData()
+    const key = formData.get('key')
+    if (typeof key !== 'string' || key.length === 0) {
+        return new Response('Invalid config key', { status: 400 })
+    }
+
+    const value = formData.get('value') === 'true'
+    const api = await caller(actionArgs)
+    await api.user.setConfig({ key, value })
+
+    return redirect('/admin')
+}
+
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const headers = new Headers(loaderArgs.request.headers)
     const result = await auth.api.getSession({ headers })

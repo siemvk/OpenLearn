@@ -22,8 +22,9 @@ export const ListItem: React.FC<{
                 <div>
                     <h1 className="font-semibold text-lg text-gray-100">{title}</h1>
                     <p className="text-gray-200 text-sm">{subtitle}</p>
-                    {/* aan de linkerkant de rest van de dingen laten zien (voor knoppen enzo) */}
-                    {children}
+                    <div onClick={(event) => event.stopPropagation()}>
+                        {children}
+                    </div>
                 </div>
             </div>
         </div>

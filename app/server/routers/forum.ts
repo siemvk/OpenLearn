@@ -16,22 +16,50 @@ export const forumRouter = {
             })
         )
         .query(async ({ input, ctx }) => {
-            return ctx.prisma.forumPost.findMany(
-                {
-                    where: {
-                        subject: input.subject,
-                        authorId: input.authorId
-                    },
-                    take: input.take ?? 20,
-                    skip: input.skip ?? 0,
-                    orderBy: {
-                        createdAt: 'desc'
-                    },
-                    include: {
-                        author: true
-                    }
+            // we halen een config op waarin staat of we safeMode aan hebben staan
+            const safeMode = await ctx.prisma.config.findFirstOrThrow({
+                where: {
+                    key: 'safeMode'
                 }
-            )
+            })
+            console.log('safeMode is', safeMode.value)
+
+            if (safeMode.value) {
+                return ctx.prisma.forumPost.findMany(
+                    {
+                        where: {
+                            subject: input.subject,
+                            authorId: input.authorId,
+                            hasBeenAdminChecked: true
+                        },
+                        take: input.take ?? 20,
+                        skip: input.skip ?? 0,
+                        orderBy: {
+                            createdAt: 'desc'
+                        },
+                        include: {
+                            author: true
+                        }
+                    }
+                )
+            } else {
+                return ctx.prisma.forumPost.findMany(
+                    {
+                        where: {
+                            subject: input.subject,
+                            authorId: input.authorId
+                        },
+                        take: input.take ?? 20,
+                        skip: input.skip ?? 0,
+                        orderBy: {
+                            createdAt: 'desc'
+                        },
+                        include: {
+                            author: true
+                        }
+                    }
+                )
+            }
         }),
     makePost: protectedProcedure
         .input(
@@ -162,6 +190,45 @@ export const forumRouter = {
                     throw new Error("Not authorized to delete this post")
                 }
 
+                if (isUserAdmin) {
+                    const post = await ctx.prisma.forumPost.findUniqueOrThrow({
+                        where: {
+                            id: input.id
+                        }
+                    })
+                    const webhookUrl = process.env.DC_WEBHOOK_URL
+                    if (!webhookUrl) {
+                        console.warn('No webhook url configured')
+                        return { success: false, message: 'No webhook url configured' }
+                    }
+                    let content = ''
+                    if (process.env.DC_WEBHOOK_PING_PPL === 'true') {
+                        content += `KIJK LOGS! <@1491883464918700033>!`
+                    } else {
+                        content += 'we zijn aan het testen...'
+                    }
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            content,
+                            embeds: [{
+                                title: 'Forum Post Deleted by Admin: ' + post.title,
+                                description: post.content,
+                                timestamp: new Date().toISOString(),
+                                author: {
+                                    name: ctx.user.name
+                                },
+                            }]
+                        })
+                    })
+                    if (!response.ok) {
+                        console.error('Failed to send webhook', await response.text())
+                        return { success: false, message: 'Failed to send webhook' }
+                    }
+                }
                 await ctx.prisma.forumVote.deleteMany({
                     where: {
                         postId: input.id
@@ -204,18 +271,26 @@ export const forumRouter = {
             orderBy: {
                 createdAt: 'asc'
             },
+            include: {
+                author: true
+            }
         })
-        const pendingReplies = await ctx.prisma.forumPostReply.findMany({
-            where: {
-                hasBeenAdminChecked: false
-            },
-            orderBy: {
-                createdAt: 'asc'
-            },
-        })
-        // combine and sort by date
-        const combined = [...pendingPosts.map(post => ({ type: 'post', data: post })), ...pendingReplies.map(reply => ({ type: 'reply', data: reply }))];
-        combined.sort((a, b) => new Date(a.data.createdAt).getTime() - new Date(b.data.createdAt).getTime());
-        return combined
-    })
+        return pendingPosts
+    }),
+    forumReviewApprove: veryProtectedProcedure
+        .input(
+            z.object({
+                postId: z.uuid()
+            })
+        )
+        .mutation(async ({ input, ctx }) => {
+            await ctx.prisma.forumPost.update({
+                where: {
+                    id: input.postId
+                },
+                data: {
+                    hasBeenAdminChecked: true
+                }
+            })
+        }),
 }

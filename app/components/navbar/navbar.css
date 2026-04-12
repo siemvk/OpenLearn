@@ -21,6 +21,7 @@
 
 nav {
   position: sticky;
+  z-index: 50;
   width: 100vw;
   top: 0;
   height: 20vh;

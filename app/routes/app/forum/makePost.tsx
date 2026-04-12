@@ -12,7 +12,7 @@ export async function action(actionArgs: Route.ActionArgs) {
   const api = await caller(actionArgs);
   try {
     // hard code de taal voor nu
-    await api.forum.makePost({ title, content, subject: 'NL' });
+    await api.forum.makePost({ title, content, subject: 'nl' });
   } catch (e) {
     // we redirecten de gebruiker naar de login pagina omdat 99% van de gevalen is de error een niet geauthed error
     // en ik heb geen zin om het te checken voor een tijdenlijken check
