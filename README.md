@@ -1,6 +1,3 @@
-
-DEVS NODIG!!!!
-
 # Openlearn
 
 > [!NOTE]
@@ -12,14 +9,13 @@ Kinda een fork van Polarlearn maar niet echt.
 
 ## Helpen?
 
-JOIN DE DISCORD!!! ALS JIJ PRAAT ANTWOORD IK DE SERVER LIJKT DOOD MAAR DAT IS HET NIET!
 https://discord.gg/rsdYBpJ9uT
 
 ## VIBECODE REGELS
 
-**NIET** vibecoden is niet goed.
+**niet vibecoden**
 
-uizondering is tests want die zijn fucking saai om te maken.
+je mag tests schrijven met ai maar zelf de code checken!
 
 **OJA TESTS ZIJN VERPLICHT**
 voor backend. frontend is gwn op gevoel.
