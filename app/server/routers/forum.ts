@@ -90,6 +90,11 @@ export const forumRouter = {
             })
         )
         .query(async ({ input, ctx }) => {
+            const safeMode = await ctx.prisma.config.findFirstOrThrow({
+                where: {
+                    key: 'safeMode'
+                }
+            })
             const post = await ctx.prisma.forumPost.findUnique({
                 where: {
                     id: input.postId
@@ -100,7 +105,10 @@ export const forumRouter = {
                 // - votes op de post
                 // postgers is nice
                 include: {
-                    replies: { include: { author: true } },
+                    replies: {
+                        where: safeMode.value ? { hasBeenAdminChecked: true } : undefined,
+                        include: { author: true }
+                    },
                     author: true,
                     votes: true
                 }
@@ -165,7 +173,8 @@ export const forumRouter = {
                 data: {
                     content: input.content,
                     postId: input.postId,
-                    authorId: ctx.user.id
+                    authorId: ctx.user.id,
+                    hasBeenAdminChecked: false
                 }
             })
             return newReply
@@ -277,16 +286,66 @@ export const forumRouter = {
         })
         return pendingPosts
     }),
+    forumReplyReviewQueue: veryProtectedProcedure.query(async ({ ctx }) => {
+        const pendingReplies = await ctx.prisma.forumPostReply.findMany({
+            where: {
+                hasBeenAdminChecked: false
+            },
+            orderBy: {
+                createdAt: 'asc'
+            },
+            include: {
+                author: true,
+                post: {
+                    select: {
+                        id: true,
+                        title: true
+                    }
+                }
+            }
+        })
+        return pendingReplies
+    }),
     forumReviewApprove: veryProtectedProcedure
         .input(
-            z.object({
-                postId: z.uuid()
-            })
+            z.union([
+                z.object({
+                    postId: z.uuid()
+                }),
+                z.object({
+                    type: z.enum(['POST', 'REPLY']),
+                    id: z.uuid()
+                })
+            ])
         )
         .mutation(async ({ input, ctx }) => {
-            await ctx.prisma.forumPost.update({
+            if ('postId' in input) {
+                await ctx.prisma.forumPost.update({
+                    where: {
+                        id: input.postId
+                    },
+                    data: {
+                        hasBeenAdminChecked: true
+                    }
+                })
+                return
+            }
+
+            if (input.type === 'POST') {
+                await ctx.prisma.forumPost.update({
+                    where: {
+                        id: input.id
+                    },
+                    data: {
+                        hasBeenAdminChecked: true
+                    }
+                })
+                return
+            }
+
+            await ctx.prisma.forumPostReply.update({
                 where: {
-                    id: input.postId
+                    id: input.id
                 },
                 data: {
                     hasBeenAdminChecked: true

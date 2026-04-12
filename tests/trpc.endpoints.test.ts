@@ -24,6 +24,11 @@ beforeEach(async () => {
   // Ensure every test starts from a clean DB and deterministic auth config.
   await cleanupArtifacts();
   process.env.AUTH_SECRET = TEST_AUTH_SECRET;
+  await prisma.config.upsert({
+    where: { key: "safeMode" },
+    update: { value: false },
+    create: { key: "safeMode", value: false },
+  });
 });
 
 afterEach(async () => {
@@ -62,7 +67,7 @@ async function cleanupArtifacts() {
   const listIds = [...createdListIds];
   const userIds = [...createdUserIds];
 
-  prisma.config.deleteMany(
+  await prisma.config.deleteMany(
     {
       where: {
         isConfig: true,
@@ -164,6 +169,19 @@ describe("tRPC endpoints (integration)", () => {
       });
       it("checks pagination of user.getUserForumPosts", async () => {
         const user = await createTestUser();
+        prisma.config.upsert({
+          where: {
+            key: "safeMode",
+          },
+          update: {
+            value: false,
+          },
+          create: {
+            key: "safeMode",
+            value: false,
+          },
+        })
+
         const firstPost = await prisma.forumPost.create({
           data: {
             title: `fist-post-${Date.now()}`,
@@ -232,6 +250,37 @@ describe("tRPC endpoints (integration)", () => {
       const call = await caller2.user.adminLog({ message: "This is a test log from user2 (admin)" });
       expect(call.success).toBe(true);
 
+    });
+
+    describe("config", () => {
+      it("allows admin to set and read config with user.setConfig and user.getConfig", async () => {
+        const admin = await createTestUser(true);
+        const { caller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+
+        const originalFetch = globalThis.fetch;
+        try {
+          const setResult = await caller.user.setConfig({ key: "safeMode", value: true });
+          expect(setResult.success).toBe(true);
+
+          const byKey = await caller.user.getConfig({ key: "safeMode" });
+          expect(byKey?.key).toBe("safeMode");
+          expect(byKey?.value).toBe(true);
+
+          const allConfigs = await caller.user.getConfig({});
+          expect(Array.isArray(allConfigs)).toBe(true);
+          expect(allConfigs.some((config) => config.key === "safeMode" && config.value === true)).toBe(true);
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      });
+
+      it("prevents non-admin users from setting or reading config", async () => {
+        const user = await createTestUser();
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+        await expect(caller.user.setConfig({ key: "safeMode", value: true })).rejects.toBeInstanceOf(TRPCError);
+        await expect(caller.user.getConfig({ key: "safeMode" })).rejects.toBeInstanceOf(TRPCError);
+      });
     });
   });
   describe("forum", () => {
@@ -658,6 +707,57 @@ describe("tRPC endpoints (integration)", () => {
         expect(queue.some((post) => post.id === createdPost.id)).not.toBe(false);
 
 
+      });
+
+      it("lets admins see pending replies and approve them", async () => {
+        const user = await createTestUser();
+        const admin = await createTestUser(true);
+
+        await prisma.config.update({
+          where: {
+            key: "safeMode",
+          },
+          data: {
+            value: true,
+          },
+        });
+
+        const createdPost = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "nl",
+            authorId: user.id,
+            hasBeenAdminChecked: true,
+          },
+        });
+        createdPostIds.add(createdPost.id);
+
+        const { caller: userCaller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        const createdReply = await userCaller.forum.replyToPost({
+          postId: createdPost.id,
+          content: "Pending reply",
+        });
+
+        const { caller: adminCaller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+        const pendingReplies = await adminCaller.forum.forumReplyReviewQueue();
+        expect(pendingReplies.some((reply) => reply.id === createdReply.id)).toBe(true);
+
+        const { caller: publicCaller } = makeCaller();
+        const postBeforeApprove = await publicCaller.forum.getSpecificPost({ postId: createdPost.id });
+        expect(postBeforeApprove?.replies.some((reply) => reply.id === createdReply.id)).toBe(false);
+
+        await adminCaller.forum.forumReviewApprove({ type: "REPLY", id: createdReply.id });
+
+        const postAfterApprove = await publicCaller.forum.getSpecificPost({ postId: createdPost.id });
+        expect(postAfterApprove?.replies.some((reply) => reply.id === createdReply.id)).toBe(true);
+      });
+
+      it("prevents non-admins from seeing pending replies", async () => {
+        const user = await createTestUser();
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+        await expect(caller.forum.forumReplyReviewQueue()).rejects.toBeInstanceOf(TRPCError);
       });
     })
 
