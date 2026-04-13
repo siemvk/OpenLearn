@@ -13,6 +13,7 @@ FROM oven/bun:1.3.10-alpine AS build-env
 COPY . /app/
 COPY --from=development-dependencies-env /app/node_modules /app/node_modules
 WORKDIR /app
+RUN bunx prisma generate
 RUN bun run build
 
 FROM oven/bun:1.3.10-alpine
@@ -20,5 +21,6 @@ COPY ./package.json bun.lock /app/
 COPY ./prisma /app/prisma
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
+COPY --from=build-env /app/generated /app/generated
 WORKDIR /app
 CMD ["bun", "run", "start"]
