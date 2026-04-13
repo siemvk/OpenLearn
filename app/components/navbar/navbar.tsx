@@ -23,7 +23,7 @@ export const Navbar = ({ knoppen }: NavbarProps = {}) => {
     return <nav>
         {/* oh ja ik vind animations leuk. */}
         <motion.div
-            className="flex flex-row justify-left items-center gap-3  translate-y-3"
+            className="flex flex-row justify-left items-center gap-3"
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
@@ -31,7 +31,7 @@ export const Navbar = ({ knoppen }: NavbarProps = {}) => {
             <div className={'navbar'}>
                 <img src={logo} alt="Logo" className="logo" onClick={() => navigate('/app')} />
                 {buttons.map((knop) => (
-                    <Button variant='secondary' onClick={() => { navigate(knop.linkTo) }}>{knop.title}</Button>
+                    <Button key={`${knop.linkTo}-${knop.title}`} variant='secondary' onClick={() => { navigate(knop.linkTo) }}>{knop.title}</Button>
                 ))}
             </div>
         </motion.div>

@@ -24,6 +24,7 @@ nav {
   z-index: 50;
   width: 100vw;
   top: 0;
-  height: 20vh;
+  height: auto;
+  padding: 0.25rem 0;
   background: linear-gradient(180deg, var(--color-openlearn-900) 0%, rgba(255, 255, 255, 0) 100%);
 }

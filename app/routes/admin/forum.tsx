@@ -19,7 +19,7 @@ export async function action(actionArgs: Route.ActionArgs) {
     const api = await caller(actionArgs);
 
     if (intent === 'remove') {
-        await api.forum.delete({ type: itemType === 'REPLY' ? 'REPLY' : 'POST', id: itemId });
+        await api.forum.deleteItem({ type: itemType === 'REPLY' ? 'REPLY' : 'POST', id: itemId });
     }
 
     if (intent === 'approve') {

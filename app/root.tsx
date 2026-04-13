@@ -7,11 +7,14 @@ import {
   ScrollRestoration,
   useRouteLoaderData,
 } from "react-router";
+import { useEffect } from "react";
 import { initI18n } from "./i18n";
 
 import { TRPCReactProvider } from "~/utils/trpc/react";
 import type { Route } from "./+types/root";
 import "./app.css";
+
+initI18n();
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,7 +48,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const data = useRouteLoaderData("root") as { lang: string, colorScheme: "light" | "dark" } | undefined;
   const lang = data?.lang || "nl";
 
-  initI18n(lang);
+  useEffect(() => {
+    initI18n(lang);
+  }, [lang]);
 
   return (
     <html lang={lang} className="h-full w-full">

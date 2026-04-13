@@ -179,7 +179,7 @@ export const forumRouter = {
             })
             return newReply
         }),
-    delete: protectedProcedure
+    deleteItem: protectedProcedure
         .input(
             z.object({
                 type: z.enum(['POST', 'REPLY']),

@@ -4,6 +4,7 @@ import { auth } from '~/utils/auth/server'
 import { redirect } from "react-router";
 import type { Route } from "./+types/layout";
 import { caller } from '~/utils/trpc/server'
+import { TRPCReactProvider } from '~/utils/trpc/react'
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const headers = new Headers(loaderArgs.request.headers)
@@ -26,7 +27,9 @@ export default function MyAppLayout() {
     return (
         <>
             <Navbar />
-            <Outlet />
+            <TRPCReactProvider>
+                <Outlet />
+            </TRPCReactProvider>
         </>
     );
 }

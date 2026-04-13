@@ -169,7 +169,7 @@ describe("tRPC endpoints (integration)", () => {
       });
       it("checks pagination of user.getUserForumPosts", async () => {
         const user = await createTestUser();
-        prisma.config.upsert({
+        await prisma.config.upsert({
           where: {
             key: "safeMode",
           },
@@ -263,12 +263,12 @@ describe("tRPC endpoints (integration)", () => {
           expect(setResult.success).toBe(true);
 
           const byKey = await caller.user.getConfig({ key: "safeMode" });
-          expect(byKey?.key).toBe("safeMode");
-          expect(byKey?.value).toBe(true);
+          expect((byKey as any)?.key).toBe("safeMode");
+          expect((byKey as any)?.value).toBe(true);
 
           const allConfigs = await caller.user.getConfig({});
           expect(Array.isArray(allConfigs)).toBe(true);
-          expect(allConfigs.some((config) => config.key === "safeMode" && config.value === true)).toBe(true);
+          expect((allConfigs as any[]).some((config: any) => config.key === "safeMode" && config.value === true)).toBe(true);
         } finally {
           globalThis.fetch = originalFetch;
         }
@@ -388,7 +388,7 @@ describe("tRPC endpoints (integration)", () => {
           createdPostIds.add(createdPost.id);
 
           const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
-          await caller.forum.delete({
+          await caller.forum.deleteItem({
             type: 'POST',
             id: createdPost.id,
           });
@@ -413,7 +413,7 @@ describe("tRPC endpoints (integration)", () => {
 
           const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
           await expect(
-            caller2.forum.delete({
+            caller2.forum.deleteItem({
               type: 'POST',
               id: createdPost.id,
             })
@@ -443,7 +443,7 @@ describe("tRPC endpoints (integration)", () => {
           createdPostIds.add(createdPost.id);
 
           const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
-          await caller2.forum.delete({
+          await caller2.forum.deleteItem({
             type: 'POST',
             id: createdPost.id,
           });
@@ -473,7 +473,7 @@ describe("tRPC endpoints (integration)", () => {
             content: "This is a reply",
           });
 
-          await caller.forum.delete({
+          await caller.forum.deleteItem({
             type: 'REPLY',
             id: createdReply.id,
           });
@@ -503,7 +503,7 @@ describe("tRPC endpoints (integration)", () => {
 
           const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
           await expect(
-            caller2.forum.delete({
+            caller2.forum.deleteItem({
               type: 'REPLY',
               id: createdReply.id,
             })
@@ -540,7 +540,7 @@ describe("tRPC endpoints (integration)", () => {
           });
 
           const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
-          await caller2.forum.delete({
+          await caller2.forum.deleteItem({
             type: 'REPLY',
             id: createdReply.id,
           });

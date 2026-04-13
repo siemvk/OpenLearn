@@ -1,7 +1,7 @@
 
 import SuperJSON from 'superjson'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { createTRPCClient, httpBatchLink, loggerLink } from '@trpc/client'
 import { createTRPCContext } from '@trpc/tanstack-react-query'
@@ -51,9 +51,9 @@ const links = [
     })
 ]
 
-export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>()
+export const { TRPCProvider, useTRPC, useTRPCClient } = createTRPCContext<AppRouter>()
 
-export function TRPCReactProvider({ children }: { children: React.ReactNode }) {
+export function TRPCReactProvider({ children }: { children: ReactNode }) {
     const queryClient = getQueryClient()
     const [trpcClient] = useState(() =>
         createTRPCClient<AppRouter>({
