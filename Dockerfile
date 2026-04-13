@@ -23,4 +23,4 @@ COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
 COPY --from=build-env /app/generated /app/generated
 WORKDIR /app
-CMD ["bun", "run", "start"]
+CMD ["sh", "-c", "bunx prisma db push --accept-data-loss && bun run start"]
