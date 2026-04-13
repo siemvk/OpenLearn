@@ -9,6 +9,7 @@ import { useTRPC } from '~/utils/trpc/react'
 // prisma types importen is zo lelijk
 import type { ForumVoteModel } from "~/../generated/prisma/models"
 import { ListContainer, ListItem } from "~/components/list/list";
+import config from "~/utils/config";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const postId = loaderArgs.params.postId;
@@ -53,7 +54,12 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
     const postId = initialPost.id;
 
     const postQuery = useQuery(
-        trpc.forum.getSpecificPost.queryOptions({ postId }, { initialData: initialPost })
+        trpc.forum.getSpecificPost.queryOptions({ postId }, {
+            initialData: initialPost,
+            staleTime: config.refetchTime,
+            refetchInterval: config.refetchTime,
+            refetchIntervalInBackground: config.refetch
+        })
     );
 
     const refreshPost = async () => {

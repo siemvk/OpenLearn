@@ -7,8 +7,9 @@ import { ListContainer, ListItem } from "~/components/list/list";
 import { getSubjectBySlug, TaalSlugEnum } from "~/components/Icons";
 import { Plus, Trash } from "lucide-react";
 import { useTRPC } from '~/utils/trpc/react'
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import config from "~/utils/config";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
   const api = await caller(loaderArgs);
@@ -22,13 +23,31 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
 export default function ForumHome({ loaderData: { forum: forumPosts, user: user } }: Route.ComponentProps) {
   const navigate = useNavigate();
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const getPostsInput = {};
 
   const [isForumMutationHappening, setIsForumMutationHappening] = useState(false);
 
+  const { data: forum, isLoading, error } = useQuery(
+    trpc.forum.getPosts.queryOptions(getPostsInput, {
+      initialData: forumPosts,
+      staleTime: config.refetchTime,
+      refetchInterval: config.refetchTime,
+      refetchIntervalInBackground: config.refetch
+    })
+  )
+
   const deletePostMutation = useMutation(
     trpc.forum.deleteItem.mutationOptions({
-      onSuccess: () => {
-        navigate('/app/forum'); // reload de pagina na het verwijderen van een post
+      onMutate: () => {
+        setIsForumMutationHappening(true);
+      },
+      onSettled: async (_data, _error) => {
+        setIsForumMutationHappening(false);
+        await queryClient.invalidateQueries({
+          queryKey: trpc.forum.getPosts.queryKey(getPostsInput),
+          exact: true
+        });
       }
     })
   )
@@ -42,8 +61,10 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
           <Plus />
         </Button>
       </div>
+      {isLoading && <p>Loading...</p>}
+      {error && <p>Error loading forum posts.</p>}
       <ListContainer className="w-full max-w">
-        {forumPosts?.map((post) => (
+        {forum?.map((post) => (
           <ListItem image={getSubjectBySlug(post.subject as TaalSlugEnum)?.icon} key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>
             {((user?.id || "this is not a valid uuid") === post.authorId || user?.role == "admin") && (
               <Button onClick={() => { deletePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening}><Trash /></Button>

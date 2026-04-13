@@ -1,4 +1,4 @@
-import type { Route } from "./+types/list";
+import type { Route } from "./+types/makePost";
 import { caller } from '~/utils/trpc/server'
 import { redirect, Form } from 'react-router'
 import { auth } from '~/utils/auth/server'
