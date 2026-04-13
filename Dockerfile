@@ -7,7 +7,7 @@ FROM oven/bun:1.3.10-alpine AS production-dependencies-env
 COPY ./package.json bun.lock prisma.config.ts /app/
 COPY ./prisma /app/prisma
 WORKDIR /app
-RUN bun install --frozen-lockfile --production
+RUN bun install --frozen-lockfile --production --ignore-scripts
 
 FROM oven/bun:1.3.10-alpine AS build-env
 COPY . /app/
