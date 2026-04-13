@@ -5,6 +5,7 @@ RUN bun install --frozen-lockfile
 
 FROM oven/bun:1.3.10-alpine AS production-dependencies-env
 COPY ./package.json bun.lock /app/
+COPY ./prisma /app/prisma
 WORKDIR /app
 RUN bun install --frozen-lockfile --production
 
@@ -16,6 +17,7 @@ RUN bun run build
 
 FROM oven/bun:1.3.10-alpine
 COPY ./package.json bun.lock /app/
+COPY ./prisma /app/prisma
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
 WORKDIR /app
