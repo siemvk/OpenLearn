@@ -1,67 +1,69 @@
 {
-  "welcome": "Welkom bij PolarLearn!",
-  "description": "PolarLearn is een gratis en open-source leerplatform.",
   "auth": {
-    "login": "Inloggen",
-    "logout": "Uitloggen",
-    "signup": "Registreren",
-    "signupMarketing": "Begin met leren!",
-    "loginHC": "Login met Hackclub auth.",
-    "noAccountSignUp": "Nog geen account?",
-    "username": "Gebruikersnaam",
-    "password": "Wachtwoord",
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Register",
+    "signupMarketing": "Start with learning!",
+    "loginHC": "Login with Hackclub auth.",
+    "noAccountSignUp": "Don't have an account yet?",
+    "username": "Username",
+    "password": "Password",
     "email": "E-mail",
-    "forgotPassword": "Wachtwoord vergeten?",
-    "emailOrUsername": "E-mail of gebruikersnaam",
-    "signUpOk": "Je account is aangemaakt! Check je e-mail voor een bevestigingslink.",
+    "forgotPassword": "Forgot password?",
+    "emailOrUsername": "Email or username",
+    "signUpOk": "Your account has been created!",
     "errors": {
-      "invcreds": "Ongeldige inloggegevens. Probeer het opnieuw.",
-      "unknown": "Er is een onbekende fout opgetreden. Probeer het later opnieuw.",
-      "UserShort": "De gebruikersnaam/e-mail is in een ongeldig formaat. Probeer een andere gebruikersnaam of e-mail.",
-      "noConnectedAccount": "Er is geen bestaande PolarLearn account verbonden met deze provider.",
-      "AccountDisabled": "Dit account is permenant gedeactiveerd door schending van onze voorwaarden van gebruik, neem contact op met support@polarlearn.nl",
-      "ProviderDisabled": "Deze inlogmethode is inactief. Probeer het met een andere inlogmethode.",
-      "OauthError": "Er is een probleem opgetreden bij het gebruik van OAuth2.1.",
-      "Ratelimit": "Woah! Rustig aan! Je bent te snel bezig. Probeer het over een paar seconden opnieuw."
+      "invcreds": "Invalid login credentials. Please try again.",
+      "unknown": "An unknown error occurred. Please try again later.",
+      "UserShort": "The username/email format is invalid. Try a different username or email.",
+      "noConnectedAccount": "No existing Openlearn account is connected to this provider.",
+      "AccountDisabled": "This account has been permanently disabled due to a violation of our terms of use. Contact support@polarlearn.nl.",
+      "ProviderDisabled": "This sign-in method is inactive. Please try another sign-in method.",
+      "OauthError": "A problem occurred while using OAuth 2.1.",
+      "Ratelimit": "Whoa, slow down. You're going too fast. Please try again in a few seconds."
     }
   },
   "errors": {
     "404": {
-      "title": "Pagina niet gevonden",
-      "message": "De opgevraagde pagina bestaat niet."
+      "title": "404 Not Found",
+      "message": "You seem to be lost."
     },
     "500": {
-      "title": "Interne serverfout",
-      "message": "Er is een fout opgetreden aan onze kant. Probeer het later opnieuw."
+      "title": "I fucked up",
+      "message": "Somthing went wrong on my end."
     },
-    "unknown": "Er is een onbekende fout opgetreden. Probeer het later opnieuw."
+    "unknown": "Congrats! You found an new error! Please report this on the github! "
   },
   "icons": {
-    "nederlands": "Nederlands",
-    "engels": "Engels",
-    "frans": "Frans",
-    "duits": "Duits",
-    "wiskunde": "Wiskunde",
-    "natuurkunde": "Natuurkunde",
-    "scheikunde": "Scheikunde"
+    "nederlands": "Dutch",
+    "engels": "English",
+    "frans": "French",
+    "duits": "German",
+    "wiskunde": "Mathematics",
+    "natuurkunde": "Physics",
+    "scheikunde": "Chemistry"
   },
   "forum": {
     "viewpost": {
-      "byOn": "Door {{author}} op {{date}}",
-      "stats": "Stemmen: {{votes}} • {{replies}} reacties",
-      "replyTitle": "{{name}} ・ om {{date}}",
-      "repliesTitle": "Reacties",
-      "noReplies": "Nog geen reacties.",
+      "byOn": "By {{author}} on {{date}}",
+      "stats": "Votes: {{votes}} • {{replies}} replies",
+      "replyTitle": "{{name}} • at {{date}}",
+      "repliesTitle": "Replies",
+      "noReplies": "No replies.",
       "placeholders": {
-        "reply": "Schrijf je reactie..."
+        "reply": "Write your reply..."
       },
       "actions": {
-        "upvote": "Omhoog stemmen",
-        "downvote": "Omlaag stemmen",
-        "reply": "Reageren",
-        "postReply": "Reactie plaatsen",
-        "cancel": "Annuleren"
+        "upvote": "Vote up",
+        "downvote": "Vote down",
+        "reply": "Reply",
+        "postReply": "Post reply",
+        "cancel": "Cancel"
       }
     }
+  },
+  "startPage": {
+    "welcome": "Welkom to Openlearn!",
+    "description": "This is not the complete version of Openlearn yet. This is only the forum beta version."
   }
 }

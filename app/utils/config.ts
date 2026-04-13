@@ -1,9 +1,11 @@
 const config = {
     refetchTime: 1000 * 30,
-    refetch: true
+    refetch: true,
+    lang: 'en'
 } as {
     refetchTime: number,
-    refetch: boolean
+    refetch: boolean,
+    lang: 'nl' | 'en'
 }
 
 export default config;

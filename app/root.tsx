@@ -9,6 +9,7 @@ import {
 } from "react-router";
 import { useEffect } from "react";
 import { initI18n } from "./i18n";
+import config from "~/utils/config";
 
 import { TRPCReactProvider } from "~/utils/trpc/react";
 import type { Route } from "./+types/root";
@@ -31,7 +32,7 @@ export const links: Route.LinksFunction = () => [
 
 export async function loader() {
   return {
-    lang: process.env.APP_LANG || "nl",
+    lang: process.env.APP_LANG || config.lang,
     colorScheme: "dark" // Placeholder, later zal dit bepaald worden op basis van gebruikersinstellingen :)
     // de placeholder zal niet mijn ogen branden dus ik vernander dit -siem
   };
@@ -46,7 +47,7 @@ export function meta({ }: Route.MetaArgs) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const data = useRouteLoaderData("root") as { lang: string, colorScheme: "light" | "dark" } | undefined;
-  const lang = data?.lang || "nl";
+  const lang = data?.lang || config.lang;
 
   useEffect(() => {
     initI18n(lang);

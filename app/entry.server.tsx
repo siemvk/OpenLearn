@@ -2,6 +2,7 @@ import { renderToReadableStream } from "react-dom/server";
 import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
 import { initI18n } from "./i18n";
+import config from "./utils/config";
 
 export default async function handleRequest(
   request: Request,
@@ -9,7 +10,7 @@ export default async function handleRequest(
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) {
-  const lang = process.env.APP_LANG || "nl";
+  const lang = process.env.APP_LANG || config.lang;
   initI18n(lang);
 
   const body = await renderToReadableStream(

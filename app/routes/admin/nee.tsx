@@ -7,6 +7,7 @@ export default function Home() {
                 <div className="flex flex-col items-center gap-1">
                     <img src={"https://cdn.siemvk.nl/aardige man 😀.png"} />
                     <strong>Wat doe jij hier</strong>
+
                 </div>
             </div>
         </div>
