@@ -10,6 +10,7 @@ import { useTRPC } from '~/utils/trpc/react'
 import type { ForumVoteModel } from "~/../generated/prisma/models"
 import { ListContainer, ListItem } from "~/components/list/list";
 import config from "~/utils/config";
+import Md from "~/components/markdown/md";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const postId = loaderArgs.params.postId;
@@ -117,10 +118,11 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
                             replies: repliesCount,
                         })}
                     </p>
-
+                    {/* 
                     <p className="mt-3 whitespace-pre-wrap text-neutral-100 leading-7">
                         {post.content}
-                    </p>
+                    </p> */}
+                    <Md content={post.content} />
 
                     <div className="flex flex-wrap items-center gap-1 mt-2">
                         <Button

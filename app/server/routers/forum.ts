@@ -258,7 +258,6 @@ export const forumRouter = {
                     })
                     if (!response.ok) {
                         console.error('Failed to send webhook', await response.text())
-                        return { success: false, message: 'Failed to send webhook' }
                     }
                 }
                 await ctx.prisma.forumVote.deleteMany({
@@ -339,44 +338,31 @@ export const forumRouter = {
         })
         return pendingReplies
     }),
-    forumReviewApprove: veryProtectedProcedure
-        .input(
-            z.union([
-                z.object({
-                    postId: z.uuid()
-                }),
-                z.object({
-                    type: z.enum(['POST', 'REPLY']),
-                    id: z.uuid()
-                })
-            ])
-        )
-        .mutation(async ({ input, ctx }) => {
-            if ('postId' in input) {
-                await ctx.prisma.forumPost.update({
-                    where: {
-                        id: input.postId
-                    },
-                    data: {
-                        hasBeenAdminChecked: true
-                    }
-                })
-                return
-            }
+    forumReviewApprove: veryProtectedProcedure.input(
+        z.union([
+            z.object({
+                postId: z.uuid()
+            }),
+            z.object({
+                type: z.enum(['POST', 'REPLY']),
+                id: z.uuid()
+            })
+        ])
+    ).mutation(async ({ input, ctx }) => {
+        if ('postId' in input) {
+            await ctx.prisma.forumPost.update({
+                where: {
+                    id: input.postId
+                },
+                data: {
+                    hasBeenAdminChecked: true
+                }
+            })
+            return
+        }
 
-            if (input.type === 'POST') {
-                await ctx.prisma.forumPost.update({
-                    where: {
-                        id: input.id
-                    },
-                    data: {
-                        hasBeenAdminChecked: true
-                    }
-                })
-                return
-            }
-
-            await ctx.prisma.forumPostReply.update({
+        if (input.type === 'POST') {
+            await ctx.prisma.forumPost.update({
                 where: {
                     id: input.id
                 },
@@ -384,5 +370,16 @@ export const forumRouter = {
                     hasBeenAdminChecked: true
                 }
             })
-        }),
+            return
+        }
+
+        await ctx.prisma.forumPostReply.update({
+            where: {
+                id: input.id
+            },
+            data: {
+                hasBeenAdminChecked: true
+            }
+        })
+    }),
 }
