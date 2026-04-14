@@ -2,8 +2,8 @@ const config = {
     refetchTime: 1000 * 30,
     refetch: true,
     lang: 'en',
-    allowForumLinks: true,
-    allowForumImages: true,
+    allowForumLinks: false,
+    allowForumImages: false,
 } as {
     refetchTime: number,
     refetch: boolean,
