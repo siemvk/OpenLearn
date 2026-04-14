@@ -106,9 +106,10 @@ export const forumRouter = {
                 }
             })
             const post = await ctx.prisma.forumPost.findUnique({
-                where: {
-                    id: input.postId
-                },
+                // FIX DE FUCKING INTENDED BEHAVIOUR
+                where: (safeMode.value && !(ctx.user?.role == "admin")) ? { hasBeenAdminChecked: true, id: input.postId } : { id: input.postId },
+
+
                 // we willen ook 
                 // - replies met authors
                 // - author van de post

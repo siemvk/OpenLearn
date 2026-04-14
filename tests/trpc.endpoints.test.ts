@@ -40,7 +40,7 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-function makeCaller(user?: { id: string; email?: string; name?: string }) {
+function makeCaller(user?: { id: string; email?: string; name?: string; role?: string }) {
   const ctx = { prisma, user } as unknown as CallerContext;
   const caller = appRouter.createCaller(ctx);
   return { caller };
@@ -758,6 +758,73 @@ describe("tRPC endpoints (integration)", () => {
         const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
 
         await expect(caller.forum.forumReplyReviewQueue()).rejects.toBeInstanceOf(TRPCError);
+      });
+      it("hides unapproved posts from public getSpecificPost when safeMode is enabled", async () => {
+        await prisma.config.upsert({
+          where: {
+            key: "safeMode",
+          },
+          update: {
+            value: true,
+          },
+          create: {
+            key: "safeMode",
+            value: true,
+          },
+        });
+
+        const hiddenContent = "This post should stay hidden until an admin approves it.";
+        const author = await createTestUser();
+        const { caller: authorCaller } = makeCaller({ id: author.id, email: author.email, name: author.name });
+
+        const post = await authorCaller.forum.makePost({
+          title: `pending-${Date.now()}`,
+          content: hiddenContent,
+          subject: "nl",
+        });
+        createdPostIds.add(post.id);
+
+        const { caller: publicCaller } = makeCaller();
+        const listedPosts = await publicCaller.forum.getPosts({});
+        expect(listedPosts.some((candidate) => candidate.id === post.id)).toBe(false);
+
+        const fetchedPost = await publicCaller.forum.getSpecificPost({ postId: post.id });
+        expect(fetchedPost).toBeNull();
+      });
+
+      it("allows admins to fetch their own unapproved posts with getSpecificPost when safeMode is enabled", async () => {
+        await prisma.config.upsert({
+          where: {
+            key: "safeMode",
+          },
+          update: {
+            value: true,
+          },
+          create: {
+            key: "safeMode",
+            value: true,
+          },
+        });
+
+        const hiddenContent = "This post should stay hidden until an admin approves it.";
+        const author = await createTestUser(true);
+        const { caller: adminCaller } = makeCaller({ id: author.id, email: author.email, name: author.name, role: "admin" });
+
+        const post = await adminCaller.forum.makePost({
+          title: `pending-${Date.now()}`,
+          content: hiddenContent,
+          subject: "nl",
+        });
+        createdPostIds.add(post.id);
+
+        const { caller: publicCaller } = makeCaller();
+        const listedPosts = await publicCaller.forum.getPosts({});
+        expect(listedPosts.some((candidate) => candidate.id === post.id)).toBe(false);
+
+        const fetchedPost = await adminCaller.forum.getSpecificPost({ postId: post.id });
+        expect(fetchedPost?.id).toBe(post.id);
+        expect(fetchedPost?.content).toBe(hiddenContent);
+        expect(fetchedPost?.hasBeenAdminChecked).toBe(false);
       });
     })
 
