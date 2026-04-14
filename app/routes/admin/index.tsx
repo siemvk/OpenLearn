@@ -2,6 +2,7 @@ import type { Route } from "./+types/index";
 import { auth } from '~/utils/auth/server'
 import { Form, redirect } from "react-router";
 import { caller } from "~/utils/trpc/server";
+import "~/components/text-field/text-field.css";
 
 type ConfigItem = {
     key: string;
@@ -65,6 +66,7 @@ export default function Home({ loaderData: { config } }: Route.ComponentProps) {
                             <span>{c.key}</span>
                             <input
                                 type="checkbox"
+                                className="text-field-checkbox"
                                 checked={c.value}
                                 onChange={(event) => event.currentTarget.form?.requestSubmit()}
                             />

@@ -47,7 +47,7 @@
     "viewpost": {
       "byOn": "By {{author}} on {{date}}",
       "stats": "Votes: {{votes}} • {{replies}} replies",
-      "replyTitle": "{{name}} • at {{date}}",
+      "replyTitle": "{{name}} • on {{date}}",
       "repliesTitle": "Replies",
       "noReplies": "No replies.",
       "placeholders": {

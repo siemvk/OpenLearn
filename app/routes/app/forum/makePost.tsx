@@ -3,6 +3,7 @@ import { caller } from '~/utils/trpc/server'
 import { redirect, Form } from 'react-router'
 import { auth } from '~/utils/auth/server'
 import { Button } from "~/components/button/button";
+import "~/components/text-field/text-field.css";
 
 export async function action(actionArgs: Route.ActionArgs) {
   const formData = await actionArgs.request.formData();
@@ -41,13 +42,13 @@ export default function ForumHome() {
           type='text'
           name='title'
           placeholder='Post title'
-          className='border rounded px-4 py-2 border-gray-700 bg-gray-800'
+          className='text-field1'
         />
         <textarea
           name='content'
           placeholder='Write your post content...'
           rows={6}
-          className='border rounded px-4 py-2 border-gray-700 bg-gray-800'
+          className='text-field1-large'
         />
         <Button type='submit'>
           Create Post
