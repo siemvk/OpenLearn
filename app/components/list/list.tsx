@@ -13,11 +13,12 @@ export const ListItem: React.FC<{
     title: string,
     subtitle?: string,
     image?: string,
-    swapSubtitleAndTitle?: boolean
-}> = ({ children, linkTo, title, subtitle, image, swapSubtitleAndTitle }) => {
+    swapSubtitleAndTitle?: boolean,
+    className?: string
+}> = ({ children, linkTo, title, subtitle, image, swapSubtitleAndTitle, className: cName }) => {
     const navigate = useNavigate()
     return (
-        <div className="bg-openlearn-800 rounded-xl p-4 cursor-pointer mx-5" onClick={() => navigate(linkTo || '#')}>
+        <div className={"bg-openlearn-800 rounded-xl p-4 cursor-pointer " + cName} onClick={() => navigate(linkTo || '#')}>
             <div className="flex flex-row gap-4">
                 {image && <img src={image} alt="Image" className="w-12 h-12 rounded-full" />}
                 <div className="flex flex-row w-full">

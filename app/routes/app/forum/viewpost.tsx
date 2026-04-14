@@ -177,23 +177,21 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
                     <h2 className="text-2xl font-bold">{t("forum:viewpost:repliesTitle")}</h2>
 
                     {repliesCount === 0 && (
-                        <div className="bg-openlearn-800 rounded-2xl p-6 text-neutral-300">
-                            {t("forum:viewpost:noReplies")}
-                        </div>
+                        <ListItem title={t("forum:viewpost:noReplies")} ></ListItem>
                     )}
-                    <ListContainer className="w-full max-w">
-                        {post.replies.map((reply) => (
-                            <ListItem key={reply.id} subtitle={t("forum:viewpost:replyTitle", { name: reply.author.name, date: new Date(reply.createdAt).toLocaleDateString() })} title={reply.content} swapSubtitleAndTitle={true} />
-                            // <div key={reply.id} className="bg-openlearn-800 rounded-2xl p-4">
-                            //     <div className="flex flex-wrap items-center justify-between gap-2">
-                            //         <h3 className="font-semibold text-lg text-gray-100">{reply.author.name}</h3>
-                            //         <p className="text-gray-300 text-sm">{new Date(reply.createdAt).toLocaleDateString()}</p>
+                    {/* <ListContainer className="w-full max-w"> */}
+                    {post.replies.map((reply) => (
+                        <ListItem key={reply.id} subtitle={t("forum:viewpost:replyTitle", { name: reply.author.name, date: new Date(reply.createdAt).toLocaleDateString() })} title={reply.content} swapSubtitleAndTitle={true} />
+                        // <div key={reply.id} className="bg-openlearn-800 rounded-2xl p-4">
+                        //     <div className="flex flex-wrap items-center justify-between gap-2">
+                        //         <h3 className="font-semibold text-lg text-gray-100">{reply.author.name}</h3>
+                        //         <p className="text-gray-300 text-sm">{new Date(reply.createdAt).toLocaleDateString()}</p>
 
-                            //     </div>
-                            //     <p className="text-gray-100 mt-2 whitespace-pre-wrap">{reply.content}</p>
-                            // </div>
-                        ))}
-                    </ListContainer>
+                        //     </div>
+                        //     <p className="text-gray-100 mt-2 whitespace-pre-wrap">{reply.content}</p>
+                        // </div>
+                    ))}
+                    {/* </ListContainer> */}
                 </div>
             </div>
         </div>
