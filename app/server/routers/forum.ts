@@ -38,7 +38,12 @@ export const forumRouter = {
                             createdAt: 'desc'
                         },
                         include: {
-                            author: true
+                            author: {
+                                select: {
+                                    id: true,
+                                    name: true
+                                }
+                            },
                         }
                     }
                 )
@@ -55,7 +60,12 @@ export const forumRouter = {
                             createdAt: 'desc'
                         },
                         include: {
-                            author: true
+                            author: {
+                                select: {
+                                    id: true,
+                                    name: true
+                                }
+                            },
                         }
                     }
                 )
@@ -107,9 +117,21 @@ export const forumRouter = {
                 include: {
                     replies: {
                         where: safeMode.value ? { hasBeenAdminChecked: true } : undefined,
-                        include: { author: true }
+                        include: {
+                            author: {
+                                select: {
+                                    id: true,
+                                    name: true
+                                }
+                            }
+                        },
                     },
-                    author: true,
+                    author: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    },
                     votes: true
                 }
             })
@@ -281,7 +303,12 @@ export const forumRouter = {
                 createdAt: 'asc'
             },
             include: {
-                author: true
+                author: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
             }
         })
         return pendingPosts
@@ -295,7 +322,12 @@ export const forumRouter = {
                 createdAt: 'asc'
             },
             include: {
-                author: true,
+                author: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
                 post: {
                     select: {
                         id: true,
