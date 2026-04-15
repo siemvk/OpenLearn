@@ -136,7 +136,18 @@ export const forumRouter = {
                     votes: true
                 }
             })
-            return post
+            if (!post) {
+                return null
+            }
+
+            const userVote = ctx.user
+                ? post.votes.find((vote) => vote.userId === ctx.user!.id)?.vote ?? null
+                : null
+
+            return {
+                ...post,
+                userVote
+            }
         }),
     votePost: protectedProcedure
         .input(

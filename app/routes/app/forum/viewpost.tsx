@@ -12,6 +12,7 @@ import { ListContainer, ListItem } from "~/components/list/list";
 import config from "~/utils/config";
 import Md from "~/components/markdown/md";
 import "~/components/text-field/text-field.css";
+import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
@@ -55,6 +56,7 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
     const [replyview, setReplyview] = useState(false);
     const [replyContent, setReplyContent] = useState('');
     const postId = initialPost.id;
+    const [userVote, setUserVote] = useState<"UPVOTE" | "DOWNVOTE" | null>(null);
 
     const postQuery = useQuery(
         trpc.forum.getSpecificPost.queryOptions({ postId }, {
@@ -65,6 +67,10 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
         })
     );
 
+    useEffect(() => {
+        setUserVote(postQuery.data?.userVote ?? null);
+    }, [postQuery.data?.userVote]);
+
     const refreshPost = async () => {
         if (!postId) {
             return;
@@ -74,7 +80,10 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
 
     const voteMutation = useMutation(
         trpc.forum.votePost.mutationOptions({
-            onSuccess: refreshPost,
+            onSuccess: (data, variables) => {
+                setUserVote(variables.vote);
+                refreshPost();
+            },
         })
     );
 
@@ -108,46 +117,41 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
     return (
         <div className="flex flex-col items-center justify-start w-full p-0 m-0">
             <div className="w-full max-w flex flex-col gap-4 p-5">
-                <div className="flex flex-col gap-2 bg-openlearn-800 rounded-2xl p-6">
-                    <h1 className="text-3xl font-bold">{post.title}</h1>
-                    <p className="text-neutral-300">
-                        {t("forum:viewpost:byOn", { author: post.author.name, date: createdAt })}
-                    </p>
+                <div className="flex flex-row bg-openlearn-800 rounded-2xl p-6">
+                    <div className="flex flex-col gap-2 ">
+                        <h1 className="text-3xl font-bold">{post.title}</h1>
+                        <p className="text-neutral-300">
+                            {t("forum:viewpost:byOn", { author: post.author.name, date: createdAt })}
+                        </p>
 
-                    <p className="text-neutral-300 text-sm">
-                        {t("forum:viewpost:stats", {
-                            votes: votes > 0 ? `+${votes}` : votes,
-                            replies: repliesCount,
-                        })}
-                    </p>
-                    {/* 
-                    <p className="mt-3 whitespace-pre-wrap text-neutral-100 leading-7">
-                        {post.content}
-                    </p> */}
-                    <Md content={post.content} />
+                        <p className="text-neutral-300 text-sm">
+                            {t("forum:viewpost:stats", {
+                                votes: votes > 0 ? `+${votes}` : votes,
+                                replies: repliesCount,
+                            })}
+                        </p>
 
-                    <div className="flex flex-wrap items-center gap-1 mt-2">
-                        <Button
-                            variant="secondary"
-                            type="button"
-                            onClick={() => voteMutation.mutate({ postId: post.id, vote: 'UPVOTE' })}
-                            disabled={voteMutation.isPending}
-                        >
-                            {t("forum:viewpost:actions:upvote")}
-                        </Button>
+                        <Md content={post.content} />
 
-                        <Button
-                            variant="secondary"
-                            type="button"
-                            onClick={() => voteMutation.mutate({ postId: post.id, vote: 'DOWNVOTE' })}
-                            disabled={voteMutation.isPending}
-                        >
-                            {t("forum:viewpost:actions:downvote")}
-                        </Button>
+                        <div className="flex flex-wrap items-center gap-1 mt-2">
 
-                        <Button type="button" onClick={() => setReplyview(!replyview)} variant="secondary">
-                            {replyview ? t("forum:viewpost:actions:cancel") : t("forum:viewpost:actions:reply")}
-                        </Button>
+
+                            <Button type="button" onClick={() => setReplyview(!replyview)} variant="secondary">
+                                {replyview ? t("forum:viewpost:actions:cancel") : t("forum:viewpost:actions:reply")}
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="ml-auto flex flex-col items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 mt-4">
+                            <Button variant={"secondary"} onClick={() => voteMutation.mutate({ postId, vote: 'UPVOTE' })}>
+                                {userVote === 'UPVOTE' ? <ArrowBigUp fill="#f87171" /> : <ArrowBigUp />}
+
+                            </Button>
+                            <span className="text-neutral-300">{votes}</span>
+                            <Button variant={"secondary"} onClick={() => voteMutation.mutate({ postId, vote: 'DOWNVOTE' })}>
+                                {userVote === 'DOWNVOTE' ? <ArrowBigDown fill="#9394fe" /> : <ArrowBigDown />}
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
