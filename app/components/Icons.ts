@@ -81,6 +81,15 @@ export const subjects: subject[] = [
             naar: TaalSlugEnum.NL
         }
     },
+    {
+        name: 'icons:spaans',
+        slug: TaalSlugEnum.SP,
+        icon: sp,
+        taalData: {
+            van: TaalSlugEnum.NL,
+            naar: TaalSlugEnum.SP
+        }
+    },
 ]
 
 export const getSubjectBySlug = (slug: TaalSlugEnum | string) => {
