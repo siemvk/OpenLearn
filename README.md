@@ -1,29 +1,26 @@
-# Openlearn
+
 
 > [!NOTE]
-> De github repo is een miror!!!
-> vraag ons op discord als je gitea toegang wilt!!
+> I have not yet implemented the learning part of the website, as of now it is only a forum. I will add the learning part later, but I wanted to get the forum out first so people can start using it and give feedback. and because I needed to ship for lockin sidequest.
 
-Een 2de poging om iets geweldigs te maken.
-Kinda een fork van Polarlearn maar niet echt.
+# Openlearn
 
-## Helpen?
+A foss alternaitve for WRTS (Studygo), quizlet and others.
 
-https://discord.gg/rsdYBpJ9uT
+## Running locally
 
-## VIBECODE REGELS
+1. Clone the repository
+2. Create a PostgreSQL database for the website
+3. Create a `.env` file based on `.env.example` and fill in the required values
+4. Install dependencies with `bun install`
+5. Run the development server with `bun dev`
+6. Open `http://localhost:5173` in your browser to see the website
+7. To run the tests, use `bun test`
 
-**niet vibecoden**
+## Credits
 
-je mag tests schrijven met ai maar zelf de code checken!
+Thanks to @unbravechimp for making the very nice subject icons used in the forum!
 
-**OJA TESTS ZIJN VERPLICHT**
-voor backend. frontend is gwn op gevoel.
+## AI declaration
 
-## Ai disclosure
-
-This is a full list of all things I asked ai to do for me.
-
-- Ai was used in the form of copilot to auto complete code.
-- Ai was used to write some tests and the setup of the test runner.
-- Ai was used when debugging a weird problem with that trpc hates me.
+I used copilot for help with CSS and Tailwind because I hate CSS. I also sometimes asked it for help when stuff just randomly brakes and I have no idea why. I also use github copilot auto complete. And help with the readme.
