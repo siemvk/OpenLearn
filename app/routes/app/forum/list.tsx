@@ -67,7 +67,7 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
         {forum?.map((post) => (
           <ListItem className="mx-5" image={getSubjectBySlug(post.subject as TaalSlugEnum)?.icon} key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>
             {((user?.id || "this is not a valid uuid") === post.authorId || user?.role == "admin") && (
-              <Button onClick={() => { deletePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening}><Trash /></Button>
+              <Button onClick={() => { deletePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening} variant="secondary"><Trash /></Button>
             )}
           </ListItem>
         ))}

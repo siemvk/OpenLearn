@@ -11,6 +11,8 @@ import type { ForumVoteModel } from "~/../generated/prisma/models"
 import { ListContainer, ListItem } from "~/components/list/list";
 import config from "~/utils/config";
 import Md from "~/components/markdown/md";
+import "~/components/text-field/text-field.css";
+
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const postId = loaderArgs.params.postId;
@@ -126,6 +128,7 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
 
                     <div className="flex flex-wrap items-center gap-1 mt-2">
                         <Button
+                            variant="secondary"
                             type="button"
                             onClick={() => voteMutation.mutate({ postId: post.id, vote: 'UPVOTE' })}
                             disabled={voteMutation.isPending}
@@ -134,6 +137,7 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
                         </Button>
 
                         <Button
+                            variant="secondary"
                             type="button"
                             onClick={() => voteMutation.mutate({ postId: post.id, vote: 'DOWNVOTE' })}
                             disabled={voteMutation.isPending}
@@ -141,7 +145,7 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
                             {t("forum:viewpost:actions:downvote")}
                         </Button>
 
-                        <Button type="button" onClick={() => setReplyview(!replyview)}>
+                        <Button type="button" onClick={() => setReplyview(!replyview)} variant="secondary">
                             {replyview ? t("forum:viewpost:actions:cancel") : t("forum:viewpost:actions:reply")}
                         </Button>
                     </div>
@@ -163,14 +167,14 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
                             onChange={(event) => setReplyContent(event.target.value)}
                             placeholder={t("forum:viewpost:placeholders:reply")}
                             rows={6}
-                            className="border rounded px-4 py-2 border-gray-700 bg-gray-800"
+                            className='text-field1-large'
                             required
                         />
                         <div className="flex flex-wrap items-center gap-1">
-                            <Button type="submit" disabled={replyMutation.isPending}>
+                            <Button variant="secondary" type="submit" disabled={replyMutation.isPending}>
                                 {t("forum:viewpost:actions:postReply")}
                             </Button>
-                            <Button type="button" onClick={() => setReplyview(false)}>{t("forum:viewpost:actions:cancel")}</Button>
+                            <Button variant="secondary" type="button" onClick={() => setReplyview(false)}>{t("forum:viewpost:actions:cancel")}</Button>
                         </div>
                     </form>
                 )}
@@ -183,7 +187,13 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
                     )}
                     {/* <ListContainer className="w-full max-w"> */}
                     {post.replies.map((reply) => (
-                        <ListItem key={reply.id} subtitle={t("forum:viewpost:replyTitle", { name: reply.author.name, date: new Date(reply.createdAt).toLocaleDateString() })} title={reply.content} swapSubtitleAndTitle={true} />
+                        <ListItem
+                            key={reply.id}
+                            subtitle={t("forum:viewpost:replyTitle", { name: reply.author.name, date: new Date(reply.createdAt).toLocaleDateString() })}
+                            title={reply.content}
+                            swapSubtitleAndTitle={true}
+                            markdown={true}
+                        />
                         // <div key={reply.id} className="bg-openlearn-800 rounded-2xl p-4">
                         //     <div className="flex flex-wrap items-center justify-between gap-2">
                         //         <h3 className="font-semibold text-lg text-gray-100">{reply.author.name}</h3>

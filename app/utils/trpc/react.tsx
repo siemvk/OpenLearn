@@ -30,14 +30,15 @@ function getQueryClient() {
 
 const getBaseUrl = () => {
     if (typeof window !== 'undefined') return window.location.origin
-    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
-    return `http://localhost:${process.env.PORT ?? 3000}`
+    if (typeof process !== 'undefined' && process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+    if (typeof process !== 'undefined' && process.env.PORT) return `http://localhost:${process.env.PORT}`
+    return `http://localhost:3000`
 }
 
 const links = [
     loggerLink({
         enabled: (op) =>
-            process.env.NODE_ENV === 'development' ||
+            (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') ||
             (op.direction === 'down' && op.result instanceof Error)
     }),
     httpBatchLink({
