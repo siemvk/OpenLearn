@@ -20,7 +20,7 @@ export const Button: React.FC<ButtonProps> = ({
             <button
                 onClick={onClick}
                 disabled={disabled}
-                className={'button1'}
+                className={'button1 flex flex-row'}
                 {...rest}
             >
                 {children}
@@ -31,7 +31,7 @@ export const Button: React.FC<ButtonProps> = ({
             <button
                 onClick={onClick}
                 disabled={disabled}
-                className='button2'
+                className='button2 flex flex-row'
                 {...rest}
             >
                 {children}

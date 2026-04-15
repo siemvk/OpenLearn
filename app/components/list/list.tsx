@@ -16,12 +16,18 @@ export const ListItem: React.FC<{
     image?: string,
     swapSubtitleAndTitle?: boolean,
     className?: string,
-    markdown?: boolean
+    markdown?: boolean,
+    adminColors?: boolean
 
-}> = ({ children, linkTo, title, subtitle, image, swapSubtitleAndTitle, className: cName, markdown }) => {
+}> = ({ children, linkTo, title, subtitle, image, swapSubtitleAndTitle, className: cName, markdown, adminColors }) => {
     const navigate = useNavigate()
+    if (adminColors) {
+        cName = (cName || '') + ' bg-admin-800'
+    } else {
+        cName = (cName || '') + ' bg-openlearn-800 '
+    }
     return (
-        <div className={"bg-openlearn-800 rounded-xl p-4 cursor-pointer " + cName} onClick={() => navigate(linkTo || '#')}>
+        <div className={" rounded-xl p-4 cursor-pointer " + cName} onClick={() => navigate(linkTo || '#')}>
             <div className="flex flex-row gap-4">
                 {image && <img src={image} alt="Image" className="w-12 h-12 rounded-full" />}
                 <div className="flex flex-row w-full">

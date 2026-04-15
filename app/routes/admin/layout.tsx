@@ -1,9 +1,12 @@
-import { Outlet } from "react-router";
+import { Outlet, useNavigate } from "react-router";
 import { Navbar } from "~/components/navbar/navbar";
 import { auth } from '~/utils/auth/server'
 import { redirect } from "react-router";
 import type { Route } from "./+types/layout";
 import { caller } from '~/utils/trpc/server'
+import './admin.css'
+import { Button } from "~/components/button/button";
+import { ArrowBigLeftIcon } from "lucide-react";
 
 export async function action(actionArgs: Route.ActionArgs) {
     const headers = new Headers(actionArgs.request.headers)
@@ -53,8 +56,10 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
 
 
 export default function MyAppLayout() {
+    const navigate = useNavigate();
+
     return (
-        <>
+        <div className="admin-layout bg-admin-900 min-h-screen relative">
             <Navbar knoppen={[
                 {
                     title: 'Admin',
@@ -65,7 +70,12 @@ export default function MyAppLayout() {
                     linkTo: '/admin/forum'
                 }
             ]} />
+            <div className="absolute bottom-4 left-4" >
+                <Button onClick={() => navigate('/app')}>
+                    <ArrowBigLeftIcon /> Platform
+                </Button>
+            </div>
             <Outlet />
-        </>
+        </div>
     );
 }

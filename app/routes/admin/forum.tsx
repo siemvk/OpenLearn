@@ -85,10 +85,10 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
             <h2 className="w-full max-w text-lg font-semibold mt-8 mb-2">Pending Posts</h2>
             <ListContainer className="w-full max-w">
                 {forumPosts?.map((post) => (
-                    <ListItem image={getSubjectBySlug(post.subject as TaalSlugEnum)?.icon} key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>
+                    <ListItem adminColors={true} image={getSubjectBySlug(post.subject as TaalSlugEnum)?.icon} key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>
                         <div className="flex flex-row flex-wrap gap-2" onClick={(event) => event.stopPropagation()}>
-                            <Button onClick={() => { deletePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening}>Remove</Button>
-                            <Button onClick={() => { approvePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening}>Approve</Button>
+                            <Button variant="secondary" onClick={() => { deletePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening}>Remove</Button>
+                            <Button variant="secondary" onClick={() => { approvePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening}>Approve</Button>
                         </div>
                     </ListItem>
                 ))}
@@ -97,14 +97,15 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
             <ListContainer className="w-full max-w">
                 {forumReplies?.map((reply) => (
                     <ListItem
+                        adminColors={true}
                         key={reply.id}
                         linkTo={`/app/forum/${reply.post.id}`}
                         title={reply.content.length > 80 ? `${reply.content.slice(0, 80)}...` : reply.content}
                         subtitle={`By ${reply.author.name} on ${new Date(reply.createdAt).toLocaleDateString()} in ${reply.post.title}`}
                     >
                         <div className="flex flex-row flex-wrap gap-2" onClick={(event) => event.stopPropagation()}>
-                            <Button onClick={() => { deletePostMutation.mutate({ type: "REPLY", id: reply.id }) }} disabled={isForumMutationHappening}>Remove</Button>
-                            <Button onClick={() => { approvePostMutation.mutate({ type: "REPLY", id: reply.id }) }} disabled={isForumMutationHappening}>Approve</Button>
+                            <Button variant="secondary" onClick={() => { deletePostMutation.mutate({ type: "REPLY", id: reply.id }) }} disabled={isForumMutationHappening}>Remove</Button>
+                            <Button variant="secondary" onClick={() => { approvePostMutation.mutate({ type: "REPLY", id: reply.id }) }} disabled={isForumMutationHappening}>Approve</Button>
                         </div>
                     </ListItem>
                 ))}
