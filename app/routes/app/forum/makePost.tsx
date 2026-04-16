@@ -7,7 +7,7 @@ import "~/components/text-field/text-field.css";
 import { subjects, TaalSlugEnum } from "~/components/Icons";
 import { useTranslation } from "react-i18next";
 import { useTRPC } from "~/utils/trpc/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
@@ -24,7 +24,7 @@ export default function MakePost() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const trpc = useTRPC();
-
+  const queryClient = useQueryClient();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [subject, setSubject] = useState<TaalSlugEnum>(subjects[0]?.slug ?? TaalSlugEnum.NL);
@@ -32,7 +32,8 @@ export default function MakePost() {
 
   const makePostMutation = useMutation(
     trpc.forum.makePost.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: trpc.forum.getPosts.queryKey() });
         navigate('/app/forum');
       },
       onError: (err) => {

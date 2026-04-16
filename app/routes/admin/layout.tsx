@@ -68,6 +68,10 @@ export default function MyAppLayout() {
                 {
                     title: 'Forum safety',
                     linkTo: '/admin/forum'
+                },
+                {
+                    title: "test helper",
+                    linkTo: '/admin/test'
                 }
             ]} />
             <div className="absolute bottom-4 left-4" >

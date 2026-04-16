@@ -1,6 +1,6 @@
 import type { Route } from "./+types/index";
 import { auth } from '~/utils/auth/server'
-import { Form, redirect } from "react-router";
+import { Form, redirect, useNavigate } from "react-router";
 import { caller } from "~/utils/trpc/server";
 import "~/components/text-field/text-field.css";
 

@@ -393,4 +393,20 @@ export const forumRouter = {
             }
         })
     }),
+    nukeForum: veryProtectedProcedure.mutation(async ({ ctx }) => {
+        const [deletedVotes, deletedReplies, deletedPosts] = await ctx.prisma.$transaction([
+            ctx.prisma.forumVote.deleteMany({}),
+            ctx.prisma.forumPostReply.deleteMany({}),
+            ctx.prisma.forumPost.deleteMany({}),
+        ])
+
+        return {
+            success: true,
+            deleted: {
+                votes: deletedVotes.count,
+                replies: deletedReplies.count,
+                posts: deletedPosts.count,
+            },
+        }
+    }),
 }
