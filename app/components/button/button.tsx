@@ -3,7 +3,7 @@ import './button.css';
 interface ButtonProps {
     onClick?: () => void;
     disabled?: boolean;
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'tertiary';
     children?: React.ReactNode;
     [x: string]: any; // Hiermee kunnen we extra props accepteren, zoals 'type' of 'formMethod'
 }
@@ -26,12 +26,23 @@ export const Button: React.FC<ButtonProps> = ({
                 {children}
             </button>
         );
-    } else {
+    } else if (variant === 'secondary') {
         return (
             <button
                 onClick={onClick}
                 disabled={disabled}
                 className='button2 flex flex-row'
+                {...rest}
+            >
+                {children}
+            </button>
+        );
+    } else {
+        return (
+            <button
+                onClick={onClick}
+                disabled={disabled}
+                className='button3 flex flex-row'
                 {...rest}
             >
                 {children}
