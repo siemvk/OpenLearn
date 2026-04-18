@@ -17,6 +17,7 @@ model User {
   updatedAt       DateTime     @updatedAt
   role            String?
   banned          Boolean?     @default(false)
+  forumBanned     Boolean      @default(false)
   banReason       String?
   banExpires      DateTime?
   username        String?

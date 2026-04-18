@@ -8,6 +8,7 @@ import { useTRPC } from "~/utils/trpc/react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import config from "~/utils/config";
+import { getErrorMessage } from "~/utils/error-message";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const api = await caller(loaderArgs);
@@ -23,6 +24,7 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
     const trpc = useTRPC();
     const queryClient = useQueryClient();
     const [isForumMutationHappening, setIsForumMutationHappening] = useState(false);
+    const [mutationError, setMutationError] = useState<string | null>(null);
     const reviewQueueInput = undefined;
 
     const { data: forumPosts, isLoading, error } = useQuery(
@@ -33,7 +35,7 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
             refetchIntervalInBackground: config.refetch
         })
     )
-    const { data: forumReplies } = useQuery(
+    const { data: forumReplies, error: forumRepliesError } = useQuery(
         trpc.forum.forumReplyReviewQueue.queryOptions(reviewQueueInput, {
             initialData: forumRepliesPreload,
             staleTime: config.refetchTime,
@@ -41,10 +43,16 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
             refetchIntervalInBackground: config.refetch
         })
     )
+    const reviewQueueError = error ?? forumRepliesError;
+
     const deletePostMutation = useMutation(
         trpc.forum.deleteItem.mutationOptions({
             onMutate: () => {
+                setMutationError(null);
                 setIsForumMutationHappening(true);
+            },
+            onError: (err) => {
+                setMutationError(getErrorMessage(err));
             },
             onSettled: async (_data, _error) => {
                 setIsForumMutationHappening(false);
@@ -63,7 +71,11 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
     const approvePostMutation = useMutation(
         trpc.forum.forumReviewApprove.mutationOptions({
             onMutate: () => {
+                setMutationError(null);
                 setIsForumMutationHappening(true);
+            },
+            onError: (err) => {
+                setMutationError(getErrorMessage(err));
             },
             onSettled: async (_data, _error) => {
                 setIsForumMutationHappening(false);
@@ -82,6 +94,16 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
     return (
         <div className='flex flex-col items-center justify-center w-full p-0 m-0'>
             <h1 className="scale-150 text-xl font-bold">Forum</h1>
+            {reviewQueueError && (
+                <p className="mt-6 w-full max-w rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-200">
+                    {getErrorMessage(reviewQueueError, 'errors.api.reviewQueueLoad')}
+                </p>
+            )}
+            {mutationError && (
+                <p className="mt-6 w-full max-w rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-200">
+                    {mutationError}
+                </p>
+            )}
             <h2 className="w-full max-w text-lg font-semibold mt-8 mb-2">Pending Posts</h2>
             <ListContainer className="w-full max-w">
                 {forumPosts?.map((post) => (

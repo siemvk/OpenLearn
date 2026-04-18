@@ -1,9 +1,10 @@
 import type { TRPCRouterRecord } from '@trpc/server'
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { protectedProcedure, publicProcedure, veryProtectedProcedure } from '~/server/trpc'
 
 export const greetingRouter = {
-    hello: publicProcedure.query(() => {
+    hello: publicProcedure.query(async ({ ctx }) => {
         return 'hello world'
     }),
     user: protectedProcedure.query(async ({ input, ctx }) => {

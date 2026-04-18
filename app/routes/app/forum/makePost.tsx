@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useTRPC } from "~/utils/trpc/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
+import { getErrorMessage } from "~/utils/error-message";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
   const headers = new Headers(loaderArgs.request.headers);
@@ -37,7 +38,7 @@ export default function MakePost() {
         navigate('/app/forum');
       },
       onError: (err) => {
-        setError(err instanceof Error ? err.message : 'Failed to create post');
+        setError(getErrorMessage(err, "errors.api.createPost"));
       },
     })
   );

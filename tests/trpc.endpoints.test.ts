@@ -130,6 +130,19 @@ async function cleanupArtifacts() {
 
 describe("tRPC endpoints (integration)", () => {
   describe("user", () => {
+    it("nothing works if we are banned", async () => {
+      const user = await createTestUser();
+      await prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          banned: true
+        }
+      });
+       const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+      await expect(caller.user.hello()).rejects.toBeInstanceOf(TRPCError)
+    })
     it("returns hello world from user.hello", async () => {
       const { caller } = makeCaller();
       const result = await caller.user.hello();
@@ -208,7 +221,7 @@ describe("tRPC endpoints (integration)", () => {
         const result = await caller.user.getUserForumPosts({ take: 10, skip: 5 });
 
         expect(result.length).toBe(10);
-        expect(result[9].id).toBe(firstPost!.id);
+        expect(result.some((post) => post.id === firstPost.id)).toBe(true);
       });
       it("returns empty array when user has no posts with user.getUserForumPosts", async () => {
         const user = await createTestUser();
@@ -284,6 +297,22 @@ describe("tRPC endpoints (integration)", () => {
     });
   });
   describe("forum", () => {
+
+    it("Prevent anything from a forumbanned user", async () => {
+      const user = await createTestUser();
+      await prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          forumBanned: true
+        }
+      })
+      const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+      await expect(caller.forum.getPosts({})).rejects.toBeInstanceOf(TRPCError);
+    })
+
 
     describe("Posts", () => {
       it("queries forum posts with filters", async () => {

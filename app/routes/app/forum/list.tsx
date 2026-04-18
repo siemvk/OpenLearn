@@ -10,6 +10,7 @@ import { useTRPC } from '~/utils/trpc/react'
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import config from "~/utils/config";
+import { getErrorMessage } from "~/utils/error-message";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
   const api = await caller(loaderArgs);
@@ -36,6 +37,7 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
       refetchIntervalInBackground: config.refetch
     })
   )
+  const forumErrorMessage = error ? getErrorMessage(error, "errors.api.forumLoad") : null;
 
   const deletePostMutation = useMutation(
     trpc.forum.deleteItem.mutationOptions({
@@ -62,7 +64,11 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
         </Button>
       </div>
       {isLoading && <p>Loading...</p>}
-      {error && <p>Error loading forum posts.</p>}
+      {forumErrorMessage && (
+        <p className="mx-5 w-full max-w rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-200">
+          {forumErrorMessage}
+        </p>
+      )}
       <ListContainer className="w-full max-w ">
         {forum?.map((post) => (
           <ListItem className="mx-5" image={getSubjectBySlug(post.subject as TaalSlugEnum)?.icon} key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>

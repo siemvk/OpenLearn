@@ -42,13 +42,9 @@ export const createCallerFactory = t.createCallerFactory
 // Utility for creating a tRPC router
 export const createTRPCRouter = t.router
 
-// Utility for a public procedure (doesn't require an autheticated user)
-export const publicProcedure = t.procedure
-
-export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+const withResolvedUser = t.middleware(async ({ ctx, next, path }) => {
     if (!ctx.user?.id) {
-        // we vangen dit op in de client en sturen de user naar de login pagina
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
+        return next()
     }
 
     const dbUser = await ctx.prisma.user.findUnique({
@@ -57,12 +53,22 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
             id: true,
             name: true,
             email: true,
-            role: true
+            role: true,
+            banned: true,
+            forumBanned: true
         }
     })
 
     if (!dbUser) {
         throw new TRPCError({ code: 'UNAUTHORIZED' })
+    }
+
+    if (path.startsWith('forum') && dbUser.forumBanned) {
+        throw new TRPCError({ code: 'FORBIDDEN' })
+    }
+
+    if (dbUser.banned) {
+        throw new TRPCError({ code: 'FORBIDDEN' })
     }
 
     return next({
@@ -72,34 +78,30 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
     })
 })
 
-// een admin only procedure
-export const veryProtectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+// Utility for a public procedure (doesn't require an autheticated user)
+export const publicProcedure = t.procedure.use(withResolvedUser)
+
+export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
     if (!ctx.user?.id) {
         // we vangen dit op in de client en sturen de user naar de login pagina
         throw new TRPCError({ code: 'UNAUTHORIZED' })
     }
 
-    const dbUser = await ctx.prisma.user.findUnique({
-        where: { id: ctx.user.id },
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true
+    return next({
+        ctx: {
+            user: ctx.user
         }
     })
-
-    if (!dbUser) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
-    }
-
-    if (dbUser.role !== 'admin') {
+})
+// een admin only procedure
+export const veryProtectedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+    if (ctx.user.role !== 'admin') {
         throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not have access to this resource' })
     }
 
     return next({
         ctx: {
-            user: dbUser
+            user: ctx.user
         }
     })
 })

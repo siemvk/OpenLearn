@@ -34,7 +34,23 @@
       "title": "Interne serverfout",
       "message": "Er is een fout opgetreden aan onze kant. Probeer het later opnieuw."
     },
-    "unknown": "Er is een onbekende fout opgetreden. Probeer het later opnieuw."
+    "unknown": "Er is een onbekende fout opgetreden. Probeer het later opnieuw.",
+    "api": {
+      "unauthorized": "Je moet ingelogd zijn om verder te gaan.",
+      "forbidden": "Je hebt geen toestemming voor deze actie.",
+      "notFound": "Dit item kon niet worden gevonden.",
+      "badRequest": "Sommige invoer is ongeldig. Controleer je gegevens en probeer het opnieuw.",
+      "timeout": "De aanvraag duurde te lang. Probeer het opnieuw.",
+      "tooManyRequests": "Te veel aanvragen. Wacht even en probeer het opnieuw.",
+      "internal": "Er ging iets mis aan onze kant. Probeer het later opnieuw.",
+      "network": "Kan de server niet bereiken. Controleer je verbinding en probeer het opnieuw.",
+      "generic": "Er ging iets mis. Probeer het later opnieuw.",
+      "forumLoad": "Forumposts konden nu niet geladen worden.",
+      "reviewQueueLoad": "De moderatiequeue kon nu niet geladen worden.",
+      "createPost": "Je post kon niet aangemaakt worden. Probeer het opnieuw.",
+      "vote": "Je stem kon niet opgeslagen worden. Probeer het opnieuw.",
+      "reply": "Je reactie kon niet geplaatst worden. Probeer het opnieuw."
+    }
   },
   "icons": {
     "nederlands": "Nederlands",

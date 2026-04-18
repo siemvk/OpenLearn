@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from '@trpc/server'
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { protectedProcedure, publicProcedure, veryProtectedProcedure } from '~/server/trpc'
 import { TaalSlugEnum } from '~/components/Icons'

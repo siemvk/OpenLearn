@@ -13,6 +13,7 @@ import config from "~/utils/config";
 import Md from "~/components/markdown/md";
 import "~/components/text-field/text-field.css";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
+import { getErrorMessage } from "~/utils/error-message";
 
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
@@ -55,6 +56,7 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
     const { t } = useTranslation();
     const [replyview, setReplyview] = useState(false);
     const [replyContent, setReplyContent] = useState('');
+    const [actionError, setActionError] = useState<string | null>(null);
     const postId = initialPost.id;
     const [userVote, setUserVote] = useState<"UPVOTE" | "DOWNVOTE" | null>(null);
 
@@ -80,19 +82,31 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
 
     const voteMutation = useMutation(
         trpc.forum.votePost.mutationOptions({
+            onMutate: () => {
+                setActionError(null);
+            },
             onSuccess: (data, variables) => {
                 setUserVote(variables.vote);
                 refreshPost();
+            },
+            onError: (error) => {
+                setActionError(getErrorMessage(error, 'errors.api.vote'));
             },
         })
     );
 
     const replyMutation = useMutation(
         trpc.forum.replyToPost.mutationOptions({
+            onMutate: () => {
+                setActionError(null);
+            },
             onSuccess: async () => {
                 setReplyview(false);
                 setReplyContent('');
                 await refreshPost();
+            },
+            onError: (error) => {
+                setActionError(getErrorMessage(error, 'errors.api.reply'));
             },
         })
     );
@@ -111,7 +125,13 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
     }
 
     if (postQuery.isError || !post) {
-        return null;
+        return (
+            <div className="flex w-full items-center justify-center p-8">
+                <p className="w-full max-w rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-200">
+                    {getErrorMessage(postQuery.error, 'errors.api.generic')}
+                </p>
+            </div>
+        );
     }
 
     return (
@@ -140,6 +160,11 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
                                 {replyview ? t("forum:viewpost:actions:cancel") : t("forum:viewpost:actions:reply")}
                             </Button>
                         </div>
+                        {actionError && (
+                            <p className="mt-3 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-200">
+                                {actionError}
+                            </p>
+                        )}
                     </div>
                     <div className="ml-auto flex flex-col items-center gap-2">
                         <div className="flex flex-wrap items-center gap-2 mt-4">
