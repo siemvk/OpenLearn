@@ -1,7 +1,7 @@
 import type { Route } from "./+types/makePost";
 import { redirect } from 'react-router';
 import { useNavigate } from 'react-router';
-import { auth } from '~/utils/auth/server';
+import { auth } from '~/utils/auth/server.server';
 import { Button } from "~/components/button/button";
 import "~/components/text-field/text-field.css";
 import { subjects, TaalSlugEnum } from "~/components/Icons";

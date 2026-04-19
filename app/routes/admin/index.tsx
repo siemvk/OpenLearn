@@ -1,7 +1,7 @@
 import type { Route } from "./+types/index";
-import { auth } from '~/utils/auth/server'
+import { auth } from '~/utils/auth/server.server'
 import { Form, redirect, useNavigate } from "react-router";
-import { caller } from "~/utils/trpc/server";
+import { caller } from "~/utils/trpc/server.server";
 import "~/components/text-field/text-field.css";
 
 type ConfigItem = {

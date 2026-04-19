@@ -1,6 +1,6 @@
 import type { Route } from "./+types/home";
 import { authClient } from "~/utils/auth/client"
-import { auth } from '~/utils/auth/server'
+import { auth } from '~/utils/auth/server.server'
 import { redirect, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import "../admin/admin.css"

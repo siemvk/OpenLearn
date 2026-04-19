@@ -6,7 +6,7 @@ import { ZodError } from 'zod'
 import { initTRPC, TRPCError } from '@trpc/server'
 
 import { prisma } from '~/utils/prisma'
-import { auth } from '~/utils/auth/server'
+import { auth } from '~/utils/auth/server.server'
 
 // Create the tRPC context, which includes the database client and the potentially authenticated user. This will provide convenient access to both within our tRPC procedures.
 export const createTRPCContext = async (opts: { headers: Headers }) => {

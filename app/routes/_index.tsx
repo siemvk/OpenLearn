@@ -4,7 +4,7 @@ import type { Route } from "./+types/_index";
 import { Button } from "~/components/button/button";
 import logo from "~/../public/logos/OL-VT-NOTLONG-LOGO-2.png";
 import homeIcon from "~/../public/logo.png"
-import { auth } from "~/utils/auth/server";
+import { auth } from "~/utils/auth/server.server";
 import "./_index.css";
 
 

@@ -1,9 +1,9 @@
 import { Outlet } from "react-router";
 import { Navbar } from "~/components/navbar/navbar";
-import { auth } from '~/utils/auth/server'
+import { auth } from '~/utils/auth/server.server'
 import { redirect } from "react-router";
 import type { Route } from "./+types/layout";
-import { caller } from '~/utils/trpc/server'
+import { caller } from '~/utils/trpc/server.server'
 import { TRPCReactProvider } from '~/utils/trpc/react'
 
 export async function loader(loaderArgs: Route.LoaderArgs) {

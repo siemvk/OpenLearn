@@ -1,6 +1,6 @@
 import type { Route } from "./+types/forum";
-import { caller } from '~/utils/trpc/server'
-import { auth } from '~/utils/auth/server'
+import { caller } from '~/utils/trpc/server.server'
+import { auth } from '~/utils/auth/server.server'
 import { Button } from "~/components/button/button";
 import { ListContainer, ListItem } from "~/components/list/list";
 import { getSubjectBySlug, TaalSlugEnum } from "~/components/Icons";

@@ -4,7 +4,7 @@ import { redirect } from 'react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from "~/components/button/button"
 import { useTranslation } from "react-i18next";
-import { caller } from '~/utils/trpc/server'
+import { caller } from '~/utils/trpc/server.server'
 import { useTRPC } from '~/utils/trpc/react'
 // prisma types importen is zo lelijk
 import type { ForumVoteModel } from "~/../generated/prisma/models"

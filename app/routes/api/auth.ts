@@ -1,5 +1,5 @@
 // Niet aanraken plz
-import { auth } from '~/utils/auth/server'
+import { auth } from '~/utils/auth/server.server'
 import type { LoaderFunctionArgs, ActionFunctionArgs } from 'react-router'
 
 export async function loader({ request }: LoaderFunctionArgs) {

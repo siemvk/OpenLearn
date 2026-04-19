@@ -1,9 +1,9 @@
 import { Outlet, useNavigate } from "react-router";
 import { Navbar } from "~/components/navbar/navbar";
-import { auth } from '~/utils/auth/server'
+import { auth } from '~/utils/auth/server.server'
 import { redirect } from "react-router";
 import type { Route } from "./+types/layout";
-import { caller } from '~/utils/trpc/server'
+import { caller } from '~/utils/trpc/server.server'
 import './admin.css'
 import { Button } from "~/components/button/button";
 import { ArrowBigLeftIcon } from "lucide-react";
