@@ -16,7 +16,8 @@ type NavbarProps = {
 export const Navbar = ({ knoppen }: NavbarProps = {}) => {
     const buttons = knoppen ?? [
         { title: "Home", linkTo: "/app" },
-        { title: "Forum", linkTo: "/app/forum" }
+        { title: "Forum", linkTo: "/app/forum" },
+        { title: "Lists", linkTo: "/app/list/beta" },
     ]
 
     const navigate = useNavigate()

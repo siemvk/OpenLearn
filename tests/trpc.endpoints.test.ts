@@ -2,6 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { TRPCError } from "@trpc/server";
 import type { AppRouter } from "~/server/main";
 import { prisma } from "~/utils/prisma";
+import { TaalSlugEnum } from "~/components/Icons";
 
 type CallerContext = Parameters<AppRouter["createCaller"]>[0];
 
@@ -106,9 +107,20 @@ async function cleanupArtifacts() {
   if (userIds.length > 0) {
     await prisma.listSessionItemAnswerHistory.deleteMany({
       where: {
-        listSessionItem: {
-          listSession: { userId: { in: userIds } },
-        },
+        OR: [
+          {
+            listSessionItem: {
+              listSession: { userId: { in: userIds } },
+            },
+          },
+          {
+            listSessionItem: {
+              listSession: {
+                list: { ownerId: { in: userIds } },
+              },
+            },
+          },
+        ],
       },
     });
     await prisma.forumVote.deleteMany({ where: { userId: { in: userIds } } });
@@ -116,10 +128,26 @@ async function cleanupArtifacts() {
     await prisma.forumPost.deleteMany({ where: { authorId: { in: userIds } } });
     await prisma.listSessionItem.deleteMany({
       where: {
-        listSession: { userId: { in: userIds } },
+        OR: [
+          { listSession: { userId: { in: userIds } } },
+          { listSession: { list: { ownerId: { in: userIds } } } },
+        ],
       },
     });
-    await prisma.listSession.deleteMany({ where: { userId: { in: userIds } } });
+    await prisma.listSession.deleteMany({
+      where: {
+        OR: [
+          { userId: { in: userIds } },
+          { list: { ownerId: { in: userIds } } },
+        ],
+      },
+    });
+    await prisma.listItemSaved.deleteMany({
+      where: {
+        list: { ownerId: { in: userIds } },
+      },
+    });
+    await prisma.list.deleteMany({ where: { ownerId: { in: userIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   }
 
@@ -140,7 +168,7 @@ describe("tRPC endpoints (integration)", () => {
           banned: true
         }
       });
-       const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+      const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
       await expect(caller.user.hello()).rejects.toBeInstanceOf(TRPCError)
     })
     it("returns hello world from user.hello", async () => {
@@ -861,59 +889,100 @@ describe("tRPC endpoints (integration)", () => {
 
   describe("learn", () => {
     describe("lists", () => {
-      it("returns a list from learn. getList", async () => {
-        const user = await createTestUser();
 
-        const createdList = await prisma.list.create({
-          data: {
-            name: `Topwoorden-${Date.now()}`,
-            ownerId: user.id,
-            listItems: {
-              create: [{ vraag: "vraag", antwoord: "antwoord" }],
+      describe("Reading lists", () => {
+        it("returns a list from learn. getList", async () => {
+          const user = await createTestUser();
+
+          const createdList = await prisma.list.create({
+            data: {
+              name: `Topwoorden-${Date.now()}`,
+              ownerId: user.id,
+              listItems: {
+                create: [{ vraag: "vraag", antwoord: "antwoord" }],
+              },
             },
-          },
-          include: { listItems: true },
+            include: { listItems: true },
+          });
+          createdListIds.add(createdList.id);
+
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+          const result = await caller.learn.getList({ id: createdList.id });
+
+          expect(result?.id).toBe(createdList.id);
+          expect(result?.listItems.length).toBeGreaterThan(0);
         });
-        createdListIds.add(createdList.id);
 
-        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
-        const result = await caller.learn.getList({ id: createdList.id });
+        it("prevents access to learn. getList for non-existent list", async () => {
+          const user = await createTestUser();
 
-        expect(result?.id).toBe(createdList.id);
-        expect(result?.listItems.length).toBeGreaterThan(0);
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+          const result = await caller.learn.getList({ id: "non-existent-list-id" });
+
+          expect(result).toBeNull();
+        });
       });
 
-      it("prevents access to learn. getList for non-existent list", async () => {
-        const user = await createTestUser();
+      describe("Creating and updating lists", () => {
+        it("creates a list", async () => {
+          const user = await createTestUser();
 
-        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
-        const result = await caller.learn.getList({ id: "non-existent-list-id" });
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+          const created = await caller.learn.upsertList({
+            name: `Topwoorden-${Date.now()}`,
+            list: [
+              { vraag: "vraag", antwoord: "antwoord" },
+            ],
+            language: TaalSlugEnum.NL,
+            fromLanguage: TaalSlugEnum.EN,
+            toLanguage: TaalSlugEnum.NL,
+          });
+          createdListIds.add(created.id);
 
-        expect(result).toBeNull();
+          expect(created.ownerId).toBe(user.id);
+          expect(created.listItems.length).toBe(1);
+          expect(created.listItems[0].vraag).toBe("vraag");
+          expect(created.listItems[0].antwoord).toBe("antwoord");
+        })
+
+        it("updates a list", async () => {
+          const user = await createTestUser();
+          const updatedName = `Updated Topwoorden-${Date.now()}`;
+
+          const createdList = await prisma.list.create({
+            data: {
+              name: `Topwoorden-${Date.now()}`,
+              ownerId: user.id,
+              listItems: {
+                create: [{ vraag: "vraag", antwoord: "antwoord" }],
+              },
+            },
+            include: { listItems: true },
+          });
+          createdListIds.add(createdList.id);
+
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+          const updated = await caller.learn.upsertList({
+            id: createdList.id,
+            name: updatedName,
+            list: [
+              { vraag: "vraag2", antwoord: "antwoord2" },
+            ],
+            language: TaalSlugEnum.NL,
+            fromLanguage: TaalSlugEnum.EN,
+            toLanguage: TaalSlugEnum.NL,
+          });
+          expect(updated.id).toBe(createdList.id);
+          expect(updated.name).toBe(updatedName);
+          expect(updated.listItems.length).toBe(1);
+          expect(updated.listItems[0].vraag).toBe("vraag2");
+          expect(updated.listItems[0].antwoord).toBe("antwoord2");
+        });
+
+
       });
 
-      it("creates a list with learn. makeList", async () => {
-        const user = await createTestUser();
-
-        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
-        const created = await caller.learn.makeList({
-          name: `Topwoorden-${Date.now()}`,
-          list: [{ vraag: "vraag", antwoord: "antwoord" }],
-        });
-        createdListIds.add(created.id);
-
-        expect(created.ownerId).toBe(user.id);
-        expect(created.listItems.length).toBe(1);
-
-        const persisted = await prisma.list.findUnique({
-          where: { id: created.id },
-          include: { listItems: true },
-        });
-        expect(persisted?.id).toBe(created.id);
-        expect(persisted?.listItems.length).toBe(1);
-      });
     });
-
     describe("sessions", () => {
       describe("startLearnSession", () => {
         it("starts a learn session with learn. startLearnSession", async () => {
@@ -967,6 +1036,7 @@ describe("tRPC endpoints (integration)", () => {
           ).rejects.toBeInstanceOf(TRPCError);
         });
       });
+
       describe("updateLearnSessionItem", () => {
 
         it("updates learn session item with learn.updateLearnSessionItem", async () => {

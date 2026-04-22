@@ -6,6 +6,10 @@
     "dev": "react-router dev --host",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint . --write",
+    "format": "biome format . --write",
+    "format:check": "biome format .",
     "postinstall": "prisma generate",
     "pretest": "prisma generate && prisma db push",
     "test": "bun test"
@@ -48,6 +52,7 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
     "@react-router/dev": "7.12.0",
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^25.0.9",

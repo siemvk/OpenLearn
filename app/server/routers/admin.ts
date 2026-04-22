@@ -8,13 +8,13 @@ export const greetingRouter = {
       userId: z.uuid(),
       level: z.enum(['forum', 'website'])
     })).mutation(async ({ input, ctx }) => {
-      
+
       ctx.prisma.user.update({
         where: {
           id: input.userId,
         },
         data: {
-          ...( input.level == "forum" ? {
+          ...(input.level == "forum" ? {
             forumBanned: true
           } : {
             banned: true
@@ -25,31 +25,19 @@ export const greetingRouter = {
   getUserProfile: veryProtectedProcedure
     .input(
       z.uuid()
-    ).mutation(async ({input, ctx})=>{
-      const forumPosts = await ctx.prisma.forumPost.findMany({
-        where: {
-          authorId: input
-        }
-      })
-      const forumReplys = await ctx.prisma.forumPostReply.findMany({
-        where: {
-          authorId: input
-        }
-      })
-      const userData = await ctx.prisma.user.findFirstOrThrow({
+    ).mutation(async ({ input, ctx }) => {
+      const user = await ctx.prisma.user.findFirstOrThrow({
         where: {
           id: input
+        },
+        include: {
+          forumPosts: true,
+          lists: true,
+          accounts: true,
+          forumPostReplies: true,
         }
-      })
-       
-      return {
-        user: userData,
-        forum: {
-          posts: forumPosts,
-          replys: forumReplys
-        }
-        
-      }
+      });
+      return user;
     })
 } satisfies TRPCRouterRecord
 

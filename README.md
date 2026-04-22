@@ -16,6 +16,7 @@ A foss alternaitve for WRTS (Studygo), quizlet and others.
 5. Run the development server with `bun dev`
 6. Open `http://localhost:5173` in your browser to see the website
 7. To run the tests, use `bun test`
+8. To lint, use `bun run lint`; to format, use `bun run format`
 
 ## Credits
 

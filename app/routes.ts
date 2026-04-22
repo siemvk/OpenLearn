@@ -14,6 +14,11 @@ export default [
             route("make", "routes/app/forum/makePost.tsx"),
             route(":postId", "routes/app/forum/viewpost.tsx"),
         ]),
+        ...prefix("list", [
+            route(":listId", "routes/app/lists/viewer.tsx"),
+            route("new/:listId", "routes/app/lists/new.tsx"),
+            route("beta", "routes/app/lists/betaUiLinker.tsx"),
+        ])
     ]),
 
     ...prefix("auth", [

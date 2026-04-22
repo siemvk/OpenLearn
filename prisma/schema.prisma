@@ -199,6 +199,9 @@ model list {
   listSessions ListSession[]
   owner        User            @relation(fields: [ownerId], references: [id])
   ownerId      String
+  language     String          @default("NL")
+  fromLanguage String
+  toLanguage   String
 }
 
 model listItemSaved {

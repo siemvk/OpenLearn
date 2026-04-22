@@ -95,3 +95,5 @@ export const subjects: subject[] = [
 export const getSubjectBySlug = (slug: TaalSlugEnum | string) => {
     return subjects.find(s => s.slug === slug.toLowerCase());
 }
+
+export const taalSlugsList = subjects.map(s => s.slug);
