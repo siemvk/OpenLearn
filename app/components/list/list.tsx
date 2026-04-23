@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router"
 import Md from "../markdown/md"
-export const ListContainer: React.FC<{ children: React.ReactNode, className: string }> = ({ children, className }) => {
+export const ListContainer: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => {
     return (
-        <div className={"flex flex-col gap-2 w-full " + className} >
+        <div className={"flex flex-col gap-2 w-full max-w-full overflow-x-hidden " + (className || "")} >
             {children}
         </div>
     )
@@ -45,6 +45,31 @@ export const ListItem: React.FC<{
                     </div>
                 </div>
             </div>
+        </div>
+    )
+}
+
+
+export const LearnListItems: React.FC<{
+    data: {
+        from: string,
+        to: string
+    }[]
+}> = (data) => {
+    return (
+        <div className="rounded-xl p-4 flex flex-col cursor-pointer bg-openlearn-800 m-4 w-[calc(100%-2rem)] box-border overflow-hidden min-w-0">
+            <div className="flex items-center w-full min-w-0 gap-3">
+                <h1 className="font-bold truncate min-w-0 flex-1 text-center">From</h1>
+                <h1 className="font-bold truncate min-w-0 flex-1 text-center">To</h1>
+            </div>
+            {/* we need a line here */}
+            <div className="border-t border-gray-600 my-2" />
+            {data.data.map((item, index) => (
+                <div key={index} className="flex items-center w-full min-w-0 gap-3">
+                    <h1 className="font-semibold truncate min-w-0 flex-1 text-center">{item.from}</h1>
+                    <h1 className="font-semibold truncate min-w-0 flex-1 text-center">{item.to}</h1>
+                </div>
+            ))}
         </div>
     )
 }

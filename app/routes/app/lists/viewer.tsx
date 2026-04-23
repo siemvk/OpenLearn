@@ -1,5 +1,10 @@
 import { caller } from "~/utils/trpc/server.server";
 import type { Route } from "./+types/viewer";
+import { LearnListItems, ListItem } from "~/components/list/list";
+import { getSubjectBySlug } from "~/components/Icons";
+import { Button } from "~/components/button/button";
+import { Pencil } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const api = await caller(loaderArgs);
@@ -10,20 +15,24 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
     if (!list) {
         throw new Response("Not Found", { status: 404 });
     }
-    return list;
+    const user = await api.user.user();
+    return {
+        ...list,
+        userId: user?.id,
+        admin: user?.role === "admin"
+    };
 }
 
 export default function Component({ loaderData }: Route.ComponentProps) {
+    const nav = useNavigate();
     return (
         <div>
-            <h1>{loaderData.name}</h1>
-            <ul>
-                {loaderData.listItems.map((item: any) => (
-                    <li key={item.id}>
-                        <strong>{item.vraag}</strong>: {item.antwoord}
-                    </li>
-                ))}
-            </ul>
+            <ListItem title={loaderData.name} subtitle={loaderData.listItems.length + " items ・ by " + loaderData.owner.name} image={getSubjectBySlug(loaderData.language)?.icon} className="mx-4">
+                {((loaderData.userId === loaderData.ownerId) || loaderData.admin) &&
+                    <Button onClick={() => { nav("/app/list/new/" + loaderData.id) }}><Pencil /></Button>
+                }
+            </ListItem>
+            <LearnListItems data={loaderData.listItems.map((value) => { return { from: value.vraag, to: value.antwoord } })} />
         </div>
     );
 }

@@ -982,6 +982,40 @@ describe("tRPC endpoints (integration)", () => {
 
       });
 
+      it("get the users lists", async () => {
+        const user = await createTestUser();
+
+        const createdList1 = await prisma.list.create({
+          data: {
+            name: `Topwoorden1-${Date.now()}`,
+            ownerId: user.id,
+            listItems: {
+              create: [{ vraag: "vraag1", antwoord: "antwoord1" }],
+            },
+          },
+          include: { listItems: true },
+        });
+        createdListIds.add(createdList1.id);
+
+        const createdList2 = await prisma.list.create({
+          data: {
+            name: `Topwoorden2-${Date.now()}`,
+            ownerId: user.id,
+            listItems: {
+              create: [{ vraag: "vraag2", antwoord: "antwoord2" }],
+            },
+          },
+          include: { listItems: true },
+        });
+        createdListIds.add(createdList2.id);
+
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        const lists = await caller.learn.getUserLists();
+
+        expect(lists.some((list) => list.id === createdList1.id)).toBe(true);
+        expect(lists.some((list) => list.id === createdList2.id)).toBe(true);
+      });
+
     });
     describe("sessions", () => {
       describe("startLearnSession", () => {

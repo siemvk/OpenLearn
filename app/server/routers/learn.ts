@@ -79,6 +79,19 @@ export const learnRouting = {
       })
       return list
     }),
+  getUserLists: protectedProcedure
+    .query(async ({ ctx }) => {
+      const lists = await ctx.prisma.list.findMany({
+        where: {
+          ownerId: ctx.user.id
+        },
+        include: {
+          owner: true,
+          listItems: true
+        },
+      })
+      return lists
+    }),
   removeList: protectedProcedure
     .input(
       z.object({
@@ -114,7 +127,12 @@ export const learnRouting = {
           id: input.id,
         },
         include: {
-          listItems: true
+          listItems: true,
+          owner: {
+            select: {
+              name: true
+            }
+          }
         }
       })
       return list

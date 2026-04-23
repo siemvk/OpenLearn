@@ -10,7 +10,7 @@ export type subject = {
     name: string, // dit mapped aan i18n
     slug: TaalSlugEnum,
     icon: any, // TODO: fix this type
-    taalData?: {
+    taalData: {
         van: TaalSlugEnum,
         naar: TaalSlugEnum
     }
