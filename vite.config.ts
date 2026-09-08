@@ -17,12 +17,23 @@ function devApiPlugin(): Plugin {
           return;
         }
 
-        if (req.url.startsWith("/api/auth") || req.url.startsWith("/api/trpc")) {
+        if (
+          req.url.startsWith("/api/auth") ||
+          req.url.startsWith("/api/trpc")
+        ) {
           try {
-            const { auth } = await server.ssrLoadModule("./app/utils/auth/server.server.ts");
-            const { appRouter } = await server.ssrLoadModule("./app/server/main.ts");
-            const { createTRPCContext } = await server.ssrLoadModule("./app/server/trpc.ts");
-            const { fetchRequestHandler } = await import("@trpc/server/adapters/fetch");
+            const { auth } = await server.ssrLoadModule(
+              "./app/utils/auth/server.server.ts",
+            );
+            const { appRouter } = await server.ssrLoadModule(
+              "./app/server/main.ts",
+            );
+            const { createTRPCContext } = await server.ssrLoadModule(
+              "./app/server/trpc.ts",
+            );
+            const { fetchRequestHandler } = await import(
+              "@trpc/server/adapters/fetch"
+            );
 
             const protocol = req.socket?.encrypted ? "https" : "http";
             const host = req.headers.host || "localhost:5173";
@@ -60,7 +71,8 @@ function devApiPlugin(): Plugin {
                 endpoint: "/api/trpc",
                 req: webReq,
                 router: appRouter,
-                createContext: () => createTRPCContext({ headers: webReq.headers }),
+                createContext: () =>
+                  createTRPCContext({ headers: webReq.headers }),
               });
             }
 
@@ -101,7 +113,10 @@ function htmlEnvPlugin(): Plugin {
       };
       const script = `<script id="__LIBRELEARN_ENV__">window.ENV = ${JSON.stringify(envObj)};</script>`;
       if (html.includes('id="__LIBRELEARN_ENV__"')) {
-        return html.replace(/<script id="__LIBRELEARN_ENV__">.*?<\/script>/, script);
+        return html.replace(
+          /<script id="__LIBRELEARN_ENV__">.*?<\/script>/,
+          script,
+        );
       }
       return html.replace("</head>", `${script}</head>`);
     },
@@ -110,11 +125,13 @@ function htmlEnvPlugin(): Plugin {
 
 export default defineConfig({
   define: {
-    "import.meta.env.UI_KLEUR": JSON.stringify(process.env.UI_KLEUR || "023824"),
+    "import.meta.env.UI_KLEUR": JSON.stringify(
+      process.env.UI_KLEUR || "023824",
+    ),
     "import.meta.env.UI_KLEUR_BEWERKBAAR": JSON.stringify(
       process.env.UI_KLEUR_BEWERKBAAR !== undefined
         ? process.env.UI_KLEUR_BEWERKBAAR
-        : "true"
+        : "true",
     ),
   },
   optimizeDeps: {
@@ -125,4 +142,3 @@ export default defineConfig({
   },
   plugins: [htmlEnvPlugin(), devApiPlugin(), reactRouter(), tsconfigPaths()],
 });
-

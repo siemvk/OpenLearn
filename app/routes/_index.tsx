@@ -27,7 +27,16 @@ export default function Home() {
       <nav className="home-nav">
         <Logo className="home-nav-logo" />
         <div className="home-nav-actions">
-          <Button variant="primary" onClick={() => window.open("https://github.com/librelearn-org/LibreLearn", "_blank", "noreferrer")}>
+          <Button
+            variant="primary"
+            onClick={() =>
+              window.open(
+                "https://github.com/librelearn-org/LibreLearn",
+                "_blank",
+                "noreferrer",
+              )
+            }
+          >
             <span className="home-nav-github-content">
               <SiGithub size={18} color="currentColor" />
               {t("home:nav.source")}
@@ -43,7 +52,9 @@ export default function Home() {
         <Logo className="home-hero-logo" />
         <div className="home-hero-copy">
           <h1 className="home-hero-title">{t("home:hero.title")}</h1>
-          <p className="home-hero-subtitle no-margin">{t("home:hero.subtitle")}</p>
+          <p className="home-hero-subtitle no-margin">
+            {t("home:hero.subtitle")}
+          </p>
         </div>
         <Button size="large" onClick={() => navigate("/auth/login")}>
           {t("auth:signupMarketing")}
@@ -55,7 +66,11 @@ export default function Home() {
           {Array.from({ length: 4 })
             .flatMap(() => subjects)
             .map((subject, i) => (
-              <img key={`${subject.slug}-${i}`} src={subject.icon} alt={t(subject.name)} />
+              <img
+                key={`${subject.slug}-${i}`}
+                src={subject.icon}
+                alt={t(subject.name)}
+              />
             ))}
         </div>
       </section>
@@ -63,7 +78,9 @@ export default function Home() {
       {/* todo: more content (maybe cards about librelearn) here */}
 
       <footer className="home-footer">
-        <span>{t("home:footer.copyright", { year: new Date().getFullYear() })}</span>
+        <span>
+          {t("home:footer.copyright", { year: new Date().getFullYear() })}
+        </span>
       </footer>
     </div>
   );

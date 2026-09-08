@@ -89,7 +89,8 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
 
   const lib = useMemo(() => {
     if (resetKey > 0) {
-      const fullList = rawLijst && rawLijst.length > 0 ? rawLijst : (rawWachtrij ?? []);
+      const fullList =
+        rawLijst && rawLijst.length > 0 ? rawLijst : (rawWachtrij ?? []);
       if (fullList.length > 0) {
         return new Learnlib(
           fullList,
@@ -99,29 +100,13 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
         );
       }
     }
-    if (rawWachtrij || rawLijst) {
-      const wachtrij = rawWachtrij ?? [];
-      const lijst = rawLijst && rawLijst.length > 0 ? rawLijst : wachtrij;
-      if (wachtrij.length > 0 || lijst.length > 0) {
-        return new Learnlib(
-          {
-            wachtrij,
-            lijst,
-            wachtrijState: {
-              current: wachtrij[0] ?? null,
-              isKlaar: wachtrij.length === 0,
-              initialCount: lijst.length || wachtrij.length,
-              progress:
-                lijst.length > 0
-                  ? (lijst.length - wachtrij.length) / lijst.length
-                  : 0,
-            },
-          },
-          methodes[0],
-          gradeMakers[0],
-          wachtrijUpdaters[0],
-        );
-      }
+    if (rawWachtrij && rawWachtrij.length > 0) {
+      return new Learnlib(
+        rawWachtrij,
+        methodes[0],
+        gradeMakers[0],
+        wachtrijUpdaters[0],
+      );
     }
     return null;
   }, [rawWachtrij, rawLijst, resetKey]);
@@ -150,36 +135,39 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   }, [feedback]);
 
   const syncProgress = useCallback(
-    (wachtrij: LearnlibState["wachtrij"], lijst?: LearnlibState["lijst"]) => {
+    (
+      wachtrij: LearnlibState["wachtrij"],
+      lijst?: LearnlibState["wachtrij"],
+    ) => {
       if (sessionId && wachtrij) {
         saveSession.mutate({
           id: sessionId,
           wachtrij,
-          lijst,
+          lijst: lijst ?? rawLijst ?? undefined,
           listId: loaderData.sessionData?.listId ?? undefined,
           methode: currentFormat,
         });
       }
     },
-    [sessionId, loaderData.sessionData, currentFormat, saveSession],
+    [sessionId, rawLijst, loaderData.sessionData, currentFormat, saveSession],
   );
 
   useEffect(() => {
     if (resetKey > 0 && lib) {
-      syncProgress(lib.wachtrij, lib.lijst);
+      syncProgress(lib.wachtrij, rawLijst ?? lib.wachtrij);
     }
-  }, [resetKey, lib, syncProgress]);
+  }, [resetKey, lib, rawLijst, syncProgress]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!lib || !state?.wachtrijState.current || feedback) return;
+    if (!lib || !state?.current || feedback) return;
 
     const antwoordVal = veld.current?.value ?? "";
-    const expected = state.wachtrijState.current.antwoord;
+    const expected = state.current.antwoord;
     const isCorrect = checkAnswer(expected, antwoordVal);
 
     setFeedback({
-      question: state.wachtrijState.current.vraag,
+      question: state.current.vraag,
       expectedAnswer: expected,
       userAnswer: antwoordVal,
       isCorrect,
@@ -200,9 +188,9 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
         veld.current.value = "";
       }
       setFeedback(null);
-      syncProgress(lib.wachtrij, lib.lijst);
+      syncProgress(lib.wachtrij, rawLijst);
     },
-    [lib, feedback, syncProgress],
+    [lib, feedback, rawLijst, syncProgress],
   );
 
   const handleOverride = useCallback(() => {
@@ -210,10 +198,10 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   }, [handleContinue]);
 
   const handleFlashcardGrade = (grade: Grade) => {
-    if (!lib || !state?.wachtrijState.current) return;
-    lib.antwoord(state.wachtrijState.current.antwoord, grade);
+    if (!lib || !state?.current) return;
+    lib.antwoord(state.current.antwoord, grade);
     setShowFlashcardAnswer(false);
-    syncProgress(lib.wachtrij, lib.lijst);
+    syncProgress(lib.wachtrij, rawLijst);
   };
 
   useEffect(() => {
@@ -242,29 +230,40 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
     currentFormat === learnFormat.toets || currentFormat === learnFormat.leren;
   const isFlashcardMode = currentFormat === learnFormat.gedachten;
 
+  const totalCount =
+    rawLijst && rawLijst.length > 0
+      ? rawLijst.length
+      : (state?.initialCount ?? state?.wachtrij.length ?? 0);
+  const queueCount = state?.wachtrij.length ?? 0;
+  const isKlaar =
+    state?.isKlaar ??
+    Boolean(
+      rawWachtrij &&
+        rawWachtrij.length === 0 &&
+        rawLijst &&
+        rawLijst.length > 0,
+    );
+
   return (
     <>
       <div className="center middle absolute">
         <div className="medium-width">
-          {lib && state && !state.wachtrijState.isKlaar && !loaderData.error && (
+          {lib && state && !isKlaar && !loaderData.error && (
             <>
               <nav className="no-space">
                 <span className="max secondary-text small-text">
-                  {t("learn:queue")}: {state.wachtrij.length} /{" "}
-                  {state.wachtrijState.initialCount}
+                  {t("learn:queue")}: {queueCount} / {totalCount}
                 </span>
                 <span className="secondary-text small-text">
-                  {Math.round(
-                    ((state.wachtrijState.initialCount - state.wachtrij.length) /
-                      (state.wachtrijState.initialCount || 1)) *
-                      100,
-                  )}
+                  {totalCount > 0
+                    ? Math.round(((totalCount - queueCount) / totalCount) * 100)
+                    : 0}
                   %
                 </span>
               </nav>
               <progress
-                value={state.wachtrijState.initialCount - state.wachtrij.length}
-                max={state.wachtrijState.initialCount}
+                value={totalCount - queueCount}
+                max={totalCount}
               ></progress>
               <div className="space"></div>
             </>
@@ -275,11 +274,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
               <div className="center-align padding">
                 <p className="error-text">{loaderData.error}</p>
               </div>
-            ) : !lib || !state ? (
-              <div className="center-align padding">
-                <p>{t("learn:noItems")}</p>
-              </div>
-            ) : state.wachtrijState.isKlaar ? (
+            ) : isKlaar ? (
               <div className="center-align padding">
                 <i className="extra green-text">check_circle</i>
                 <h2>{t("learn:congratsTitle")}</h2>
@@ -296,9 +291,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                     <Button
                       variant="transparent"
                       onClick={() =>
-                        navigate(
-                          `/app/lists/${loaderData.sessionData?.listId}`,
-                        )
+                        navigate(`/app/lists/${loaderData.sessionData?.listId}`)
                       }
                       icon="arrow_back"
                     >
@@ -307,12 +300,16 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                   )}
                 </nav>
               </div>
+            ) : !lib || !state ? (
+              <div className="center-align padding">
+                <p>{t("learn:noItems")}</p>
+              </div>
             ) : isFlashcardMode ? (
               <nav className="vertical center-align no-space">
                 <p className="secondary-text small-text">
                   {t("learn:question")}
                 </p>
-                <h3 className={classNames.text.bold}>{state.wachtrijState.current?.vraag}</h3>
+                <h3 className={classNames.text.bold}>{state.current?.vraag}</h3>
 
                 <div className="space"></div>
                 {showFlashcardAnswer ? (
@@ -321,7 +318,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       {t("learn:correctAnswer")}
                     </p>
                     <h4 className="green-text bold">
-                      {state.wachtrijState.current?.antwoord}
+                      {state.current?.antwoord}
                     </h4>
                     <Space />
                     <nav className="responsive center-align">
@@ -439,7 +436,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       {t("learn:question")}
                     </p>
                     <h3 className={classNames.text.bold}>
-                      {state.wachtrijState.current?.vraag}
+                      {state.current?.vraag}
                     </h3>
 
                     <div className="space"></div>

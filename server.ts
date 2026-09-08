@@ -50,7 +50,10 @@ function renderIndexHtml() {
   let html = fs.readFileSync(indexPath, "utf-8");
   const script = `<script id="__LIBRELEARN_ENV__">window.ENV = ${JSON.stringify(getPublicClientEnv())};</script>`;
   if (html.includes('id="__LIBRELEARN_ENV__"')) {
-    html = html.replace(/<script id="__LIBRELEARN_ENV__">.*?<\/script>/, script);
+    html = html.replace(
+      /<script id="__LIBRELEARN_ENV__">.*?<\/script>/,
+      script,
+    );
   } else {
     html = html.replace("</head>", `${script}</head>`);
   }

@@ -21,7 +21,7 @@ export default async function handleRequest(
         console.error(error);
         responseStatusCode = 500;
       },
-    }
+    },
   );
 
   responseHeaders.set("Content-Type", "text/html");

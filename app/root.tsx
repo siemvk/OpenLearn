@@ -35,22 +35,35 @@ export const links: Route.LinksFunction = () => [
 export async function clientLoader() {
   return {
     lang: config.lang,
-    colorScheme: "light" as const
+    colorScheme: "light" as const,
   };
 }
 
-export function meta({ }: Route.MetaArgs) {
+export function meta({}: Route.MetaArgs) {
   return [
     { title: "Librelearn" },
-    { name: "description", content: "Librelearn is een opensource alternative voor Studygo." },
-    { property: "og:image", content: "https://github.com/librelearn-org/Librelearn/blob/main/public/logos/LiL-VT-LONG-ICON-WITHBG.png?raw=true" },
+    {
+      name: "description",
+      content: "Librelearn is een opensource alternative voor Studygo.",
+    },
+    {
+      property: "og:image",
+      content:
+        "https://github.com/librelearn-org/Librelearn/blob/main/public/logos/LiL-VT-LONG-ICON-WITHBG.png?raw=true",
+    },
     { property: "og:title", content: "Librelearn" },
-    { property: "og:description", content: "Librelearn is een opensource alternative voor Studygo en andere platforms." },
+    {
+      property: "og:description",
+      content:
+        "Librelearn is een opensource alternative voor Studygo en andere platforms.",
+    },
   ];
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const data = useRouteLoaderData("root") as { lang: string, colorScheme: "light" | "dark" } | undefined;
+  const data = useRouteLoaderData("root") as
+    | { lang: string; colorScheme: "light" | "dark" }
+    | undefined;
   const lang = data?.lang || config.lang;
 
   useEffect(() => {
@@ -58,8 +71,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const envData = {
-    UI_KLEUR: typeof process !== "undefined" ? (process.env.UI_KLEUR || "023824") : "023824",
-    UI_KLEUR_BEWERKBAAR: typeof process !== "undefined" ? (process.env.UI_KLEUR_BEWERKBAAR !== "false" && process.env.UI_KLEUR_BEWERKBAAR !== "0" && process.env.UI_KLEUR_BEWERKBAAR !== "no" && process.env.UI_KLEUR_BEWERKBAAR !== "False") : true,
+    UI_KLEUR:
+      typeof process !== "undefined"
+        ? process.env.UI_KLEUR || "023824"
+        : "023824",
+    UI_KLEUR_BEWERKBAAR:
+      typeof process !== "undefined"
+        ? process.env.UI_KLEUR_BEWERKBAAR !== "false" &&
+          process.env.UI_KLEUR_BEWERKBAAR !== "0" &&
+          process.env.UI_KLEUR_BEWERKBAAR !== "no" &&
+          process.env.UI_KLEUR_BEWERKBAAR !== "False"
+        : true,
   };
 
   return (
@@ -73,16 +95,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
             __html: `window.ENV = window.ENV || ${JSON.stringify(envData)};`,
           }}
         />
-        <script data-goatcounter="https://librelearn.goatcounter.com/count"
-          async src="//gc.zgo.at/count.js"></script>
+        <script
+          data-goatcounter="https://librelearn.goatcounter.com/count"
+          async
+          src="//gc.zgo.at/count.js"
+        ></script>
         <Meta />
         <Links />
       </head>
       <body className="dark" suppressHydrationWarning>
         <TRPCReactProvider>
-          <BeerProviders>
-            {children}
-          </BeerProviders>
+          <BeerProviders>{children}</BeerProviders>
         </TRPCReactProvider>
 
         <ScrollRestoration />
@@ -113,11 +136,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main >
+    <main>
       <h1>{message}</h1>
       <p>{details}</p>
       {stack && (
-        <pre >
+        <pre>
           <code>{stack}</code>
         </pre>
       )}

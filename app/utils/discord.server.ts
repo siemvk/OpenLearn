@@ -1,4 +1,3 @@
-
 export interface DiscordEmbedFooter {
   text: string;
   icon_url?: string;
@@ -46,11 +45,11 @@ export interface DiscordEmbedField {
 
 export interface DiscordEmbed {
   title?: string;
-  type?: 'rich' | 'image' | 'video' | 'gifv' | 'article' | 'link';
+  type?: "rich" | "image" | "video" | "gifv" | "article" | "link";
   description?: string;
   url?: string;
   timestamp?: string; // Moet een ISO8601 timestamp zijn
-  color?: number;     // RGB-kleur omgezet naar een integer (bijv. 16711680 voor rood)
+  color?: number; // RGB-kleur omgezet naar een integer (bijv. 16711680 voor rood)
   footer?: DiscordEmbedFooter;
   image?: DiscordEmbedImage;
   thumbnail?: DiscordEmbedThumbnail;
@@ -60,37 +59,36 @@ export interface DiscordEmbed {
   fields?: DiscordEmbedField[];
 }
 export async function sendMessageToDiscord(embed: DiscordEmbed) {
-
-        const webhookUrl = process.env.DC_WEBHOOK_URL
-        if (!webhookUrl) {
-            console.warn('No webhook url configured')
-            return { success: false, message: 'No webhook url configured' }
-        }
-        let content = ''
-        if (process.env.DC_WEBHOOK_PING_PPL === 'true') {
-            content += `KIJK LOGS! <@&1491883346081615955>!`
-        } else {
-            content += 'we zijn aan het testen...'
-        }
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                content,
-                embeds: [embed]
-            })
-        })
-        // [{
-        //             title: 'Forum Post Deleted by Admin: ' + post.title,
-        //             description: post.content,
-        //             timestamp: new Date().toISOString(),
-        //             author: {
-        //                 name: ctx.user.name
-        //             },
-        //         }]
-        if (!response.ok) {
-            console.error('Failed to send webhook', await response.text())
-        }
+  const webhookUrl = process.env.DC_WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.warn("No webhook url configured");
+    return { success: false, message: "No webhook url configured" };
+  }
+  let content = "";
+  if (process.env.DC_WEBHOOK_PING_PPL === "true") {
+    content += `KIJK LOGS! <@&1491883346081615955>!`;
+  } else {
+    content += "we zijn aan het testen...";
+  }
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      content,
+      embeds: [embed],
+    }),
+  });
+  // [{
+  //             title: 'Forum Post Deleted by Admin: ' + post.title,
+  //             description: post.content,
+  //             timestamp: new Date().toISOString(),
+  //             author: {
+  //                 name: ctx.user.name
+  //             },
+  //         }]
+  if (!response.ok) {
+    console.error("Failed to send webhook", await response.text());
+  }
 }

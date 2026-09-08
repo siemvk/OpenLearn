@@ -6,45 +6,46 @@ import { trpcClient } from "~/utils/trpc/client";
 import { useTRPC } from "~/utils/trpc/react";
 import { useMemo } from "react";
 
-
 export default function Mylists() {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const trpc = useTRPC();
-    const queryClient = useQueryClient();
-    const lists = useQuery(trpc.learn.getUserLists.queryOptions(undefined, {
-        // configs hier.....
-    }));
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const lists = useQuery(
+    trpc.learn.getUserLists.queryOptions(undefined, {
+      // configs hier.....
+    }),
+  );
 
-    return (
-        <div>
+  return (
+    <div>
+      <h4>{t("lists:myLists")}</h4>
 
-            <h4>{t("lists:myLists")}</h4>
+      {lists.isPending ? <Progress></Progress> : ""}
 
-            {lists.isPending ? <Progress></Progress> : ""}
+      {lists.data?.map((v) => {
+        const handlePreload = () => {
+          queryClient.prefetchQuery(
+            trpc.learn.getList.queryOptions({ id: v.id }),
+          );
+        };
 
-            {lists.data?.map((v) => {
-                const handlePreload = () => {
-                    queryClient.prefetchQuery(trpc.learn.getList.queryOptions({ id: v.id }));
-                };
-
-                return (
-                    <Button
-                        key={v.id}
-                        variant="transparent"
-                        responsive={true}
-                        onClick={() => {
-                            navigate("/app/lists/" + v.id);
-                        }}
-                        onMouseEnter={handlePreload}
-                        onFocus={handlePreload}
-                        onTouchStart={handlePreload}
-                    >
-                        {v.name}
-                    </Button>
-                );
-            })}
-        </div>
-    );
+        return (
+          <Button
+            key={v.id}
+            variant="transparent"
+            responsive={true}
+            onClick={() => {
+              navigate("/app/lists/" + v.id);
+            }}
+            onMouseEnter={handlePreload}
+            onFocus={handlePreload}
+            onTouchStart={handlePreload}
+          >
+            {v.name}
+          </Button>
+        );
+      })}
+    </div>
+  );
 }
-
